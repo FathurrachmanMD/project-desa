@@ -39,17 +39,12 @@ const handleSystemThemeChange = () => {
 };
 
 export function initializeTheme() {
-    // Always use light mode
-    const forcedAppearance: Appearance = 'light';
-    
-    // Save to localStorage
-    localStorage.setItem('appearance', forcedAppearance);
-    
-    // Apply light theme
-    applyTheme(forcedAppearance);
-    
-    // Remove event listener for system theme changes since we're forcing light mode
-    mediaQuery()?.removeEventListener('change', handleSystemThemeChange);
+    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'system';
+
+    applyTheme(savedAppearance);
+
+    // Add the event listener for system theme changes...
+    mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
 export function useAppearance() {
