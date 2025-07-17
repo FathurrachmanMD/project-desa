@@ -11,6 +11,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+    
+    Route::get('perizinan', function () {
+        return Inertia::render('perizinan/index');
+    })->name('perizinan.index');
 });
 
 require __DIR__.'/settings.php';
