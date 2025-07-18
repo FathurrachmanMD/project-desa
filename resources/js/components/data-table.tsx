@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <DataTableToolbar 
         table={table} 
         searchPlaceholder={searchPlaceholder}
@@ -77,7 +77,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} colSpan={header.colSpan} className="text-xs font-medium">
+                    <TableHead key={header.id} colSpan={header.colSpan} className="text-xs font-medium py-3.5">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
                   className="hover:bg-muted/30"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

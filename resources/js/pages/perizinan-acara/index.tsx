@@ -9,10 +9,10 @@ import { EventPermitDetailModal } from '@/components/event-permit-detail-modal';
 import { EventPermitEditModal } from '@/components/event-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 import { 
-  eventPermitTypes, 
-  hajatnData, 
-  acaraPublikData, 
-  saranaUmumData,
+  eventPermitTypes as originalEventPermitTypes,
+  hajatnData as originalHajatnData, 
+  acaraPublikData as originalAcaraPublikData, 
+  saranaUmumData as originalSaranaUmumData,
   SuratIzinHajatan,
   SuratIzinAcaraPublik,
   IzinPenggunaanSaranaUmum
@@ -45,15 +45,27 @@ const permitIcons = {
 export default function PerizinanAcara() {
   const [activeTab, setActiveTab] = useState('hajatan');
   const [selectedData, setSelectedData] = useState<SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // State management for each data type
+  const [hajatnData, setHajatnData] = useState<SuratIzinHajatan[]>(originalHajatnData);
+  const [acaraPublikData, setAcaraPublikData] = useState<SuratIzinAcaraPublik[]>(originalAcaraPublikData);
+  const [saranaUmumData, setSaranaUmumData] = useState<IzinPenggunaanSaranaUmum[]>(originalSaranaUmumData);
+  
+  // Create a event permits array that always uses the latest state
+  const eventPermitTypes = [
+    { key: 'hajatan', label: 'Perizinan Hajatan', data: hajatnData },
+    { key: 'acara-publik', label: 'Perizinan Acara Publik', data: acaraPublikData },
+    { key: 'sarana-umum', label: 'Perizinan Penggunaan Sarana Umum', data: saranaUmumData },
+  ];
 
   const handleView = (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
     setSelectedData(data);
-    setIsModalOpen(true);
+    setIsDetailModalOpen(true);
   };
 
   const handleEdit = (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
@@ -67,8 +79,32 @@ export default function PerizinanAcara() {
   };
 
   const handleSaveEdit = (updatedData: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
-    // Here you would typically update the data in your state management or API
-    console.log('Updated data:', updatedData);
+    // Update the data in local state based on type
+    switch (activeTab) {
+      case 'hajatan': {
+        const newData = hajatnData.map(item => 
+          item.id === updatedData.id ? updatedData as SuratIzinHajatan : item
+        );
+        setHajatnData(newData);
+        break;
+      }
+      case 'acara-publik': {
+        const newData = acaraPublikData.map(item => 
+          item.id === updatedData.id ? updatedData as SuratIzinAcaraPublik : item
+        );
+        setAcaraPublikData(newData);
+        break;
+      }
+      case 'sarana-umum': {
+        const newData = saranaUmumData.map(item => 
+          item.id === updatedData.id ? updatedData as IzinPenggunaanSaranaUmum : item
+        );
+        setSaranaUmumData(newData);
+        break;
+      }
+    }
+    
+    setIsEditModalOpen(false);
     alert('Data berhasil diperbarui');
   };
 
@@ -80,8 +116,24 @@ export default function PerizinanAcara() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Here you would typically delete the data from your state management or API
-      console.log('Deleted data:', dataToDelete);
+      // Delete the data from the state based on type
+      switch (activeTab) {
+        case 'hajatan': {
+          const newData = hajatnData.filter(item => item.id !== dataToDelete.id);
+          setHajatnData(newData);
+          break;
+        }
+        case 'acara-publik': {
+          const newData = acaraPublikData.filter(item => item.id !== dataToDelete.id);
+          setAcaraPublikData(newData);
+          break;
+        }
+        case 'sarana-umum': {
+          const newData = saranaUmumData.filter(item => item.id !== dataToDelete.id);
+          setSaranaUmumData(newData);
+          break;
+        }
+      }
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
@@ -157,8 +209,8 @@ export default function PerizinanAcara() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Manajemen Perizinan Acara" />
       
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto py-8 px-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               Manajemen Perizinan Acara
@@ -176,9 +228,9 @@ export default function PerizinanAcara() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Total Pengajuan</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -191,7 +243,7 @@ export default function PerizinanAcara() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Diproses</CardTitle>
               <div className="h-2 w-2 rounded-full bg-yellow-500" />
             </CardHeader>
@@ -204,7 +256,7 @@ export default function PerizinanAcara() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Disetujui</CardTitle>
               <div className="h-2 w-2 rounded-full bg-green-500" />
             </CardHeader>
@@ -217,7 +269,7 @@ export default function PerizinanAcara() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Ditolak</CardTitle>
               <div className="h-2 w-2 rounded-full bg-red-500" />
             </CardHeader>
@@ -232,15 +284,15 @@ export default function PerizinanAcara() {
 
         {/* Main Content */}
         <Card className="shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-4">
             <CardTitle>Data Perizinan Acara</CardTitle>
             <CardDescription>
               Kelola semua jenis perizinan acara yang diajukan warga
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-3 w-full mb-6">
+              <TabsList className="grid grid-cols-3 w-full mb-8">
                 {eventPermitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
                   const counts = getStatusCounts(permit.data);
@@ -249,7 +301,7 @@ export default function PerizinanAcara() {
                     <TabsTrigger 
                       key={permit.key} 
                       value={permit.key}
-                      className="flex flex-col items-center gap-1 p-3 h-auto"
+                      className="flex flex-col items-center gap-2 p-4 h-auto"
                     >
                       <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4" />
@@ -270,9 +322,9 @@ export default function PerizinanAcara() {
               {eventPermitTypes.map((permit) => {
                 const tabData = getDataForTab(permit.key);
                 return (
-                  <TabsContent key={permit.key} value={permit.key} className="mt-0">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
+                  <TabsContent key={permit.key} value={permit.key} className="mt-2">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between mb-2">
                         <div>
                           <h3 className="text-lg font-semibold">{permit.label}</h3>
                           <p className="text-sm text-muted-foreground">
@@ -283,6 +335,7 @@ export default function PerizinanAcara() {
                       
                       <EventPermitTable
                         type={permit.key as 'hajatan' | 'acara-publik' | 'sarana-umum'}
+                        data={permit.data}
                         searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
                         onView={handleView}
                         onEdit={handleEdit}
@@ -301,8 +354,8 @@ export default function PerizinanAcara() {
       <EventPermitDetailModal
         data={selectedData}
         type={activeTab as 'hajatan' | 'acara-publik' | 'sarana-umum'}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
       />
 
       {/* Edit Modal */}

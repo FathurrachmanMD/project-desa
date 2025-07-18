@@ -27,15 +27,15 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-1 items-center space-x-3">
         <Input
           placeholder={searchPlaceholder}
           value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn(searchColumn)?.setFilterValue(event.target.value)
           }
-          className="h-8 w-[150px] lg:w-[250px]"
+          className="h-9 w-[180px] lg:w-[280px]"
         />
         {enableStatusFilter && table.getColumn("status") && (
           <Select
@@ -44,7 +44,7 @@ export function DataTableToolbar<TData>({
               table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
             }
           >
-            <SelectTrigger className="h-8 w-[150px]">
+            <SelectTrigger className="h-9 w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

@@ -9,11 +9,10 @@ import { BusinessPermitDetailModal } from '@/components/business-permit-detail-m
 import { BusinessPermitEditModal } from '@/components/business-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 import { 
-  permitTypes, 
-  skuData, 
-  iumkData, 
-  situData, 
-  nibData,
+  skuData as originalSkuData, 
+  iumkData as originalIumkData, 
+  situData as originalSituData, 
+  nibData as originalNibData,
   SuratKeteranganUsaha,
   IzinUsahaMikroKecil,
   SuratIzinTempatUsaha,
@@ -54,6 +53,20 @@ export default function PerizinanUsaha() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Manage data state locally
+  const [skuData, setSkuData] = useState<SuratKeteranganUsaha[]>(originalSkuData);
+  const [iumkData, setIumkData] = useState<IzinUsahaMikroKecil[]>(originalIumkData);
+  const [situData, setSituData] = useState<SuratIzinTempatUsaha[]>(originalSituData);
+  const [nibData, setNibData] = useState<RekomendasiNIB[]>(originalNibData);
+  
+  // Create a permits array that always uses the latest state
+  const permitTypes = [
+    { key: 'sku', label: 'Surat Keterangan Usaha (SKU)', data: skuData },
+    { key: 'iumk', label: 'Izin Usaha Mikro Kecil (IUMK)', data: iumkData },
+    { key: 'situ', label: 'Surat Izin Tempat Usaha (SITU)', data: situData },
+    { key: 'nib', label: 'Rekomendasi NIB/OSS', data: nibData },
+  ];
 
   const handleView = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
     setSelectedData(data);
@@ -71,8 +84,41 @@ export default function PerizinanUsaha() {
   };
 
   const handleSaveEdit = (updatedData: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
-    // Here you would typically update the data in your state management or API
-    console.log('Updated data:', updatedData);
+    // Update the data in local state based on type
+    switch (activeTab) {
+      case 'sku': {
+        const newData = skuData.map(item => 
+          item.id === updatedData.id ? updatedData as SuratKeteranganUsaha : item
+        );
+        setSkuData(newData);
+        break;
+      }
+      case 'iumk': {
+        const newData = iumkData.map(item => 
+          item.id === updatedData.id ? updatedData as IzinUsahaMikroKecil : item
+        );
+        setIumkData(newData);
+        break;
+      }
+      case 'situ': {
+        const newData = situData.map(item => 
+          item.id === updatedData.id ? updatedData as SuratIzinTempatUsaha : item
+        );
+        setSituData(newData);
+        break;
+      }
+      case 'nib': {
+        const newData = nibData.map(item => 
+          item.id === updatedData.id ? updatedData as RekomendasiNIB : item
+        );
+        setNibData(newData);
+        break;
+      }
+    }
+
+    // Close the modal and show success message
+    setIsEditModalOpen(false);
+    setSelectedData(null);
     alert('Data berhasil diperbarui');
   };
 
@@ -81,11 +127,32 @@ export default function PerizinanUsaha() {
     
     setIsDeleting(true);
     try {
-      // Simulate API call
+      // Simulate API call (you can replace with actual API call)
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Here you would typically delete the data from your state management or API
-      console.log('Deleted data:', dataToDelete);
+      // Delete the data from local state based on type
+      switch (activeTab) {
+        case 'sku': {
+          const newData = skuData.filter(item => item.id !== dataToDelete.id);
+          setSkuData(newData);
+          break;
+        }
+        case 'iumk': {
+          const newData = iumkData.filter(item => item.id !== dataToDelete.id);
+          setIumkData(newData);
+          break;
+        }
+        case 'situ': {
+          const newData = situData.filter(item => item.id !== dataToDelete.id);
+          setSituData(newData);
+          break;
+        }
+        case 'nib': {
+          const newData = nibData.filter(item => item.id !== dataToDelete.id);
+          setNibData(newData);
+          break;
+        }
+      }
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
@@ -169,8 +236,8 @@ export default function PerizinanUsaha() {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Manajemen Perizinan Usaha" />
       
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto py-8 px-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               Manajemen Perizinan Usaha
@@ -188,9 +255,9 @@ export default function PerizinanUsaha() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Total Pengajuan</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -203,7 +270,7 @@ export default function PerizinanUsaha() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Diproses</CardTitle>
               <div className="h-2 w-2 rounded-full bg-yellow-500" />
             </CardHeader>
@@ -216,7 +283,7 @@ export default function PerizinanUsaha() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Disetujui</CardTitle>
               <div className="h-2 w-2 rounded-full bg-green-500" />
             </CardHeader>
@@ -229,7 +296,7 @@ export default function PerizinanUsaha() {
           </Card>
           
           <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium">Ditolak</CardTitle>
               <div className="h-2 w-2 rounded-full bg-red-500" />
             </CardHeader>
@@ -244,15 +311,15 @@ export default function PerizinanUsaha() {
 
         {/* Main Content */}
         <Card className="shadow-sm">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-4">
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription>
               Kelola semua jenis perizinan usaha yang diajukan warga
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 w-full mb-6">
+              <TabsList className="grid grid-cols-4 w-full mb-8">
                 {permitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
                   const counts = getStatusCounts(permit.data);
@@ -261,7 +328,7 @@ export default function PerizinanUsaha() {
                     <TabsTrigger 
                       key={permit.key} 
                       value={permit.key}
-                      className="flex flex-col items-center gap-1 p-3 h-auto"
+                      className="flex flex-col items-center gap-2 p-4 h-auto"
                     >
                       <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4" />
@@ -280,9 +347,9 @@ export default function PerizinanUsaha() {
               {permitTypes.map((permit) => {
                 const tabData = getDataForTab(permit.key);
                 return (
-                  <TabsContent key={permit.key} value={permit.key} className="mt-0">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
+                  <TabsContent key={permit.key} value={permit.key} className="mt-2">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between mb-2">
                         <div>
                           <h3 className="text-lg font-semibold">{permit.label}</h3>
                           <p className="text-sm text-muted-foreground">
@@ -293,6 +360,7 @@ export default function PerizinanUsaha() {
                       
                       <PermitTable
                         type={permit.key as 'sku' | 'iumk' | 'situ' | 'nib'}
+                        data={permit.data}
                         searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
                         onView={handleView}
                         onEdit={handleEdit}

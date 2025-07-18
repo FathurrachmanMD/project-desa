@@ -4,9 +4,6 @@ import { createHajatnColumns } from '@/components/columns/hajatan-columns';
 import { createAcaraPublikColumns } from '@/components/columns/acara-publik-columns';
 import { createSaranaUmumColumns } from '@/components/columns/sarana-umum-columns';
 import { 
-  hajatnData, 
-  acaraPublikData, 
-  saranaUmumData,
   SuratIzinHajatan,
   SuratIzinAcaraPublik,
   IzinPenggunaanSaranaUmum
@@ -14,6 +11,7 @@ import {
 
 interface EventPermitTableProps {
   type: 'hajatan' | 'acara-publik' | 'sarana-umum';
+  data?: SuratIzinHajatan[] | SuratIzinAcaraPublik[] | IzinPenggunaanSaranaUmum[];
   searchPlaceholder?: string;
   onView?: (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => void;
   onEdit?: (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => void;
@@ -22,6 +20,7 @@ interface EventPermitTableProps {
 
 export function EventPermitTable({ 
   type, 
+  data = [],
   searchPlaceholder,
   onView,
   onEdit,
@@ -32,7 +31,7 @@ export function EventPermitTable({
       return (
         <DataTable
           columns={createHajatnColumns({ onView, onEdit, onDelete })}
-          data={hajatnData}
+          data={data as SuratIzinHajatan[]}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"
           enableStatusFilter={true}
@@ -42,7 +41,7 @@ export function EventPermitTable({
       return (
         <DataTable
           columns={createAcaraPublikColumns({ onView, onEdit, onDelete })}
-          data={acaraPublikData}
+          data={data as SuratIzinAcaraPublik[]}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_penyelenggara"
           enableStatusFilter={true}
@@ -52,7 +51,7 @@ export function EventPermitTable({
       return (
         <DataTable
           columns={createSaranaUmumColumns({ onView, onEdit, onDelete })}
-          data={saranaUmumData}
+          data={data as IzinPenggunaanSaranaUmum[]}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"
           enableStatusFilter={true}
