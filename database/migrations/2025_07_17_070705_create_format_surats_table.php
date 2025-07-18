@@ -48,10 +48,7 @@ return new class extends Migration
             $table->tinyInteger('format_nomor_global')->nullable()->default(1);
             $table->boolean('sumber_penduduk_berulang')->nullable()->default(false);
 
-            $table->timestamp('created_at')->nullable()->useCurrent();
             $table->unsignedBigInteger('created_by')->nullable();
-
-            $table->timestamp('updated_at')->nullable()->useCurrent()->useCurrentOnUpdate();
             $table->unsignedBigInteger('updated_by')->nullable();
 
             // Relasi ke users
