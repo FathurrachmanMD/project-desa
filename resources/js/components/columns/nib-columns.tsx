@@ -4,7 +4,11 @@ import { DataTableColumnHeader } from '@/components/data-table-column-header';
 import { DataTableRowActions } from '@/components/data-table-row-actions';
 import { StatusBadge } from '@/components/status-badge';
 
-export const nibColumns: ColumnDef<RekomendasiNIB>[] = [
+export const nibColumns = (
+  onView?: (data: RekomendasiNIB) => void,
+  onEdit?: (data: RekomendasiNIB) => void,
+  onDelete?: (data: RekomendasiNIB) => void
+): ColumnDef<RekomendasiNIB>[] => [
   {
     accessorKey: 'nama_pemohon',
     header: ({ column }) => (
@@ -81,9 +85,9 @@ export const nibColumns: ColumnDef<RekomendasiNIB>[] = [
     cell: ({ row }) => (
       <DataTableRowActions
         row={row}
-        onView={(data) => console.log('View:', data)}
-        onEdit={(data) => console.log('Edit:', data)}
-        onDelete={(data) => console.log('Delete:', data)}
+        onView={onView ? () => onView(row.original) : undefined}
+        onEdit={onEdit ? () => onEdit(row.original) : undefined}
+        onDelete={onDelete ? () => onDelete(row.original) : undefined}
       />
     ),
   },

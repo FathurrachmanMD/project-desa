@@ -8,20 +8,27 @@ import {
   skuData, 
   iumkData, 
   situData, 
-  nibData
+  nibData,
+  SuratKeteranganUsaha,
+  IzinUsahaMikroKecil,
+  SuratIzinTempatUsaha,
+  RekomendasiNIB
 } from '@/data/business-permits';
 
 interface PermitTableProps {
   type: 'sku' | 'iumk' | 'situ' | 'nib';
   searchPlaceholder?: string;
+  onView?: (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => void;
+  onEdit?: (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => void;
+  onDelete?: (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => void;
 }
 
-export function PermitTable({ type, searchPlaceholder }: PermitTableProps) {
+export function PermitTable({ type, searchPlaceholder, onView, onEdit, onDelete }: PermitTableProps) {
   switch (type) {
     case 'sku':
       return (
         <DataTable
-          columns={skuColumns}
+          columns={skuColumns(onView, onEdit, onDelete)}
           data={skuData}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"
@@ -31,7 +38,7 @@ export function PermitTable({ type, searchPlaceholder }: PermitTableProps) {
     case 'iumk':
       return (
         <DataTable
-          columns={iumkColumns}
+          columns={iumkColumns(onView, onEdit, onDelete)}
           data={iumkData}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"
@@ -41,7 +48,7 @@ export function PermitTable({ type, searchPlaceholder }: PermitTableProps) {
     case 'situ':
       return (
         <DataTable
-          columns={situColumns}
+          columns={situColumns(onView, onEdit, onDelete)}
           data={situData}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"
@@ -51,7 +58,7 @@ export function PermitTable({ type, searchPlaceholder }: PermitTableProps) {
     case 'nib':
       return (
         <DataTable
-          columns={nibColumns}
+          columns={nibColumns(onView, onEdit, onDelete)}
           data={nibData}
           searchPlaceholder={searchPlaceholder}
           searchColumn="nama_pemohon"

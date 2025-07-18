@@ -5,12 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PermitTable } from '@/components/permit-table';
+import { BusinessPermitDetailModal } from '@/components/business-permit-detail-modal';
+import { BusinessPermitEditModal } from '@/components/business-permit-edit-modal';
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 import { 
   permitTypes, 
   skuData, 
   iumkData, 
   situData, 
-  nibData
+  nibData,
+  SuratKeteranganUsaha,
+  IzinUsahaMikroKecil,
+  SuratIzinTempatUsaha,
+  RekomendasiNIB
 } from '@/data/business-permits';
 import { type BreadcrumbItem } from '@/types';
 import { 
@@ -41,6 +48,94 @@ const permitIcons = {
 
 export default function PerizinanUsaha() {
   const [activeTab, setActiveTab] = useState('sku');
+  const [selectedData, setSelectedData] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [dataToDelete, setDataToDelete] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleView = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
+    setSelectedData(data);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleEdit = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
+    setSelectedData(data);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
+    setDataToDelete(data);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSaveEdit = (updatedData: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
+    // Here you would typically update the data in your state management or API
+    console.log('Updated data:', updatedData);
+    alert('Data berhasil diperbarui');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!dataToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would typically delete the data from your state management or API
+      console.log('Deleted data:', dataToDelete);
+      
+      setIsDeleteModalOpen(false);
+      setDataToDelete(null);
+      alert('Data berhasil dihapus');
+    } catch {
+      alert('Terjadi kesalahan saat menghapus data');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const getDeleteModalContent = () => {
+    if (!dataToDelete) return { title: '', description: '' };
+    
+    let title = '';
+    let description = '';
+    
+    switch (activeTab) {
+      case 'sku': {
+        const skuData = dataToDelete as SuratKeteranganUsaha;
+        title = 'Hapus Surat Keterangan Usaha';
+        description = `Apakah Anda yakin ingin menghapus surat keterangan usaha "${skuData.nama_usaha}" milik ${skuData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      case 'iumk': {
+        const iumkData = dataToDelete as IzinUsahaMikroKecil;
+        title = 'Hapus Izin Usaha Mikro Kecil';
+        description = `Apakah Anda yakin ingin menghapus izin usaha mikro kecil "${iumkData.nama_usaha}" milik ${iumkData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      case 'situ': {
+        const situData = dataToDelete as SuratIzinTempatUsaha;
+        title = 'Hapus Surat Izin Tempat Usaha';
+        description = `Apakah Anda yakin ingin menghapus surat izin tempat usaha untuk ${situData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      case 'nib': {
+        const nibData = dataToDelete as RekomendasiNIB;
+        title = 'Hapus Rekomendasi NIB/OSS';
+        description = `Apakah Anda yakin ingin menghapus rekomendasi NIB/OSS "${nibData.nama_usaha}" milik ${nibData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      default: {
+        title = 'Hapus Data';
+        description = 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.';
+      }
+    }
+    
+    return { title, description };
+  };
 
   const getDataForTab = (tabKey: string) => {
     switch (tabKey) {
@@ -199,6 +294,9 @@ export default function PerizinanUsaha() {
                       <PermitTable
                         type={permit.key as 'sku' | 'iumk' | 'situ' | 'nib'}
                         searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
+                        onView={handleView}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
                       />
                     </div>
                   </TabsContent>
@@ -208,6 +306,33 @@ export default function PerizinanUsaha() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Detail Modal */}
+      <BusinessPermitDetailModal
+        data={selectedData}
+        type={activeTab as 'sku' | 'iumk' | 'situ' | 'nib'}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+      />
+
+      {/* Edit Modal */}
+      <BusinessPermitEditModal
+        data={selectedData}
+        type={activeTab as 'sku' | 'iumk' | 'situ' | 'nib'}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSave={handleSaveEdit}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title={getDeleteModalContent().title}
+        description={getDeleteModalContent().description}
+        isLoading={isDeleting}
+      />
     </AppLayout>
   );
 }

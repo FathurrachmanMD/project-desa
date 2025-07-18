@@ -5,7 +5,11 @@ import { DataTableRowActions } from '@/components/data-table-row-actions';
 import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 
-export const situColumns: ColumnDef<SuratIzinTempatUsaha>[] = [
+export const situColumns = (
+  onView?: (data: SuratIzinTempatUsaha) => void,
+  onEdit?: (data: SuratIzinTempatUsaha) => void,
+  onDelete?: (data: SuratIzinTempatUsaha) => void
+): ColumnDef<SuratIzinTempatUsaha>[] => [
   {
     accessorKey: 'nama_pemohon',
     header: ({ column }) => (
@@ -97,9 +101,9 @@ export const situColumns: ColumnDef<SuratIzinTempatUsaha>[] = [
     cell: ({ row }) => (
       <DataTableRowActions
         row={row}
-        onView={(data) => console.log('View:', data)}
-        onEdit={(data) => console.log('Edit:', data)}
-        onDelete={(data) => console.log('Delete:', data)}
+        onView={onView ? () => onView(row.original) : undefined}
+        onEdit={onEdit ? () => onEdit(row.original) : undefined}
+        onDelete={onDelete ? () => onDelete(row.original) : undefined}
       />
     ),
   },

@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventPermitTable } from '@/components/event-permit-table';
 import { EventPermitDetailModal } from '@/components/event-permit-detail-modal';
+import { EventPermitEditModal } from '@/components/event-permit-edit-modal';
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 import { 
   eventPermitTypes, 
   hajatnData, 
@@ -44,6 +46,10 @@ export default function PerizinanAcara() {
   const [activeTab, setActiveTab] = useState('hajatan');
   const [selectedData, setSelectedData] = useState<SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [dataToDelete, setDataToDelete] = useState<SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleView = (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
     setSelectedData(data);
@@ -51,13 +57,74 @@ export default function PerizinanAcara() {
   };
 
   const handleEdit = (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
-    console.log('Edit:', data);
-    // TODO: Implement edit functionality
+    setSelectedData(data);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = (data: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
-    console.log('Delete:', data);
-    // TODO: Implement delete functionality
+    setDataToDelete(data);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSaveEdit = (updatedData: SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum) => {
+    // Here you would typically update the data in your state management or API
+    console.log('Updated data:', updatedData);
+    alert('Data berhasil diperbarui');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!dataToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would typically delete the data from your state management or API
+      console.log('Deleted data:', dataToDelete);
+      
+      setIsDeleteModalOpen(false);
+      setDataToDelete(null);
+      alert('Data berhasil dihapus');
+    } catch {
+      alert('Terjadi kesalahan saat menghapus data');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const getDeleteModalContent = () => {
+    if (!dataToDelete) return { title: '', description: '' };
+    
+    let title = '';
+    let description = '';
+    
+    switch (activeTab) {
+      case 'hajatan': {
+        const hajatnData = dataToDelete as SuratIzinHajatan;
+        title = 'Hapus Surat Izin Hajatan';
+        description = `Apakah Anda yakin ingin menghapus surat izin hajatan untuk ${hajatnData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      case 'acara-publik': {
+        const acaraData = dataToDelete as SuratIzinAcaraPublik;
+        title = 'Hapus Surat Izin Acara Publik';
+        description = `Apakah Anda yakin ingin menghapus surat izin acara publik "${acaraData.nama_acara}" dari ${acaraData.nama_penyelenggara}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      case 'sarana-umum': {
+        const saranaData = dataToDelete as IzinPenggunaanSaranaUmum;
+        title = 'Hapus Izin Penggunaan Sarana Umum';
+        description = `Apakah Anda yakin ingin menghapus izin penggunaan sarana umum untuk ${saranaData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
+        break;
+      }
+      default: {
+        title = 'Hapus Data';
+        description = 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.';
+      }
+    }
+    
+    return { title, description };
   };
 
   const getDataForTab = (tabKey: string) => {
@@ -236,6 +303,25 @@ export default function PerizinanAcara() {
         type={activeTab as 'hajatan' | 'acara-publik' | 'sarana-umum'}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
+      />
+
+      {/* Edit Modal */}
+      <EventPermitEditModal
+        data={selectedData}
+        type={activeTab as 'hajatan' | 'acara-publik' | 'sarana-umum'}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSave={handleSaveEdit}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title={getDeleteModalContent().title}
+        description={getDeleteModalContent().description}
+        isLoading={isDeleting}
       />
     </AppLayout>
   );

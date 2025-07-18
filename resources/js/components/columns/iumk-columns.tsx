@@ -4,7 +4,11 @@ import { DataTableColumnHeader } from '@/components/data-table-column-header';
 import { DataTableRowActions } from '@/components/data-table-row-actions';
 import { StatusBadge } from '@/components/status-badge';
 
-export const iumkColumns: ColumnDef<IzinUsahaMikroKecil>[] = [
+export const iumkColumns = (
+  onView?: (data: IzinUsahaMikroKecil) => void,
+  onEdit?: (data: IzinUsahaMikroKecil) => void,
+  onDelete?: (data: IzinUsahaMikroKecil) => void
+): ColumnDef<IzinUsahaMikroKecil>[] => [
   {
     accessorKey: 'nama_pemohon',
     header: ({ column }) => (
@@ -99,9 +103,9 @@ export const iumkColumns: ColumnDef<IzinUsahaMikroKecil>[] = [
     cell: ({ row }) => (
       <DataTableRowActions
         row={row}
-        onView={(data) => console.log('View:', data)}
-        onEdit={(data) => console.log('Edit:', data)}
-        onDelete={(data) => console.log('Delete:', data)}
+        onView={onView ? () => onView(row.original) : undefined}
+        onEdit={onEdit ? () => onEdit(row.original) : undefined}
+        onDelete={onDelete ? () => onDelete(row.original) : undefined}
       />
     ),
   },

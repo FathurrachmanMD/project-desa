@@ -4,7 +4,11 @@ import { DataTableColumnHeader } from '@/components/data-table-column-header';
 import { DataTableRowActions } from '@/components/data-table-row-actions';
 import { StatusBadge } from '@/components/status-badge';
 
-export const skuColumns: ColumnDef<SuratKeteranganUsaha>[] = [
+export const skuColumns = (
+  onView?: (data: SuratKeteranganUsaha) => void,
+  onEdit?: (data: SuratKeteranganUsaha) => void,
+  onDelete?: (data: SuratKeteranganUsaha) => void
+): ColumnDef<SuratKeteranganUsaha>[] => [
   {
     accessorKey: 'nama_pemohon',
     header: ({ column }) => (
@@ -90,9 +94,9 @@ export const skuColumns: ColumnDef<SuratKeteranganUsaha>[] = [
     cell: ({ row }) => (
       <DataTableRowActions
         row={row}
-        onView={(data) => console.log('View:', data)}
-        onEdit={(data) => console.log('Edit:', data)}
-        onDelete={(data) => console.log('Delete:', data)}
+        onView={onView ? () => onView(row.original) : undefined}
+        onEdit={onEdit ? () => onEdit(row.original) : undefined}
+        onDelete={onDelete ? () => onDelete(row.original) : undefined}
       />
     ),
   },

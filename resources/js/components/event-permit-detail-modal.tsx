@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
+import { printUtils } from '@/utils/print-utils';
 import { 
   SuratIzinHajatan, 
   SuratIzinAcaraPublik, 
@@ -23,7 +24,8 @@ import {
   User, 
   Shield,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Printer
 } from 'lucide-react';
 
 interface EventPermitDetailModalProps {
@@ -48,6 +50,10 @@ export function EventPermitDetailModal({
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handlePrint = () => {
+    printUtils.printPermit(data, type);
   };
 
   const getModalTitle = () => {
@@ -304,7 +310,8 @@ export function EventPermitDetailModal({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Tutup
           </Button>
-          <Button onClick={() => console.log('Print', data)}>
+          <Button onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-2" />
             Cetak
           </Button>
         </DialogFooter>
