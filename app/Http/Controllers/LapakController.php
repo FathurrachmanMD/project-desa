@@ -28,7 +28,33 @@ class LapakController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'penduduk_id' => 'nullable|exists:penduduk,id',
+                'telepon'     => 'nullable|string|max:20',
+                'lat'         => 'nullable|string|max:20',
+                'lng'         => 'nullable|string|max:20',
+                'zoom'        => 'nullable|integer|min:0|max:21',
+                'status'      => 'boolean',
+                'created_by'  => 'nullable|exists:users,id',
+                'updated_by'  => 'nullable|exists:users,id',
+            ]);
+
+            $item = Lapak::create($validated);
+            return response()->json($item, 201);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -50,16 +76,58 @@ class LapakController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Lapak $lapak)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $item = Lapak::findOrFail($id);
+
+            $validated = $request->validate([
+                'penduduk_id' => 'nullable|exists:penduduk,id',
+                'telepon'     => 'nullable|string|max:20',
+                'lat'         => 'nullable|string|max:20',
+                'lng'         => 'nullable|string|max:20',
+                'zoom'        => 'nullable|integer|min:0|max:21',
+                'status'      => 'boolean',
+                'updated_by'  => 'nullable|exists:users,id',
+            ]);
+
+            $item->update($validated);
+            return response()->json($item);
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        }
+        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Data not found',
+            ], 404);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Lapak $lapak)
+    public function destroy($id)
     {
-        //
+        try {
+            $item = Lapak::findOrFail($id);
+            $item->delete();
+            return response()->json(['message' => 'Deleted successfully']);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Delete failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
