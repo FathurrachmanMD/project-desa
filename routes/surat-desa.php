@@ -9,6 +9,7 @@ use App\Http\Controllers\PemohonController;
 use App\Http\Controllers\SuratHasilController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SuratController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,11 @@ use App\Http\Controllers\SettingsController;
 */
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+    Route::get('/surat', [SuratController::class, 'show']);
+    Route::post('/surat', [SuratController::class, 'store']);
+    Route::put('/surat/{id}', [SuratController::class, 'update']);
+    Route::delete('/surat/{id}', [SuratController::class, 'destroy']);
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [DashboardController::class, 'search'])->name('search');
