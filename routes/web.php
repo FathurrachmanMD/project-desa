@@ -19,6 +19,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('perizinan-acara', function () {
         return Inertia::render('perizinan-acara/index');
     })->name('perizinan-acara.index');
+
+    Route::get('perizinan-bangunan', function () {
+        return Inertia::render('perizinan-bangunan/index');
+    })->name('perizinan-bangunan.index');
 });
 
 require __DIR__.'/settings.php';

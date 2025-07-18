@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, FileText, Calendar } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, FileText, Calendar, Building2 } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
         title: 'Perizinan Acara',
         href: '/perizinan-acara',
         icon: Calendar,
+    },
+    {
+        title: 'Perizinan Bangunan',
+        href: '/perizinan-bangunan',
+        icon: Building2,
     },
 ];
 
