@@ -2,10 +2,11 @@ import { Badge } from '@/components/ui/badge';
 import { StatusType, statusConfig } from '@/data/business-permits';
 import { EventStatusType, eventStatusConfig } from '@/data/event-permits';
 import { BuildingStatusType, buildingStatusConfig } from '@/data/building-permits';
+import { AgriculturalStatusType, agriculturalStatusConfig } from '@/data/agricultural-permits';
 
 interface StatusBadgeProps {
-  status: StatusType | EventStatusType | BuildingStatusType;
-  type?: 'business' | 'event' | 'building';
+  status: StatusType | EventStatusType | BuildingStatusType | AgriculturalStatusType;
+  type?: 'business' | 'event' | 'building' | 'agricultural';
 }
 
 export function StatusBadge({ status, type = 'business' }: StatusBadgeProps) {
@@ -17,6 +18,9 @@ export function StatusBadge({ status, type = 'business' }: StatusBadgeProps) {
       break;
     case 'building':
       config = buildingStatusConfig[status as BuildingStatusType];
+      break;
+    case 'agricultural':
+      config = agriculturalStatusConfig[status as AgriculturalStatusType];
       break;
     default:
       config = statusConfig[status as StatusType];

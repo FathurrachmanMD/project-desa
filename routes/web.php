@@ -23,6 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('perizinan-bangunan', function () {
         return Inertia::render('perizinan-bangunan/index');
     })->name('perizinan-bangunan.index');
+
+    Route::get('perizinan-pertanian', function () {
+        return Inertia::render('perizinan-pertanian/index');
+    })->name('perizinan-pertanian.index');
 });
 
 require __DIR__.'/settings.php';
