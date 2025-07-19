@@ -4,9 +4,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
 import { 
@@ -22,7 +25,9 @@ import {
   FileText,
   Printer,
   Droplets,
-  Sprout
+  Sprout,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 interface AgriculturalPermitDetailModalProps {
@@ -88,7 +93,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Building className="h-4 w-4 text-muted-foreground" />
-            <span>{data.tujuan_pengelolaan}</span>
+            <span className="font-medium">{data.tujuan_pengelolaan}</span>
           </div>
         </div>
       </div>
@@ -143,7 +148,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Sprout className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jenis_bantuan}</span>
+            <span className="font-medium">{data.jenis_bantuan}</span>
           </div>
         </div>
       </div>
@@ -171,9 +176,8 @@ export function AgriculturalPermitDetailModal({
         <Label className="text-sm font-medium text-muted-foreground">
           Alasan Kebutuhan
         </Label>
-        <div className="flex items-start gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
-          <span>{data.alasan_kebutuhan}</span>
+        <div className="p-3 bg-muted rounded-lg">
+          <p className="text-sm">{data.alasan_kebutuhan}</p>
         </div>
       </div>
     </div>
@@ -198,7 +202,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Building className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jenis_profesi}</span>
+            <span className="font-medium">{data.jenis_profesi}</span>
           </div>
         </div>
       </div>
@@ -236,9 +240,8 @@ export function AgriculturalPermitDetailModal({
         <Label className="text-sm font-medium text-muted-foreground">
           Tujuan Surat
         </Label>
-        <div className="flex items-start gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
-          <span>{data.tujuan_surat}</span>
+        <div className="p-3 bg-muted rounded-lg">
+          <p className="text-sm">{data.tujuan_surat}</p>
         </div>
       </div>
     </div>
@@ -263,7 +266,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-muted-foreground" />
-            <span>{data.sumber_air}</span>
+            <span className="font-medium">{data.sumber_air}</span>
           </div>
         </div>
       </div>
@@ -301,17 +304,18 @@ export function AgriculturalPermitDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            {getModalTitle()}
-          </DialogTitle>
+          <DialogTitle>{getModalTitle()}</DialogTitle>
+          <DialogDescription>
+            Informasi lengkap tentang pengajuan perizinan ini
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Informasi Perizinan</CardTitle>
+              <CardTitle className="text-lg">Informasi Pengajuan</CardTitle>
             </CardHeader>
             <CardContent>
               {type === 'pengelolaan-lahan' && renderPengelolaanLahanDetails(data as IzinPengelolaanLahan)}
@@ -334,20 +338,25 @@ export function AgriculturalPermitDetailModal({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Status Terkini</span>
-                  <StatusBadge status={data.status} type="agricultural" />
+                  <span className="text-sm font-medium">ID Pengajuan</span>
+                  <span className="text-sm text-muted-foreground font-mono">
+                    {data.id}
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex justify-end space-x-2">
-            <Button onClick={handlePrint} className="flex items-center gap-2">
-              <Printer className="h-4 w-4" />
-              Cetak Dokumen
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Tutup
+          </Button>
+          <Button onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-2" />
+            Cetak
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ import {
   SuratKeteranganPetani,
   SuratIzinIrigasi
 } from '@/data/agricultural-permits';
+import { Save, X } from 'lucide-react';
 
 interface AgriculturalPermitEditModalProps {
   data: IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi | null;
@@ -491,9 +493,10 @@ export function AgriculturalPermitEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="flex items-center gap-2">
+            <Save className="h-5 w-5" />
             {getModalTitle()}
           </DialogTitle>
         </DialogHeader>
@@ -501,19 +504,21 @@ export function AgriculturalPermitEditModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           {renderForm()}
           
-          <div className="flex justify-end space-x-2 pt-4">
+          <DialogFooter className="flex gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
+              <X className="h-4 w-4 mr-2" />
               Batal
             </Button>
             <Button type="submit" disabled={isLoading}>
+              <Save className="h-4 w-4 mr-2" />
               {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
