@@ -10,37 +10,38 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
 import { 
-  SuratKeteranganUsaha,
-  IzinUsahaMikroKecil,
-  SuratIzinTempatUsaha,
-  RekomendasiNIB
-} from '@/data/business-permits';
+  SuratPengantarSKCK,
+  SuratKeteranganDomisili,
+  SuratIzinTinggalPendatang,
+  SuratIzinKeluarNegeri,
+  SuratKeteranganTidakBekerja
+} from '@/data/personal-permits';
 import { 
   User, 
+  IdCard, 
+  Target, 
   MapPin, 
-  Building, 
-  FileText,
-  Printer,
+  Home,
+  Clock,
+  Plane,
   Calendar,
-  Target,
-  IdCard,
-  Coins,
-  CheckCircle
+  FileText,
+  Printer 
 } from 'lucide-react';
 
-interface BusinessPermitDetailModalProps {
-  data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null;
-  type: 'sku' | 'iumk' | 'situ' | 'nib';
+interface PersonalPermitDetailModalProps {
+  data: SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja | null;
+  type: 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja';
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function BusinessPermitDetailModal({ 
+export function PersonalPermitDetailModal({ 
   data, 
   type, 
   open, 
   onOpenChange 
-}: BusinessPermitDetailModalProps) {
+}: PersonalPermitDetailModalProps) {
   if (!data) return null;
 
   const formatDate = (dateString: string) => {
@@ -58,20 +59,22 @@ export function BusinessPermitDetailModal({
 
   const getModalTitle = () => {
     switch (type) {
-      case 'sku':
-        return 'Detail Surat Keterangan Usaha (SKU)';
-      case 'iumk':
-        return 'Detail Izin Usaha Mikro Kecil (IUMK)';
-      case 'situ':
-        return 'Detail Surat Izin Tempat Usaha (SITU)';
-      case 'nib':
-        return 'Detail Rekomendasi NIB / OSS';
+      case 'pengantar-skck':
+        return 'Detail Surat Pengantar SKCK';
+      case 'keterangan-domisili':
+        return 'Detail Surat Keterangan Domisili';
+      case 'izin-tinggal-pendatang':
+        return 'Detail Surat Izin Tinggal Pendatang';
+      case 'izin-keluar-negeri':
+        return 'Detail Surat Izin Keluar Negeri';
+      case 'keterangan-tidak-bekerja':
+        return 'Detail Surat Keterangan Tidak Bekerja';
       default:
-        return 'Detail Perizinan Usaha';
+        return 'Detail Perizinan Pribadi';
     }
   };
 
-  const renderSKUDetails = (data: SuratKeteranganUsaha) => (
+  const renderPengantarSKCKDetails = (data: SuratPengantarSKCK) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -98,120 +101,21 @@ export function BusinessPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Nama Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_usaha}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Alamat Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.alamat_usaha}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Lama Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.lama_usaha}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tanggal Pengajuan
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Status Pengajuan
-        </Label>
-        <StatusBadge status={data.status} type="business" />
-      </div>
-    </div>
-  );
-
-  const renderIUMKDetails = (data: IzinUsahaMikroKecil) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Pemohon
-          </Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_pemohon}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            NIK
-          </Label>
-          <div className="flex items-center gap-2">
-            <IdCard className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nik}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_usaha}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Usaha
+            Tujuan SKCK
           </Label>
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.jenis_usaha}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Modal Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <Coins className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.modal_usaha}</span>
+            <span className="text-sm">{data.tujuan_skck}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Status Tempat Usaha
+            Tempat Tujuan SKCK
           </Label>
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.status_tempat_usaha}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.tempat_tujuan_skck}</span>
           </div>
         </div>
       </div>
@@ -231,131 +135,54 @@ export function BusinessPermitDetailModal({
           <Label className="text-sm font-medium text-muted-foreground">
             Status Pengajuan
           </Label>
-          <StatusBadge status={data.status} type="business" />
+          <StatusBadge status={data.status} type="personal" />
         </div>
       </div>
     </div>
   );
 
-  const renderSITUDetails = (data: SuratIzinTempatUsaha) => (
+  const renderKeteranganDomisiliDetails = (data: SuratKeteranganDomisili) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Nama Pemohon
+            Nama Warga
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_warga}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Alamat Usaha
+            RT/RW
+          </Label>
+          <div className="flex items-center gap-2">
+            <Home className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.rt_rw}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Alamat Domisili
           </Label>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.alamat_usaha}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Status Lahan
-          </Label>
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.status_lahan}</span>
+            <span className="text-sm">{data.alamat_domisili}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Usaha
+            Lama Tinggal
           </Label>
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.jenis_usaha}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Rekomendasi RT/RW
-          </Label>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.rekomendasi_rtrw}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tanggal Pengajuan
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Status Pengajuan
-        </Label>
-        <StatusBadge status={data.status} type="business" />
-      </div>
-    </div>
-  );
-
-  const renderNIBDetails = (data: RekomendasiNIB) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Pemohon
-          </Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_pemohon}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            NIK
-          </Label>
-          <div className="flex items-center gap-2">
-            <IdCard className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nik}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Usaha
-          </Label>
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.nama_usaha}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tujuan
-          </Label>
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{data.tujuan}</span>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lama_tinggal}</span>
           </div>
         </div>
       </div>
@@ -375,7 +202,195 @@ export function BusinessPermitDetailModal({
           <Label className="text-sm font-medium text-muted-foreground">
             Status Pengajuan
           </Label>
-          <StatusBadge status={data.status} type="business" />
+          <StatusBadge status={data.status} type="personal" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderIzinTinggalPendatangDetails = (data: SuratIzinTinggalPendatang) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Nama Pendatang
+          </Label>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.nama_pendatang}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Alamat Asal
+          </Label>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.alamat_asal}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tujuan Pindah
+          </Label>
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.tujuan_pindah}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            RT/RW Tujuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Home className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.rt_rw_tujuan}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Status Pengajuan
+          </Label>
+          <StatusBadge status={data.status} type="personal" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderIzinKeluarNegeriDetails = (data: SuratIzinKeluarNegeri) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Nama Pemohon
+          </Label>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.nama_pemohon}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tujuan Keberangkatan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.tujuan_keberangkatan}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Negara Tujuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Plane className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.negara_tujuan}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Periode
+          </Label>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.periode}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Status Pengajuan
+          </Label>
+          <StatusBadge status={data.status} type="personal" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderKeteranganTidakBekerjaDetails = (data: SuratKeteranganTidakBekerja) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Nama Pemohon
+          </Label>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.nama_pemohon}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Alasan Tidak Bekerja
+          </Label>
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.alasan_tidak_bekerja}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Status Pengajuan
+          </Label>
+          <StatusBadge status={data.status} type="personal" />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Tujuan Surat
+        </Label>
+        <div className="p-3 bg-muted rounded-lg">
+          <span className="text-sm">{data.tujuan_surat}</span>
         </div>
       </div>
     </div>
@@ -383,14 +398,16 @@ export function BusinessPermitDetailModal({
 
   const renderDetails = () => {
     switch (type) {
-      case 'sku':
-        return renderSKUDetails(data as SuratKeteranganUsaha);
-      case 'iumk':
-        return renderIUMKDetails(data as IzinUsahaMikroKecil);
-      case 'situ':
-        return renderSITUDetails(data as SuratIzinTempatUsaha);
-      case 'nib':
-        return renderNIBDetails(data as RekomendasiNIB);
+      case 'pengantar-skck':
+        return renderPengantarSKCKDetails(data as SuratPengantarSKCK);
+      case 'keterangan-domisili':
+        return renderKeteranganDomisiliDetails(data as SuratKeteranganDomisili);
+      case 'izin-tinggal-pendatang':
+        return renderIzinTinggalPendatangDetails(data as SuratIzinTinggalPendatang);
+      case 'izin-keluar-negeri':
+        return renderIzinKeluarNegeriDetails(data as SuratIzinKeluarNegeri);
+      case 'keterangan-tidak-bekerja':
+        return renderKeteranganTidakBekerjaDetails(data as SuratKeteranganTidakBekerja);
       default:
         return null;
     }

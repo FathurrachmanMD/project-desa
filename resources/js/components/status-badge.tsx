@@ -3,10 +3,11 @@ import { StatusType, statusConfig } from '@/data/business-permits';
 import { EventStatusType, eventStatusConfig } from '@/data/event-permits';
 import { BuildingStatusType, buildingStatusConfig } from '@/data/building-permits';
 import { AgriculturalStatusType, agriculturalStatusConfig } from '@/data/agricultural-permits';
+import { PersonalStatusType, personalStatusConfig } from '@/data/personal-permits';
 
 interface StatusBadgeProps {
-  status: StatusType | EventStatusType | BuildingStatusType | AgriculturalStatusType;
-  type?: 'business' | 'event' | 'building' | 'agricultural';
+  status: StatusType | EventStatusType | BuildingStatusType | AgriculturalStatusType | PersonalStatusType;
+  type?: 'business' | 'event' | 'building' | 'agricultural' | 'personal';
 }
 
 export function StatusBadge({ status, type = 'business' }: StatusBadgeProps) {
@@ -21,6 +22,9 @@ export function StatusBadge({ status, type = 'business' }: StatusBadgeProps) {
       break;
     case 'agricultural':
       config = agriculturalStatusConfig[status as AgriculturalStatusType];
+      break;
+    case 'personal':
+      config = personalStatusConfig[status as PersonalStatusType];
       break;
     default:
       config = statusConfig[status as StatusType];

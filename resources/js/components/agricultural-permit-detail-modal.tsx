@@ -2,14 +2,11 @@ import React from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
 import { 
@@ -21,13 +18,12 @@ import {
 import { 
   User, 
   MapPin, 
-  Building, 
-  FileText,
+  Sprout,
   Printer,
   Droplets,
-  Sprout,
-  CheckCircle,
-  XCircle
+  Calendar,
+  Target,
+  Coins
 } from 'lucide-react';
 
 interface AgriculturalPermitDetailModalProps {
@@ -55,20 +51,19 @@ export function AgriculturalPermitDetailModal({
   };
 
   const handlePrint = () => {
-    // Implement print functionality similar to other permits
-    console.log('Print agricultural permit:', data);
+    console.log('Print permit', data, type);
   };
 
   const getModalTitle = () => {
     switch (type) {
       case 'pengelolaan-lahan':
-        return 'Detail Izin Pengelolaan Lahan Desa / Tanah Negara';
+        return 'Detail Izin Pengelolaan Lahan';
       case 'permohonan-bantuan':
-        return 'Detail Permohonan Bantuan Pupuk / Bibit / Alat';
+        return 'Detail Permohonan Bantuan';
       case 'surat-keterangan-petani':
-        return 'Detail Surat Keterangan Petani atau Buruh Tani';
+        return 'Detail Surat Keterangan Petani';
       case 'surat-izin-irigasi':
-        return 'Detail Surat Izin Irigasi / Air Pertanian';
+        return 'Detail Surat Izin Irigasi';
       default:
         return 'Detail Perizinan Pertanian';
     }
@@ -83,28 +78,18 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_pemohon}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Tujuan Pengelolaan
+            Lokasi Lahan
           </Label>
           <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.tujuan_pengelolaan}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lokasi_lahan}</span>
           </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Lokasi Lahan
-        </Label>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>{data.lokasi_lahan}</span>
         </div>
       </div>
 
@@ -114,8 +99,30 @@ export function AgriculturalPermitDetailModal({
             Luas Lahan
           </Label>
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>{data.luas_lahan}</span>
+            <Sprout className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.luas_lahan}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tujuan Pengelolaan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.tujuan_pengelolaan}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -138,7 +145,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_pemohon}</span>
           </div>
         </div>
         
@@ -147,8 +154,8 @@ export function AgriculturalPermitDetailModal({
             Jenis Bantuan
           </Label>
           <div className="flex items-center gap-2">
-            <Sprout className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.jenis_bantuan}</span>
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.jenis_bantuan}</span>
           </div>
         </div>
       </div>
@@ -156,14 +163,26 @@ export function AgriculturalPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Jumlah / Volume
+            Jumlah Bantuan
           </Label>
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jumlah}</span>
+            <Coins className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.jumlah}</span>
           </div>
         </div>
         
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
             Status Pengajuan
@@ -177,7 +196,7 @@ export function AgriculturalPermitDetailModal({
           Alasan Kebutuhan
         </Label>
         <div className="p-3 bg-muted rounded-lg">
-          <p className="text-sm">{data.alasan_kebutuhan}</p>
+          <span className="text-sm">{data.alasan_kebutuhan}</span>
         </div>
       </div>
     </div>
@@ -192,7 +211,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama}</span>
+            <span className="text-sm">{data.nama}</span>
           </div>
         </div>
         
@@ -201,30 +220,42 @@ export function AgriculturalPermitDetailModal({
             Jenis Profesi
           </Label>
           <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.jenis_profesi}</span>
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.jenis_profesi}</span>
           </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Lokasi Bertani
-        </Label>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>{data.lokasi_bertani}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Masa Aktif Bertani
+            Lokasi Bertani
           </Label>
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>{data.masa_aktif}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lokasi_bertani}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Masa Aktif
+          </Label>
+          <div className="flex items-center gap-2">
+            <Sprout className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.masa_aktif}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -241,7 +272,7 @@ export function AgriculturalPermitDetailModal({
           Tujuan Surat
         </Label>
         <div className="p-3 bg-muted rounded-lg">
-          <p className="text-sm">{data.tujuan_surat}</p>
+          <span className="text-sm">{data.tujuan_surat}</span>
         </div>
       </div>
     </div>
@@ -256,7 +287,7 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_pemohon}</span>
           </div>
         </div>
         
@@ -266,29 +297,41 @@ export function AgriculturalPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.sumber_air}</span>
+            <span className="text-sm">{data.sumber_air}</span>
           </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Lokasi Penggunaan Air
-        </Label>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>{data.lokasi_penggunaan_air}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
+            Lokasi Penggunaan Air
+          </Label>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lokasi_penggunaan_air}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
             Jenis Tanaman
           </Label>
           <div className="flex items-center gap-2">
             <Sprout className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jenis_tanaman}</span>
+            <span className="text-sm">{data.jenis_tanaman}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -302,58 +345,44 @@ export function AgriculturalPermitDetailModal({
     </div>
   );
 
+  const renderDetails = () => {
+    switch (type) {
+      case 'pengelolaan-lahan':
+        return renderPengelolaanLahanDetails(data as IzinPengelolaanLahan);
+      case 'permohonan-bantuan':
+        return renderPermohonanBantuanDetails(data as PermohonanBantuan);
+      case 'surat-keterangan-petani':
+        return renderSuratKeteranganPetaniDetails(data as SuratKeteranganPetani);
+      case 'surat-izin-irigasi':
+        return renderSuratIzinIrigasiDetails(data as SuratIzinIrigasi);
+      default:
+        return null;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>{getModalTitle()}</DialogTitle>
-          <DialogDescription>
-            Informasi lengkap tentang pengajuan perizinan ini
-          </DialogDescription>
+          <DialogTitle className="text-xl font-semibold">
+            {getModalTitle()}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Informasi Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {type === 'pengelolaan-lahan' && renderPengelolaanLahanDetails(data as IzinPengelolaanLahan)}
-              {type === 'permohonan-bantuan' && renderPermohonanBantuanDetails(data as PermohonanBantuan)}
-              {type === 'surat-keterangan-petani' && renderSuratKeteranganPetaniDetails(data as SuratKeteranganPetani)}
-              {type === 'surat-izin-irigasi' && renderSuratIzinIrigasiDetails(data as SuratIzinIrigasi)}
-            </CardContent>
-          </Card>
+          {renderDetails()}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Riwayat Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Tanggal Pengajuan</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(data.tanggal_pengajuan)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">ID Pengajuan</span>
-                  <span className="text-sm text-muted-foreground font-mono">
-                    {data.id}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-xs text-muted-foreground mt-4 pt-4 border-t">
+            ID Dokumen: {data.id}
+          </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Tutup
           </Button>
-          <Button onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
+          <Button onClick={handlePrint} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
             Cetak
           </Button>
         </DialogFooter>
