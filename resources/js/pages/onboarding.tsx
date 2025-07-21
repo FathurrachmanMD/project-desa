@@ -16,7 +16,7 @@ export default function Onboarding() {
                 <div 
                     className="relative min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url('/latar-onboard.png')`
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2)), url('/latar-onboard.png')`
                     }}
                 >
                     {/* Header */}
