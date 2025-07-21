@@ -4,12 +4,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
 import { printUtils } from '@/utils/print-utils';
@@ -22,10 +19,10 @@ import {
   Calendar, 
   MapPin, 
   User, 
-  Shield,
   Clock,
-  AlertTriangle,
-  Printer
+  Printer,
+  Shield,
+  Building2
 } from 'lucide-react';
 
 interface EventPermitDetailModalProps {
@@ -69,248 +66,228 @@ export function EventPermitDetailModal({
     }
   };
 
-  const renderHajatnDetails = (data: SuratIzinHajatan) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Pemohon
-          </Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.jenis_acara}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tanggal Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{formatDate(data.tanggal_acara)}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Lokasi Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>{data.lokasi_acara}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Dampak Keramaian
-          </Label>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            <Badge variant={data.dampak_keramaian === 'Ya' ? 'destructive' : 'secondary'}>
-              {data.dampak_keramaian}
-            </Badge>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Status Pengajuan
-          </Label>
-          <StatusBadge status={data.status} type="event" />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAcaraPublikDetails = (data: SuratIzinAcaraPublik) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Penyelenggara
-          </Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_penyelenggara}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_acara}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tanggal & Waktu Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{data.tanggal_waktu_acara}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Lokasi Acara
-          </Label>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>{data.lokasi_acara}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Rekomendasi Keamanan
-          </Label>
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-muted-foreground" />
-            <Badge variant={data.rekomendasi_keamanan === 'Sudah' ? 'default' : 'destructive'}>
-              {data.rekomendasi_keamanan}
-            </Badge>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Status Pengajuan
-          </Label>
-          <StatusBadge status={data.status} type="event" />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSaranaUmumDetails = (data: IzinPenggunaanSaranaUmum) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Nama Pemohon
-          </Label>
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Fasilitas
-          </Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.jenis_fasilitas}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Tanggal Penggunaan
-          </Label>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{formatDate(data.tanggal_penggunaan)}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Status Pengajuan
-          </Label>
-          <StatusBadge status={data.status} type="event" />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Keperluan
-        </Label>
-        <div className="p-3 bg-muted rounded-lg">
-          <p className="text-sm">{data.keperluan}</p>
-        </div>
-      </div>
-    </div>
-  );
+  // Fungsi render digantikan dengan inline rendering di dalam return statement
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>{getModalTitle()}</DialogTitle>
-          <DialogDescription>
-            Informasi lengkap tentang pengajuan perizinan ini
-          </DialogDescription>
+          <DialogTitle className="text-lg font-medium">{getModalTitle()}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Informasi Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {type === 'hajatan' && renderHajatnDetails(data as SuratIzinHajatan)}
-              {type === 'acara-publik' && renderAcaraPublikDetails(data as SuratIzinAcaraPublik)}
-              {type === 'sarana-umum' && renderSaranaUmumDetails(data as IzinPenggunaanSaranaUmum)}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Riwayat Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Tanggal Pengajuan</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(data.tanggal_pengajuan)}
-                  </span>
+        <div className="space-y-4 py-4">
+          {/* Type-specific details */}
+          {type === 'hajatan' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Nama Pemohon</Label>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinHajatan).nama_pemohon}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">ID Pengajuan</span>
-                  <span className="text-sm text-muted-foreground font-mono">
-                    {data.id}
-                  </span>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Jenis Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinHajatan).jenis_acara}</span>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Lokasi Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinHajatan).lokasi_acara}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{formatDate((data as SuratIzinHajatan).tanggal_acara)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Dampak Keramaian</Label>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      (data as SuratIzinHajatan).dampak_keramaian === 'Ya' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {(data as SuratIzinHajatan).dampak_keramaian}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Status Pengajuan</Label>
+                  <StatusBadge status={data.status} type="event" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal Pengajuan</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+                  </div>
+                </div>
+                
+                <div></div>
+              </div>
+            </>
+          )}
+          
+          {type === 'acara-publik' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Nama Penyelenggara</Label>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinAcaraPublik).nama_penyelenggara}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Nama Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinAcaraPublik).nama_acara}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Lokasi Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinAcaraPublik).lokasi_acara}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal & Waktu Acara</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as SuratIzinAcaraPublik).tanggal_waktu_acara}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Rekomendasi Keamanan</Label>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      (data as SuratIzinAcaraPublik).rekomendasi_keamanan === 'Sudah' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {(data as SuratIzinAcaraPublik).rekomendasi_keamanan}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Status Pengajuan</Label>
+                  <StatusBadge status={data.status} type="event" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal Pengajuan</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+                  </div>
+                </div>
+                
+                <div></div>
+              </div>
+            </>
+          )}
+          
+          {type === 'sarana-umum' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Nama Pemohon</Label>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as IzinPenggunaanSaranaUmum).nama_pemohon}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Jenis Fasilitas</Label>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as IzinPenggunaanSaranaUmum).jenis_fasilitas}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal Penggunaan</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{formatDate((data as IzinPenggunaanSaranaUmum).tanggal_penggunaan)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Keperluan</Label>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{(data as IzinPenggunaanSaranaUmum).keperluan}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Tanggal Pengajuan</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Status Pengajuan</Label>
+                  <StatusBadge status={data.status} type="event" />
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="border-t pt-4">
+            <p className="text-sm text-gray-600">ID Dokumen: {data.id}</p>
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-3">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Tutup
           </Button>
-          <Button onClick={handlePrint}>
+          <Button onClick={handlePrint} variant="default" className="bg-black hover:bg-gray-800">
             <Printer className="h-4 w-4 mr-2" />
             Cetak
           </Button>
