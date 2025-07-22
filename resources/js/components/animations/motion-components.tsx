@@ -3,7 +3,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 
 // Animated Button
 interface AnimatedButtonProps extends Omit<HTMLMotionProps<"button">, 'whileHover' | 'whileTap'> {
-  variant?: 'bounce' | 'scale' | 'float' | 'glow';
+  variant?: 'bounce' | 'scale' | 'float' | 'glow' | 'premium';
   children: React.ReactNode;
 }
 
@@ -33,8 +33,17 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         };
       case 'glow':
         return {
-          boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
-          transition: { duration: 0.2 }
+          boxShadow: "0 0 25px rgba(51, 71, 91, 0.4)",
+          scale: 1.02,
+          y: -2,
+          transition: { duration: 0.3, ease: [0.25, 0.8, 0.25, 1] as const }
+        };
+      case 'premium':
+        return {
+          scale: 1.05,
+          y: -3,
+          boxShadow: "0 10px 30px rgba(51, 71, 91, 0.3)",
+          transition: { duration: 0.3, ease: [0.25, 0.8, 0.25, 1] as const }
         };
       default:
         return { scale: 1.05 };
@@ -45,7 +54,8 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
     <motion.button
       className={className}
       whileHover={getHoverAnimation()}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.95, y: 0 }}
+      transition={{ duration: 0.2 }}
       {...props}
     >
       {children}

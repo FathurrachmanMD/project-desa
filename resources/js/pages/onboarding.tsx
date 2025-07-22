@@ -138,13 +138,32 @@ export default function Onboarding() {
                             </FadeInView>
                             
                             <FadeInView direction="up" delay={4}>
-                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <motion.div 
+                                    whileHover={{ scale: 1.05, y: -2 }} 
+                                    whileTap={{ scale: 0.95 }}
+                                    className="inline-block"
+                                >
                                     <Link href={route('login')}>
                                         <AnimatedButton
                                             variant="glow"
-                                            className="bg-[#33475B] hover:bg-[#2a3c4a] text-white px-16 py-8 text-xl font-semibold rounded-2xl shadow-xl transition-all duration-300 h-16"
+                                            className="relative overflow-hidden bg-gradient-to-r from-[#33475B] via-[#3d5269] to-[#33475B] hover:from-[#2a3c4a] hover:via-[#344556] hover:to-[#2a3c4a] text-white px-12 py-4 text-lg font-bold rounded-xl shadow-2xl border border-white/10 backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_30px_rgba(51,71,91,0.4)] group"
                                         >
-                                            Masuk Sekarang
+                                            <span className="relative z-10 flex items-center gap-3">
+                                                Masuk Sekarang
+                                                <motion.span
+                                                    animate={{ x: [0, 5, 0] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                                    className="text-xl"
+                                                >
+                                                    →
+                                                </motion.span>
+                                            </span>
+                                            <motion.div
+                                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                                initial={{ x: '-100%' }}
+                                                whileHover={{ x: '100%' }}
+                                                transition={{ duration: 0.6 }}
+                                            />
                                         </AnimatedButton>
                                     </Link>
                                 </motion.div>

@@ -317,14 +317,45 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                             </div>
 
                                             {/* Submit Button */}
-                                            <AnimatedButton
-                                                variant="glow"
-                                                type="submit"
-                                                disabled={processing}
-                                                className="w-full bg-[#33475B] hover:bg-[#2a3c4a] text-white h-12 text-base font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
-                                            >
-                                                {processing ? 'Memproses...' : 'Masuk'}
-                                            </AnimatedButton>
+                                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                                <AnimatedButton
+                                                    variant="glow"
+                                                    type="submit"
+                                                    disabled={processing}
+                                                    className="relative overflow-hidden w-full bg-gradient-to-r from-[#33475B] via-[#3d5269] to-[#33475B] hover:from-[#2a3c4a] hover:via-[#344556] hover:to-[#2a3c4a] text-white h-12 text-base font-bold rounded-lg shadow-lg border border-white/10 transition-all duration-300 hover:shadow-xl group disabled:opacity-70 disabled:cursor-not-allowed"
+                                                >
+                                                    <span className="relative z-10 flex items-center justify-center gap-2">
+                                                        {processing ? (
+                                                            <>
+                                                                <motion.div 
+                                                                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                                                                    animate={{ rotate: 360 }}
+                                                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                                                />
+                                                                Memproses...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                Masuk
+                                                                <motion.span
+                                                                    animate={{ x: [0, 3, 0] }}
+                                                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                                                >
+                                                                    →
+                                                                </motion.span>
+                                                            </>
+                                                        )}
+                                                    </span>
+                                                    {!processing && (
+                                                        <motion.div
+                                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                                                            initial={{ x: '-100%' }}
+                                                            whileHover={{ x: '100%' }}
+                                                            transition={{ duration: 0.6 }}
+                                                        />
+                                                    )}
+                                                </AnimatedButton>
+                                            </motion.div>
                                         </form>
 
                                         {/* Additional Links */}
