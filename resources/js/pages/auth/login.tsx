@@ -4,8 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/footer';
+import { FadeInView, StaggerAnimation, StaggerItem, AnimatedCard, AnimatedButton, Typewriter } from '@/components/animations';
 import { ChevronDown, Facebook, Instagram, Twitter, Youtube, Eye, EyeOff, Lock, User } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
+import { motion } from 'framer-motion';
 
 type LoginForm = {
     email: string;
@@ -50,85 +52,155 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     }}
                 >
                     {/* Header */}
-                    <div className="relative z-20 w-full">
+                    <motion.div 
+                        className="relative z-20 w-full"
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                    >
                         <div className="flex justify-between items-center px-6 md:px-8 lg:px-12 py-6">
                             {/* Logo */}
-                            <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <FadeInView direction="left" className="flex items-center space-x-3">
+                                <motion.div 
+                                    className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                    transition={{ duration: 0.2 }}
+                                >
                                     <img 
                                         src="/logo-drawati.png" 
                                         alt="Logo Desa Drawati" 
                                         className="w-8 h-8 object-contain"
                                     />
-                                </div>
+                                </motion.div>
                                 <div className="text-white">
                                     <h2 className="text-lg font-bold">Desa Drawati</h2>
                                     <p className="text-sm text-white/80">Kec. Passeh, Kab. Bandung</p>
                                 </div>
-                            </div>
+                            </FadeInView>
 
                             {/* Social Media */}
-                            <div className="flex space-x-4">
-                                <a href="#" className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300">
-                                    <Facebook className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300">
-                                    <Instagram className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300">
-                                    <Twitter className="w-5 h-5" />
-                                </a>
-                                <a href="#" className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300">
-                                    <Youtube className="w-5 h-5" />
-                                </a>
-                            </div>
+                            <StaggerAnimation className="flex space-x-4" staggerDelay={0.1}>
+                                <StaggerItem>
+                                    <motion.a 
+                                        href="#" 
+                                        className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
+                                        whileHover={{ scale: 1.1, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Facebook className="w-5 h-5" />
+                                    </motion.a>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <motion.a 
+                                        href="#" 
+                                        className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
+                                        whileHover={{ scale: 1.1, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Instagram className="w-5 h-5" />
+                                    </motion.a>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <motion.a 
+                                        href="#" 
+                                        className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
+                                        whileHover={{ scale: 1.1, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Twitter className="w-5 h-5" />
+                                    </motion.a>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <motion.a 
+                                        href="#" 
+                                        className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
+                                        whileHover={{ scale: 1.1, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <Youtube className="w-5 h-5" />
+                                    </motion.a>
+                                </StaggerItem>
+                            </StaggerAnimation>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Main Content */}
                     <div className="flex-1 flex items-center justify-center px-6">
                         <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
                             {/* Left Side - Welcome Text */}
-                            <div className="text-left text-white space-y-8">
+                            <FadeInView direction="left" delay={0.3} className="text-left text-white space-y-8">
                                 <div>
-                                    <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                                        Selamat Datang Kembali
-                                    </h1>
-                                    <p className="text-lg md:text-xl text-white/90 leading-relaxed font-normal max-w-lg">
-                                        Masuk ke dashboard admin untuk mengelola layanan digital Desa Drawati 
-                                        dengan mudah dan efisien.
-                                    </p>
+                                    <Typewriter
+                                        text="Selamat Datang Kembali"
+                                        className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
+                                        speed={100}
+                                        delay={500}
+                                    />
+                                    <FadeInView delay={3} direction="up">
+                                        <p className="text-lg md:text-xl text-white/90 leading-relaxed font-normal max-w-lg">
+                                            Masuk ke dashboard admin untuk mengelola layanan digital Desa Drawati 
+                                            dengan mudah dan efisien.
+                                        </p>
+                                    </FadeInView>
                                 </div>
                                 
-                                <div className="space-y-4">
-                                    <div className="flex items-center space-x-3 text-white/80">
-                                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                        <span>Kelola perizinan masyarakat</span>
-                                    </div>
-                                    <div className="flex items-center space-x-3 text-white/80">
-                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                        <span>Pantau aktivitas desa</span>
-                                    </div>
-                                    <div className="flex items-center space-x-3 text-white/80">
-                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                        <span>Berikan pelayanan terbaik</span>
-                                    </div>
-                                </div>
-                            </div>
+                                <StaggerAnimation className="space-y-4" staggerDelay={0.2}>
+                                    <StaggerItem>
+                                        <motion.div 
+                                            className="flex items-center space-x-3 text-white/80"
+                                            whileHover={{ x: 10, transition: { duration: 0.2 } }}
+                                        >
+                                            <motion.div 
+                                                className="w-2 h-2 bg-blue-400 rounded-full"
+                                                animate={{ scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 2, repeat: Infinity }}
+                                            ></motion.div>
+                                            <span>Kelola perizinan masyarakat</span>
+                                        </motion.div>
+                                    </StaggerItem>
+                                    <StaggerItem>
+                                        <motion.div 
+                                            className="flex items-center space-x-3 text-white/80"
+                                            whileHover={{ x: 10, transition: { duration: 0.2 } }}
+                                        >
+                                            <motion.div 
+                                                className="w-2 h-2 bg-green-400 rounded-full"
+                                                animate={{ scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                                            ></motion.div>
+                                            <span>Pantau aktivitas desa</span>
+                                        </motion.div>
+                                    </StaggerItem>
+                                    <StaggerItem>
+                                        <motion.div 
+                                            className="flex items-center space-x-3 text-white/80"
+                                            whileHover={{ x: 10, transition: { duration: 0.2 } }}
+                                        >
+                                            <motion.div 
+                                                className="w-2 h-2 bg-yellow-400 rounded-full"
+                                                animate={{ scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+                                            ></motion.div>
+                                            <span>Berikan pelayanan terbaik</span>
+                                        </motion.div>
+                                    </StaggerItem>
+                                </StaggerAnimation>
+                            </FadeInView>
 
                             {/* Right Side - Login Form */}
-                            <div className="w-full max-w-md mx-auto lg:mx-0">
-                                <Card className="backdrop-blur-md bg-white/95 border-0 shadow-2xl">
-                                    <CardHeader className="space-y-4 pb-6">
-                                        <div className="text-center">
-                                            <CardTitle className="text-2xl font-bold text-gray-900">
-                                                Admin Panel
-                                            </CardTitle>
-                                            <CardDescription className="text-gray-600 mt-2">
-                                                Masukkan kredensial Anda untuk melanjutkan
-                                            </CardDescription>
-                                        </div>
-                                    </CardHeader>
+                            <FadeInView direction="right" delay={0.5} className="w-full max-w-md mx-auto lg:mx-0">
+                                <AnimatedCard hover={false}>
+                                    <Card className="backdrop-blur-md bg-white/95 border-0 shadow-2xl">
+                                        <CardHeader className="space-y-4 pb-6">
+                                            <FadeInView delay={0.8} className="text-center">
+                                                <CardTitle className="text-2xl font-bold text-gray-900">
+                                                    Admin Panel
+                                                </CardTitle>
+                                                <CardDescription className="text-gray-600 mt-2">
+                                                    Masukkan kredensial Anda untuk melanjutkan
+                                                </CardDescription>
+                                            </FadeInView>
+                                        </CardHeader>
                                     
                                     <CardContent className="space-y-6">
                                         {status && (
@@ -222,34 +294,47 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                             </div>
 
                                             {/* Submit Button */}
-                                            <Button
+                                            <AnimatedButton
+                                                variant="glow"
                                                 type="submit"
                                                 disabled={processing}
                                                 className="w-full bg-[#33475B] hover:bg-[#2a3c4a] text-white h-12 text-base font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl"
                                             >
                                                 {processing ? 'Memproses...' : 'Masuk'}
-                                            </Button>
+                                            </AnimatedButton>
                                         </form>
 
                                         {/* Additional Links */}
-                                        <div className="text-center pt-4 border-t border-gray-200">
+                                        <FadeInView delay={1.2} className="text-center pt-4 border-t border-gray-200">
                                             <p className="text-sm text-gray-600">
                                                 Belum punya akses?{' '}
-                                                <Link href="#" className="text-[#33475B] hover:text-[#2a3c4a] font-medium">
+                                                <Link href="#" className="text-[#33475B] hover:text-[#2a3c4a] font-medium hover:underline transition-all duration-200">
                                                     Hubungi Administrator
                                                 </Link>
                                             </p>
-                                        </div>
+                                        </FadeInView>
                                     </CardContent>
                                 </Card>
-                            </div>
+                                </AnimatedCard>
+                            </FadeInView>
                         </div>
                     </div>
 
                     {/* Scroll Indicator */}
-                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/80 animate-bounce z-10">
+                    <motion.div 
+                        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/80 z-10"
+                        animate={{ 
+                            y: [0, -10, 0],
+                            opacity: [0.8, 1, 0.8]
+                        }}
+                        transition={{ 
+                            duration: 2, 
+                            repeat: Infinity, 
+                            ease: "easeInOut" 
+                        }}
+                    >
                         <ChevronDown className="w-6 h-6" />
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Footer */}
