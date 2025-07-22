@@ -2,19 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
 import { type User } from '@/types';
 
-export function UserInfo({ 
-    user, 
-    showEmail = false, 
-    variant = 'navbar' 
-}: { 
-    user: User; 
-    showEmail?: boolean;
-    variant?: 'navbar' | 'dropdown';
-}) {
+export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: boolean }) {
     const getInitials = useInitials();
-
-    const nameColor = variant === 'navbar' ? 'text-white' : 'text-gray-900';
-    const emailColor = variant === 'navbar' ? 'text-gray-300' : 'text-gray-600';
 
     return (
         <>
@@ -25,8 +14,8 @@ export function UserInfo({
                 </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className={`truncate font-medium ${nameColor}`}>{user.name}</span>
-                {showEmail && <span className={`truncate text-xs ${emailColor}`}>{user.email}</span>}
+                <span className="truncate font-medium text-white">{user.name}</span>
+                {showEmail && <span className="truncate text-xs text-gray-300">{user.email}</span>}
             </div>
         </>
     );
