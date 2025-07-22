@@ -7,6 +7,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Custom sidebar hover override - no hover effects */
+[data-sidebar="menu-button"]:hover,
+[data-sidebar="menu-button"]:focus,
+[data-sidebar="menu-button"]:active,
+[data-sidebar="group-action"]:hover,
+[data-sidebar="group-action"]:focus,
+[data-sidebar="menu-action"]:hover,
+[data-sidebar="menu-action"]:focus,
+[data-sidebar="menu-sub-button"]:hover,
+[data-sidebar="menu-sub-button"]:focus,
+[data-sidebar="menu-sub-button"]:active,
+[data-sidebar="menu-button"][data-active="true"],
+[data-sidebar="menu-button"][aria-current="page"],
+[data-sidebar="menu-sub-button"][data-active="true"],
+[data-sidebar="menu-sub-button"][aria-current="page"] {
+    background-color: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 @theme {
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
