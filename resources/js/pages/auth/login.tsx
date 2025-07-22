@@ -63,8 +63,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <FadeInView direction="left" className="flex items-center space-x-3">
                                 <motion.div 
                                     className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center"
-                                    whileHover={{ scale: 1.1, rotate: 5 }}
-                                    transition={{ duration: 0.2 }}
+                                    whileHover={{ 
+                                        scale: 1.1, 
+                                        rotate: [0, -10, 10, -10, 0],
+                                        transition: { duration: 0.5 }
+                                    }}
                                 >
                                     <img 
                                         src="/logo-drawati.png" 
@@ -84,8 +87,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     <motion.a 
                                         href="#" 
                                         className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
-                                        whileHover={{ scale: 1.1, y: -2 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ 
+                                            scale: 1.2, 
+                                            y: -5,
+                                            rotate: 360,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                        whileTap={{ scale: 0.9 }}
                                     >
                                         <Facebook className="w-5 h-5" />
                                     </motion.a>
@@ -94,8 +102,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     <motion.a 
                                         href="#" 
                                         className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
-                                        whileHover={{ scale: 1.1, y: -2 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ 
+                                            scale: 1.2, 
+                                            y: -5,
+                                            rotate: -360,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                        whileTap={{ scale: 0.9 }}
                                     >
                                         <Instagram className="w-5 h-5" />
                                     </motion.a>
@@ -104,8 +117,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     <motion.a 
                                         href="#" 
                                         className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
-                                        whileHover={{ scale: 1.1, y: -2 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ 
+                                            scale: 1.2, 
+                                            y: -5,
+                                            rotate: 360,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                        whileTap={{ scale: 0.9 }}
                                     >
                                         <Twitter className="w-5 h-5" />
                                     </motion.a>
@@ -114,8 +132,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     <motion.a 
                                         href="#" 
                                         className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all duration-300"
-                                        whileHover={{ scale: 1.1, y: -2 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{ 
+                                            scale: 1.2, 
+                                            y: -5,
+                                            rotate: -360,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                        whileTap={{ scale: 0.9 }}
                                     >
                                         <Youtube className="w-5 h-5" />
                                     </motion.a>
@@ -308,8 +331,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         <FadeInView delay={1.2} className="text-center pt-4 border-t border-gray-200">
                                             <p className="text-sm text-gray-600">
                                                 Belum punya akses?{' '}
-                                                <Link href="#" className="text-[#33475B] hover:text-[#2a3c4a] font-medium hover:underline transition-all duration-200">
-                                                    Hubungi Administrator
+                                                <Link href={route('register')} className="text-[#33475B] hover:text-[#2a3c4a] font-medium hover:underline transition-all duration-200">
+                                                    Daftar Sekarang
                                                 </Link>
                                             </p>
                                         </FadeInView>

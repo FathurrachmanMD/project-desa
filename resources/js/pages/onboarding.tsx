@@ -138,14 +138,16 @@ export default function Onboarding() {
                             </FadeInView>
                             
                             <FadeInView direction="up" delay={4}>
-                                <Link href={route('login')}>
-                                    <AnimatedButton
-                                        variant="glow"
-                                        className="bg-[#33475B] hover:bg-[#2a3c4a] text-white px-16 py-8 text-xl font-semibold rounded-2xl shadow-xl transition-all duration-300 h-16"
-                                    >
-                                        Masuk Sekarang
-                                    </AnimatedButton>
-                                </Link>
+                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <Link href={route('login')}>
+                                        <AnimatedButton
+                                            variant="glow"
+                                            className="bg-[#33475B] hover:bg-[#2a3c4a] text-white px-16 py-8 text-xl font-semibold rounded-2xl shadow-xl transition-all duration-300 h-16"
+                                        >
+                                            Masuk Sekarang
+                                        </AnimatedButton>
+                                    </Link>
+                                </motion.div>
                             </FadeInView>
                         </div>
                     </div>
