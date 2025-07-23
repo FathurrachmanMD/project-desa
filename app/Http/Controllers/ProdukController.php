@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class ProdukController extends Controller
 {
@@ -40,9 +42,10 @@ class ProdukController extends Controller
                 'deskripsi'     => 'nullable|string',
                 'foto'          => 'nullable|string|max:225',
                 'status'        => 'boolean',
-                'created_by'    => 'nullable|exists:users,id',
-                'updated_by'    => 'nullable|exists:users,id',
             ]);
+
+            $validated["created_by"] = auth()->id();
+            $validated["updated_by"] = auth()->id();
 
             $item = Produk::create($validated);
             return response()->json($item, 201);
@@ -91,8 +94,9 @@ class ProdukController extends Controller
                 'deskripsi'     => 'nullable|string',
                 'foto'          => 'nullable|string|max:225',
                 'status'        => 'boolean',
-                'updated_by'    => 'nullable|exists:users,id',
             ]);
+            
+            $validated["updated_by"] = auth()->id();
 
             $item->update($validated);
             return response()->json($item);

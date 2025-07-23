@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Enums\JenisSuratEnum;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class SuratController extends Controller
 {
@@ -31,64 +33,34 @@ class SuratController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
-
         try {
-            $request->validate([
-                // 'jenis' => ['required', new Enum(JenisSuratEnum::class)],
-                'jenis' => 'required|in:masuk,keluar',
-                'nomor_urut' => 'nullable|integer',
-                'nomor_surat' => 'nullable|string|max:35',
-                'kode_surat' => 'nullable|string|max:10',
-                'tanggal_surat' => 'required|date',
-                'tanggal_penerimaan' => 'nullable|date',
-                'pengirim' => 'nullable|string|max:255',
-                'tujuan' => 'nullable|string|max:255',
-                'isi_singkat' => 'nullable|string|max:255',
-                'isi_disposisi' => 'nullable|string|max:255',
-                'berkas_scan' => 'nullable|string|max:255',
-                'lokasi_arsip' => 'nullable|string|max:255',
-                'ekspedisi' => 'nullable|boolean',
-                'tanda_terima' => 'nullable|string|max:255',
-                'keterangan' => 'nullable|string|max:255',
+            $validated = $request->validate([
+                'penduduk_id'   => 'nullable|exists:penduduk,id',
+                'format_id'     => 'required|exists:format_surat,id',
+                'nomor_surat'   => 'nullable|string|max:255',
+                'kode_surat'    => 'nullable|string|max:255',
+                'form'          => 'nullable|array',
+                'syarat'        => 'nullable|array',
+                'status'        => 'in:draft,diajukan,disetujui,ditolak,dicetak',
             ]);
 
-            $surat = new Surat();
-            $surat->jenis = $request->jenis;
-            $surat->nomor_urut = $request->nomor_urut;
-            $surat->nomor_surat = $request->nomor_surat;
-            $surat->kode_surat = $request->kode_surat;
-            $surat->tanggal_surat = $request->tanggal_surat;
-            $surat->tanggal_catat= now();
-            $surat->tanggal_penerimaan = $request->tanggal_penerimaan;
-            $surat->pengirim = $request->pengirim;
-            $surat->tujuan = $request->tujuan;
-            $surat->isi_singkat = $request->isi_singkat;
-            $surat->isi_disposisi = $request->isi_disposisi;
-            $surat->berkas_scan = $request->berkas_scan;        
-            $surat->lokasi_arsip = $request->lokasi_arsip;
-            $surat->ekspedisi = $request->ekspedisi;
-            $surat->tanda_terima = $request->tanda_terima;
-            $surat->keterangan = $request->keterangan;
-            $surat->created_at = now();
-            $surat->updated_at = now();
-            // $surat->created_by = auth()->user()->id;
-            // $surat->updated_by = auth()->user()->id;
+            $validated['created_by'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
 
-            $surat->save();
+            $surat = Surat::create($validated);
 
-            DB::commit();
+            return response()->json($surat, 201);
 
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Surat berhasil ditambahkan',
-                'data' => $surat
-            ])->setStatusCode(200);
-        }  catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json(['message' => 'Surat Gagal disimpan: ' . $th->getMessage()])->setStatusCode(500);
+                'message' => 'Validation error',
+                'errors'  => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Surat Gagal disimpan: ' . $e->getMessage()])->setStatusCode(500);
+            return response()->json([
+                'message' => 'Error',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -126,65 +98,39 @@ class SuratController extends Controller
      */
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
-
         try {
-            $request->validate([
-                'jenis' => 'nullable|in:masuk,keluar',
-                'nomor_urut' => 'nullable|integer',
-                'nomor_surat' => 'nullable|string|max:35',
-                'kode_surat' => 'nullable|string|max:10',
-                'tanggal_surat' => 'nullable|date',
-                'tanggal_penerimaan' => 'nullable|date',
-                'pengirim' => 'nullable|string|max:255',
-                'tujuan' => 'nullable|string|max:255',
-                'isi_singkat' => 'nullable|string|max:255',
-                'isi_disposisi' => 'nullable|string|max:255',
-                'berkas_scan' => 'nullable|string|max:255',
-                'lokasi_arsip' => 'nullable|string|max:255',
-                'ekspedisi' => 'nullable|boolean',
-                'tanda_terima' => 'nullable|string|max:255',
-                'keterangan' => 'nullable|string|max:255',
+            $item = Surat::findOrFail($id);
+
+            $validated = $request->validate([
+                'penduduk_id'   => 'nullable|exists:penduduk,id',
+                'format_id'     => 'nullable|exists:format_surat,id',
+                'nomor_surat'   => 'nullable|string|max:255',
+                'kode_surat'    => 'nullable|string|max:255',
+                'form'          => 'nullable|array',
+                'syarat'        => 'nullable|array',
+                'status'        => 'in:draft,diajukan,disetujui,ditolak,dicetak',
             ]);
 
-            $surat = Surat::findOrFail($id);
+            $validated['updated_by'] = auth()->id();
 
-            $data = array_filter($request->only([
-                'jenis',
-                'nomor_urut',
-                'nomor_surat',
-                'kode_surat',
-                'tanggal_surat',
-                'tanggal_penerimaan',
-                'pengirim',
-                'tujuan',
-                'isi_singkat',
-                'isi_disposisi',
-                'berkas_scan',
-                'lokasi_arsip',
-                'ekspedisi',
-                'tanda_terima',
-                'keterangan',
-            ]), function ($value) {
-                return !is_null($value);
-            });
+            $item->update($validated);
 
-            $surat->forceFill($data);
-            $surat->updated_at = now();
-            $surat->save(); // <-- WAJIB untuk menyimpan perubahan
+            return response()->json($item);
 
-            DB::commit();
-
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Surat berhasil diupdate',
-                'data' => $surat
-            ]);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json(['message' => 'Surat gagal diupdate: ' . $th->getMessage()])->setStatusCode(500);
+                'message' => 'Validation error',
+                'errors'  => $e->errors()
+            ], 422);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Data not found'
+            ], 404);
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Surat gagal diupdate: ' . $e->getMessage()])->setStatusCode(500);
+            return response()->json([
+                'message' => 'Error',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
