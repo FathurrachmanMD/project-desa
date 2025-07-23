@@ -32,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('perizinan-pribadi/index');
     })->name('perizinan-pribadi.index');
     
+    Route::get('perizinan-usaha', function () {
+        return Inertia::render('perizinan-usaha/index');
+    })->name('perizinan-usaha.index');
+    
     Route::get('customers', function () {
         return Inertia::render('customers/index');
     })->name('customers.index');

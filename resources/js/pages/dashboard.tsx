@@ -120,7 +120,7 @@ export default function Dashboard() {
                 <div className="w-full">
                     <StaggerAnimation className="grid gap-4 md:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <StaggerItem>
-                            <Link href="/dashboard" className="block h-full">
+                            <Link href="/perizinan" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
@@ -140,7 +140,7 @@ export default function Dashboard() {
                             </Link>
                         </StaggerItem>
                         <StaggerItem>
-                            <Link href="/event-permits" className="block h-full">
+                            <Link href="/perizinan-acara" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
@@ -160,7 +160,7 @@ export default function Dashboard() {
                             </Link>
                         </StaggerItem>
                         <StaggerItem>
-                            <Link href="/building-permits" className="block h-full">
+                            <Link href="/perizinan-bangunan" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
@@ -180,7 +180,7 @@ export default function Dashboard() {
                             </Link>
                         </StaggerItem>
                         <StaggerItem>
-                            <Link href="/personal-permits" className="block h-full">
+                            <Link href="/perizinan-pribadi" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
@@ -200,7 +200,7 @@ export default function Dashboard() {
                             </Link>
                         </StaggerItem>
                         <StaggerItem>
-                            <Link href="/business-permits" className="block h-full">
+                            <Link href="/perizinan-usaha" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
@@ -220,7 +220,7 @@ export default function Dashboard() {
                             </Link>
                         </StaggerItem>
                         <StaggerItem>
-                            <Link href="/agriculture-permits" className="block h-full">
+                            <Link href="/perizinan-pertanian" className="block h-full">
                                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer h-full">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-3 lg:px-4 pt-2 lg:pt-3">
                                         <CardTitle className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">
