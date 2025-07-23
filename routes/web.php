@@ -32,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('perizinan-pribadi/index');
     })->name('perizinan-pribadi.index');
     
+    Route::get('customers', function () {
+        return Inertia::render('customers/index');
+    })->name('customers.index');
+    
     // Demo route for toast notifications
     Route::get('demo/toast', function () {
         return Inertia::render('demo/toast');

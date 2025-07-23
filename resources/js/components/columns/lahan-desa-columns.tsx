@@ -54,14 +54,12 @@ export const createLahanDesaColumns = ({ onView, onEdit, onDelete }: LahanDesaCo
       <DataTableColumnHeader column={column} title="Rekomendasi Kades" />
     ),
     cell: ({ row }) => {
-      const rekomendasi = row.getValue('rekomendasi_kades') as 'Disetujui' | 'Ditolak' | 'Menunggu';
+      const rekomendasi = row.getValue('rekomendasi_kades') as 'Ya' | 'Tidak';
       return (
         <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          rekomendasi === 'Disetujui' 
-            ? 'bg-green-100 text-green-800' 
-            : rekomendasi === 'Ditolak'
-            ? 'bg-red-100 text-red-800'
-            : 'bg-yellow-100 text-yellow-800'
+          rekomendasi === 'Ya' 
+            ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800' 
+            : 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800'
         }`}>
           {rekomendasi}
         </div>

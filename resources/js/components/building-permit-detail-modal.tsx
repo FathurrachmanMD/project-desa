@@ -2,14 +2,12 @@ import React from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/status-badge';
 import { 
@@ -26,7 +24,8 @@ import {
   Target,
   Home,
   CheckCircle,
-  Printer
+  Printer,
+  Calendar
 } from 'lucide-react';
 
 interface BuildingPermitDetailModalProps {
@@ -81,17 +80,17 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_pemohon}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Alamat Bangunan
+            Jenis Bangunan
           </Label>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.alamat_bangunan}</span>
+            <Building className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.jenis_bangunan}</span>
           </div>
         </div>
       </div>
@@ -99,11 +98,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Bangunan
+            Alamat Bangunan
           </Label>
           <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jenis_bangunan}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.alamat_bangunan}</span>
           </div>
         </div>
         
@@ -113,7 +112,7 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>{data.status_tanah}</span>
+            <span className="text-sm">{data.status_tanah}</span>
           </div>
         </div>
       </div>
@@ -121,11 +120,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Status Tanah
+            Tanggal Pengajuan
           </Label>
           <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-muted-foreground" />
-            <span>{data.status_tanah}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -148,17 +147,17 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemohon}</span>
+            <span className="text-sm">{data.nama_pemohon}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Nama Lahan
+            Tujuan Pembangunan
           </Label>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_lahan}</span>
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.tujuan_pembangunan}</span>
           </div>
         </div>
       </div>
@@ -166,11 +165,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Tujuan Pembangunan
+            Nama Lahan
           </Label>
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <span>{data.tujuan_pembangunan}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.nama_lahan}</span>
           </div>
         </div>
         
@@ -180,7 +179,14 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            <Badge variant={data.rekomendasi_kades === 'Ya' ? 'default' : 'secondary'}>
+            <Badge 
+              variant="outline" 
+              className={`px-2.5 py-0.5 text-xs font-medium ${
+                data.rekomendasi_kades === 'Ya' 
+                  ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800' 
+                  : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800'
+              }`}
+            >
               {data.rekomendasi_kades}
             </Badge>
           </div>
@@ -190,11 +196,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Rekomendasi Kades
+            Tanggal Pengajuan
           </Label>
           <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-muted-foreground" />
-            <span>{data.rekomendasi_kades}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -217,31 +223,7 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemilik_tanah}</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Lokasi Tanah
-          </Label>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.lokasi_tanah}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-muted-foreground">
-            Status Sengketa
-          </Label>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            <Badge variant={data.status_sengketa === 'Tidak' ? 'default' : 'destructive'}>
-              {data.status_sengketa}
-            </Badge>
+            <span className="text-sm">{data.nama_pemilik_tanah}</span>
           </div>
         </div>
         
@@ -251,7 +233,7 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-muted-foreground" />
-            <span>{data.tujuan_penggunaan}</span>
+            <span className="text-sm">{data.tujuan_penggunaan}</span>
           </div>
         </div>
       </div>
@@ -259,11 +241,42 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
+            Lokasi Tanah
+          </Label>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lokasi_tanah}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
             Status Sengketa
           </Label>
           <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-muted-foreground" />
-            <span>{data.status_sengketa}</span>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <Badge 
+              variant="outline" 
+              className={`px-2.5 py-0.5 text-xs font-medium ${
+                data.status_sengketa === 'Tidak' 
+                  ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800' 
+                  : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800'
+              }`}
+            >
+              {data.status_sengketa}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Tanggal Pengajuan
+          </Label>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -275,9 +288,7 @@ export function BuildingPermitDetailModal({
         </div>
       </div>
     </div>
-  );
-
-  const renderRenovasiDetails = (data: IzinRenovasiPerluasan) => (
+  );  const renderRenovasiDetails = (data: IzinRenovasiPerluasan) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -286,17 +297,17 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.nama_pemilik}</span>
+            <span className="text-sm">{data.nama_pemilik}</span>
           </div>
         </div>
         
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Lokasi Bangunan
+            Jenis Renovasi
           </Label>
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{data.lokasi_bangunan}</span>
+            <Home className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.jenis_renovasi}</span>
           </div>
         </div>
       </div>
@@ -304,11 +315,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Jenis Renovasi
+            Lokasi Bangunan
           </Label>
           <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-muted-foreground" />
-            <span>{data.jenis_renovasi}</span>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{data.lokasi_bangunan}</span>
           </div>
         </div>
         
@@ -318,7 +329,7 @@ export function BuildingPermitDetailModal({
           </Label>
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>{data.status_tanah}</span>
+            <span className="text-sm">{data.status_tanah}</span>
           </div>
         </div>
       </div>
@@ -326,11 +337,11 @@ export function BuildingPermitDetailModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            Status Tanah
+            Tanggal Pengajuan
           </Label>
           <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <span>{data.status_tanah}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{formatDate(data.tanggal_pengajuan)}</span>
           </div>
         </div>
         
@@ -363,51 +374,25 @@ export function BuildingPermitDetailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>{getModalTitle()}</DialogTitle>
-          <DialogDescription>
-            Informasi lengkap tentang pengajuan perizinan ini
-          </DialogDescription>
+          <DialogTitle className="text-xl font-semibold">
+            {getModalTitle()}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Informasi Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {renderDetails()}
-            </CardContent>
-          </Card>
+          {renderDetails()}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Riwayat Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Tanggal Pengajuan</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(data.tanggal_pengajuan)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">ID Pengajuan</span>
-                  <span className="text-sm text-muted-foreground font-mono">
-                    {data.id}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-xs text-muted-foreground mt-4 pt-4 border-t">
+            ID Dokumen: {data.id}
+          </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Tutup
           </Button>
-          <Button onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
+          <Button onClick={handlePrint} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
             Cetak
           </Button>
         </DialogFooter>
