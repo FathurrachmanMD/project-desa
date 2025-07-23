@@ -31,6 +31,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('perizinan-pribadi', function () {
         return Inertia::render('perizinan-pribadi/index');
     })->name('perizinan-pribadi.index');
+    
+    // Demo route for toast notifications
+    Route::get('demo/toast', function () {
+        return Inertia::render('demo/toast');
+    })->name('demo.toast');
+    
+    // Test route for toast notifications
+    Route::get('test-toast', function () {
+        return Inertia::render('test-toast');
+    })->name('test.toast');
 });
 
 require __DIR__.'/settings.php';

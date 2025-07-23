@@ -8,6 +8,7 @@ import { FadeInView, StaggerAnimation, StaggerItem, AnimatedCard, AnimatedButton
 import { ChevronDown, Facebook, Instagram, Twitter, Youtube, Eye, EyeOff, Lock, User } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAuthToast } from '@/hooks/useToast';
 
 type LoginForm = {
     email: string;
@@ -28,10 +29,22 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     });
 
     const [showPassword, setShowPassword] = useState(false);
+    const { loginSuccess, loginError } = useAuthToast();
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('login'), {
+            onSuccess: () => {
+                loginSuccess();
+            },
+            onError: (errors) => {
+                // Check if there are validation errors for email/password
+                if (errors.email || errors.password) {
+                    loginError('Periksa kembali email dan password Anda');
+                } else {
+                    loginError();
+                }
+            },
             onFinish: () => reset('password'),
         });
     };

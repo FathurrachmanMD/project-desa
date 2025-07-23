@@ -7,20 +7,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import HeadingSmall from '@/components/heading-small';
+import { useCrudToast } from '@/hooks/useToast';
 
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
     const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm<Required<{ password: string }>>({ password: '' });
+    const { deleteSuccess, deleteError } = useCrudToast();
 
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
 
         destroy(route('profile.destroy'), {
             preserveScroll: true,
-            onSuccess: () => closeModal(),
-            onError: () => passwordInput.current?.focus(),
+            onSuccess: () => {
+                closeModal();
+                deleteSuccess('Akun pengguna');
+            },
+            onError: (errors: any) => {
+                passwordInput.current?.focus();
+                const errorMessage = errors.password || 'Gagal menghapus akun';
+                deleteError(errorMessage);
+            },
             onFinish: () => reset(),
         });
     };

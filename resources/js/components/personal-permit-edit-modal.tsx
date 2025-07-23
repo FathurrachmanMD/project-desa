@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCrudToast } from '@/hooks/useToast';
 import { 
   SuratPengantarSKCK,
   SuratKeteranganDomisili,
@@ -37,6 +38,7 @@ export function PersonalPermitEditModal({
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<Record<string, string | number>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { updateSuccess, updateError } = useCrudToast();
 
   useEffect(() => {
     if (data) {
@@ -112,10 +114,10 @@ export function PersonalPermitEditModal({
       onSave(updatedData as unknown as SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja);
       onOpenChange(false);
       
-      // Show success message (you can implement toast here)
-      alert('Data perizinan berhasil diperbarui');
+      // Show success message
+      updateSuccess('Data perizinan');
     } catch {
-      alert('Terjadi kesalahan saat memperbarui data');
+      updateError('Terjadi kesalahan saat memperbarui data perizinan');
     } finally {
       setIsLoading(false);
     }

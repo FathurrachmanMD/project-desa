@@ -8,6 +8,7 @@ import { PermitTable } from '@/components/permit-table';
 import { BusinessPermitDetailModal } from '@/components/business-permit-detail-modal';
 import { BusinessPermitEditModal } from '@/components/business-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
+import { useCrudToast, usePermitToast } from '@/hooks/useToast';
 import { 
   skuData as originalSkuData, 
   iumkData as originalIumkData, 
@@ -53,6 +54,10 @@ export default function PerizinanUsaha() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Toast hooks
+  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
+  const { approveSuccess } = usePermitToast();
   
   // Manage data state locally
   const [skuData, setSkuData] = useState<SuratKeteranganUsaha[]>(originalSkuData);
@@ -119,7 +124,7 @@ export default function PerizinanUsaha() {
     // Close the modal and show success message
     setIsEditModalOpen(false);
     setSelectedData(null);
-    alert('Data berhasil diperbarui');
+    updateSuccess('Data perizinan');
   };
 
   const handleConfirmDelete = async () => {
@@ -156,9 +161,9 @@ export default function PerizinanUsaha() {
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
-      alert('Data berhasil dihapus');
+      deleteSuccess('Data perizinan');
     } catch {
-      alert('Terjadi kesalahan saat menghapus data');
+      deleteError('Terjadi kesalahan saat menghapus data perizinan');
     } finally {
       setIsDeleting(false);
     }

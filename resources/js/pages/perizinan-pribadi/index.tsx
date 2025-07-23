@@ -8,6 +8,7 @@ import { PersonalPermitTable } from '@/components/personal-permit-table';
 import { PersonalPermitDetailModal } from '@/components/personal-permit-detail-modal';
 import { PersonalPermitEditModal } from '@/components/personal-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
+import { useCrudToast, usePermitToast } from '@/hooks/useToast';
 import { 
   pengantarSKCKData as originalPengantarSKCKData, 
   keteranganDomisiliData as originalKeteranganDomisiliData, 
@@ -57,6 +58,10 @@ export default function PerizinanPribadi() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Toast hooks
+  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
+  const { approveSuccess } = usePermitToast();
   
   // State management for each data type
   const [pengantarSKCKData, setPengantarSKCKData] = useState<SuratPengantarSKCK[]>(originalPengantarSKCKData);
@@ -130,7 +135,7 @@ export default function PerizinanPribadi() {
     }
     
     setIsEditModalOpen(false);
-    alert('Data berhasil diperbarui');
+    updateSuccess('Data perizinan pribadi');
   };
 
   const handleConfirmDelete = async () => {
@@ -172,9 +177,9 @@ export default function PerizinanPribadi() {
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
-      alert('Data berhasil dihapus');
+      deleteSuccess('Data perizinan pribadi');
     } catch {
-      alert('Terjadi kesalahan saat menghapus data');
+      deleteError('Terjadi kesalahan saat menghapus data perizinan pribadi');
     } finally {
       setIsDeleting(false);
     }

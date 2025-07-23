@@ -8,6 +8,7 @@ import { FadeInView, StaggerAnimation, StaggerItem, AnimatedCard, AnimatedButton
 import { ChevronDown, Facebook, Instagram, Twitter, Youtube, Eye, EyeOff, Lock, User, Mail, UserCheck } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAuthToast } from '@/hooks/useToast';
 
 type RegisterForm = {
     name: string;
@@ -26,10 +27,20 @@ export default function Register() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
+    const { registerSuccess, registerError } = useAuthToast();
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('register'), {
+            onSuccess: () => {
+                registerSuccess();
+            },
+            onError: (errors: any) => {
+                const errorMessage = errors.email || errors.password || errors.name 
+                    ? 'Periksa kembali data yang Anda masukkan' 
+                    : 'Terjadi kesalahan saat mendaftarkan akun';
+                registerError(errorMessage);
+            },
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };

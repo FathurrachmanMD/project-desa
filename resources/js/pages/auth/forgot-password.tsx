@@ -6,15 +6,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Footer } from '@/components/footer';
 import { ChevronDown, Facebook, Instagram, Twitter, Youtube, Mail, ArrowLeft, Shield, Clock, CheckCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
+import { useAuthToast } from '@/hooks/useToast';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     const { data, setData, post, processing, errors } = useForm<Required<{ email: string }>>({
         email: '',
     });
+    
+    const { passwordResetSent } = useAuthToast();
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('password.email'));
+        post(route('password.email'), {
+            onSuccess: () => {
+                passwordResetSent();
+            }
+        });
     };
 
     return (

@@ -8,6 +8,7 @@ import { BuildingPermitTable } from '@/components/building-permit-table';
 import { BuildingPermitDetailModal } from '@/components/building-permit-detail-modal';
 import { BuildingPermitEditModal } from '@/components/building-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
+import { useCrudToast, usePermitToast } from '@/hooks/useToast';
 import { 
   imbData as originalImbData, 
   lahanDesaData as originalLahanDesaData, 
@@ -53,6 +54,10 @@ export default function PerizinanBangunan() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dataToDelete, setDataToDelete] = useState<IzinMendirikanBangunan | IzinBangunLahanDesa | SuratTidakSengketaTanah | IzinRenovasiPerluasan | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Toast hooks
+  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
+  const { approveSuccess } = usePermitToast();
   
   // State management for each data type
   const [imbData, setImbData] = useState<IzinMendirikanBangunan[]>(originalImbData);
@@ -117,7 +122,7 @@ export default function PerizinanBangunan() {
     }
     
     setIsEditModalOpen(false);
-    alert('Data berhasil diperbarui');
+    updateSuccess('Data perizinan bangunan');
   };
 
   const handleConfirmDelete = async () => {
@@ -154,9 +159,9 @@ export default function PerizinanBangunan() {
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
-      alert('Data berhasil dihapus');
+      deleteSuccess('Data perizinan bangunan');
     } catch {
-      alert('Terjadi kesalahan saat menghapus data');
+      deleteError('Terjadi kesalahan saat menghapus data perizinan bangunan');
     } finally {
       setIsDeleting(false);
     }

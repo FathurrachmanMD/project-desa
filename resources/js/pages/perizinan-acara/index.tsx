@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+const { useState } = React;
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { EventPermitTable } from '@/components/event-permit-table';
 import { EventPermitDetailModal } from '@/components/event-permit-detail-modal';
 import { EventPermitEditModal } from '@/components/event-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
+import { useCrudToast, usePermitToast } from '@/hooks/useToast';
 import { 
   eventPermitTypes as originalEventPermitTypes,
   hajatnData as originalHajatnData, 
@@ -43,6 +45,9 @@ const permitIcons = {
 };
 
 export default function PerizinanAcara() {
+  // Toast hooks
+  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
+
   const [activeTab, setActiveTab] = useState('hajatan');
   const [selectedData, setSelectedData] = useState<SuratIzinHajatan | SuratIzinAcaraPublik | IzinPenggunaanSaranaUmum | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -105,7 +110,7 @@ export default function PerizinanAcara() {
     }
     
     setIsEditModalOpen(false);
-    alert('Data berhasil diperbarui');
+    updateSuccess('Data perizinan acara');
   };
 
   const handleConfirmDelete = async () => {
@@ -137,9 +142,9 @@ export default function PerizinanAcara() {
       
       setIsDeleteModalOpen(false);
       setDataToDelete(null);
-      alert('Data berhasil dihapus');
+      deleteSuccess('Data perizinan acara');
     } catch {
-      alert('Terjadi kesalahan saat menghapus data');
+      deleteError('Terjadi kesalahan saat menghapus data perizinan acara');
     } finally {
       setIsDeleting(false);
     }
