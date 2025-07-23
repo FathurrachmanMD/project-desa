@@ -13,6 +13,22 @@ interface PengelolaanLahanColumnsProps {
 
 export const createPengelolaanLahanColumns = ({ onView, onEdit, onDelete }: PengelolaanLahanColumnsProps): ColumnDef<IzinPengelolaanLahan>[] => [
   {
+    id: 'nomor',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="No" />
+    ),
+    cell: ({ row, table }) => {
+      const pageIndex = table.getState().pagination.pageIndex;
+      const pageSize = table.getState().pagination.pageSize;
+      return (
+        <div className="font-medium text-center">
+          {pageIndex * pageSize + row.index + 1}
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
+  {
     accessorKey: 'id',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="ID" />

@@ -49,6 +49,19 @@ export function DataTable<TData, TValue>({
     pageSize: 10,
   });
 
+  // Effect to ensure pagination doesn't exceed available data
+  React.useEffect(() => {
+    const totalRows = data.length;
+    const totalPages = totalRows > 0 ? Math.ceil(totalRows / pagination.pageSize) : 1;
+    
+    if (pagination.pageIndex >= totalPages && totalPages > 0) {
+      setPagination(prev => ({
+        ...prev,
+        pageIndex: Math.max(0, totalPages - 1)
+      }));
+    }
+  }, [data.length, pagination.pageSize, pagination.pageIndex]);
+
   const table = useReactTable({
     data,
     columns,
@@ -72,7 +85,6 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: false,
-    pageCount: -1,
   });
 
   return (

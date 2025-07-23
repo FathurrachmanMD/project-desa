@@ -10,6 +10,21 @@ export const iumkColumns = (
   onDelete?: (data: IzinUsahaMikroKecil) => void
 ): ColumnDef<IzinUsahaMikroKecil>[] => [
   {
+    id: 'nomor',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="No" />
+    ),
+    cell: ({ row, table }) => {
+      const pageIndex = table.getState().pagination.pageIndex;
+      const pageSize = table.getState().pagination.pageSize;
+      return (
+        <div className="font-medium text-center">
+          {pageIndex * pageSize + row.index + 1}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'nama_pemohon',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Nama Pemohon" />
