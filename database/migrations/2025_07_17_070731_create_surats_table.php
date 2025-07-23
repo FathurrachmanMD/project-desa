@@ -16,35 +16,24 @@ return new class extends Migration
 
             // $table->unsignedBigInteger('config_id')->nullable()->index();
 
-            $table->enum('jenis', ['masuk', 'keluar']); // penanda jenis surat
+            $table->unsignedBigInteger('penduduk_id')->nullable()->index();
+            $table->foreign('penduduk_id')->references('id')->on('penduduk')->nullOnDelete();
 
-            $table->smallInteger('nomor_urut')->nullable();
-            $table->string('nomor_surat', 35)->nullable();
-            $table->string('kode_surat', 10)->nullable();
+            $table->unsignedBigInteger('format_id')->index();
+            $table->foreign('format_id')->references('id')->on('format_surat')->cascadeOnDelete();
 
-            $table->date('tanggal_surat');
-            $table->date('tanggal_penerimaan')->nullable();    // hanya untuk surat masuk
-            $table->timestamp('tanggal_catat')->nullable()->useCurrent(); // hanya untuk surat keluar
-            $table->date('tanggal_pengiriman')->nullable();    // hanya untuk surat keluar
+            $table->string('nomor_surat')->nullable();
+            $table->string('kode_surat')->nullable();
 
-            // Pengirim atau Tujuan (gunakan satu kolom serbaguna)
-            $table->string('pengirim')->nullable(); // surat masuk
-            $table->string('tujuan')->nullable();   // surat keluar
+            $table->json('form')->nullable();   // isi surat
+            $table->json('syarat')->nullable(); // file syarat, misal: {ktp: '...', kk: '...'}
 
-            $table->string('isi_singkat')->nullable();
-            $table->string('isi_disposisi')->nullable(); // hanya untuk surat masuk
-            $table->string('berkas_scan')->nullable();
-            $table->string('lokasi_arsip')->nullable();
-
-            $table->boolean('ekspedisi')->nullable()->default(false); // hanya untuk surat keluar
-            $table->string('tanda_terima')->nullable(); // hanya untuk surat keluar
-            $table->string('keterangan')->nullable();   // hanya untuk surat keluar
+            $table->enum('status', ['draft', 'diajukan', 'disetujui', 'ditolak', 'dicetak'])->default('draft');
 
             $table->timestamps();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
 
-            // Relasi user
             $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
             $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
         });

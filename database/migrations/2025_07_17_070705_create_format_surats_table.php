@@ -36,7 +36,7 @@ return new class extends Migration
             $table->longText('form_isian')->nullable();
             $table->longText('kode_isian')->nullable();
 
-            $table->string('orientasi', 10)->nullable();
+            $table->enum('orientasi', ['portrait', 'landscape'])->default('portrait');
             $table->string('ukuran', 10)->nullable();
             $table->text('margin')->nullable();
             $table->boolean('margin_global')->nullable()->default(false);
