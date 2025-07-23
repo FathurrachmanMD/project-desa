@@ -13,8 +13,8 @@ class FormatSuratSeeder extends Seeder
      */
     public function run(): void
     {
-        FormatSurat::factory()->create([
+        // FormatSurat::factory()->create([
 
-        ]);
+        // ]);
     }
 }

@@ -11,7 +11,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+type DashboardProps = {
+    total_penduduk: number;
+    izin_aktif: number;
+    total_kegiatan: number;
+};
+
+export default function Dashboard({ total_penduduk, izin_aktif, total_kegiatan }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -38,7 +44,7 @@ export default function Dashboard() {
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
                                     <h3 className="text-lg font-semibold mb-2">Total Penduduk</h3>
-                                    <p className="text-3xl font-bold text-blue-600">1,234</p>
+                                    <p className="text-3xl font-bold text-blue-600">{total_penduduk}</p>
                                 </div>
                             </div>
                         </AnimatedCard>
@@ -49,7 +55,7 @@ export default function Dashboard() {
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
                                     <h3 className="text-lg font-semibold mb-2">Izin Aktif</h3>
-                                    <p className="text-3xl font-bold text-green-600">56</p>
+                                    <p className="text-3xl font-bold text-green-600">{izin_aktif}</p>
                                 </div>
                             </div>
                         </AnimatedCard>
@@ -60,7 +66,7 @@ export default function Dashboard() {
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
                                     <h3 className="text-lg font-semibold mb-2">Kegiatan</h3>
-                                    <p className="text-3xl font-bold text-purple-600">12</p>
+                                    <p className="text-3xl font-bold text-purple-600">{total_kegiatan}</p>
                                 </div>
                             </div>
                         </AnimatedCard>
