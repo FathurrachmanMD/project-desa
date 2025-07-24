@@ -43,8 +43,8 @@ export const customersData: Customer[] = [
     jenis_kelamin: 'Laki-laki',
     pekerjaan: 'Wiraswasta',
     status_akun: 'Aktif',
-    tanggal_daftar: '2024-01-15',
-    terakhir_login: '2025-07-23',
+    tanggal_daftar: '2025-07-24',
+    terakhir_login: '2025-07-24',
     total_pengajuan: 5
   },
   {
@@ -58,8 +58,8 @@ export const customersData: Customer[] = [
     jenis_kelamin: 'Perempuan',
     pekerjaan: 'Pegawai Swasta',
     status_akun: 'Aktif',
-    tanggal_daftar: '2024-02-10',
-    terakhir_login: '2025-07-22',
+    tanggal_daftar: '2025-07-24',
+    terakhir_login: '2025-07-24',
     total_pengajuan: 3
   },
   {
@@ -72,8 +72,8 @@ export const customersData: Customer[] = [
     tanggal_lahir: '1982-12-05',
     jenis_kelamin: 'Laki-laki',
     pekerjaan: 'Petani',
-    status_akun: 'Aktif',
-    tanggal_daftar: '2024-03-20',
+    status_akun: 'Nonaktif',
+    tanggal_daftar: '2025-07-23',
     terakhir_login: '2025-07-20',
     total_pengajuan: 8
   },
@@ -87,9 +87,9 @@ export const customersData: Customer[] = [
     tanggal_lahir: '1988-06-18',
     jenis_kelamin: 'Perempuan',
     pekerjaan: 'Guru',
-    status_akun: 'Nonaktif',
-    tanggal_daftar: '2024-04-05',
-    terakhir_login: '2025-06-15',
+    status_akun: 'Aktif',
+    tanggal_daftar: '2025-07-23',
+    terakhir_login: '2025-07-23',
     total_pengajuan: 2
   },
   {

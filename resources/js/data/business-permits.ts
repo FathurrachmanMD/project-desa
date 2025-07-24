@@ -55,7 +55,7 @@ export const skuData: SuratKeteranganUsaha[] = [
     alamat_usaha: 'Jl. Melati No.12, Bandung',
     lama_usaha: '3 tahun, 6 bulan',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-10',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'SKU002',
@@ -65,7 +65,7 @@ export const skuData: SuratKeteranganUsaha[] = [
     alamat_usaha: 'Jl. Mawar No.25, Bandung',
     lama_usaha: '2 tahun, 3 bulan',
     status: 'Disetujui',
-    tanggal_pengajuan: '2025-07-08',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'SKU003',
@@ -75,7 +75,7 @@ export const skuData: SuratKeteranganUsaha[] = [
     alamat_usaha: 'Jl. Anggrek No.8, Bandung',
     lama_usaha: '1 tahun, 2 bulan',
     status: 'Ditolak',
-    tanggal_pengajuan: '2025-07-05',
+    tanggal_pengajuan: '2025-07-23',
   },
   {
     id: 'SKU004',

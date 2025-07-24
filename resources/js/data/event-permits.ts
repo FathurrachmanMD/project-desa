@@ -43,7 +43,7 @@ export const hajatnData: SuratIzinHajatan[] = [
     lokasi_acara: 'Jl. Anggrek No. 7, Cileunyi',
     dampak_keramaian: 'Ya',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-15',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'HAJ002',
@@ -53,7 +53,7 @@ export const hajatnData: SuratIzinHajatan[] = [
     lokasi_acara: 'Jl. Melati No. 15, Bandung',
     dampak_keramaian: 'Tidak',
     status: 'Disetujui',
-    tanggal_pengajuan: '2025-07-12',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'HAJ003',
@@ -63,7 +63,7 @@ export const hajatnData: SuratIzinHajatan[] = [
     lokasi_acara: 'Jl. Mawar No. 22, Cimahi',
     dampak_keramaian: 'Ya',
     status: 'Ditolak',
-    tanggal_pengajuan: '2025-07-10',
+    tanggal_pengajuan: '2025-07-23',
   },
   {
     id: 'HAJ004',

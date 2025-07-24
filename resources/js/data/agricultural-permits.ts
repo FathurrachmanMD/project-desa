@@ -51,7 +51,7 @@ export const pengelolaanLahanData: IzinPengelolaanLahan[] = [
     tujuan_pengelolaan: 'Kebun',
     luas_lahan: '1.5 Hektar',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-10',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'PL002',
@@ -60,7 +60,7 @@ export const pengelolaanLahanData: IzinPengelolaanLahan[] = [
     tujuan_pengelolaan: 'Sawah',
     luas_lahan: '2.0 Hektar',
     status: 'Disetujui',
-    tanggal_pengajuan: '2025-06-25',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'PL003',
@@ -69,7 +69,7 @@ export const pengelolaanLahanData: IzinPengelolaanLahan[] = [
     tujuan_pengelolaan: 'Perkebunan',
     luas_lahan: '3.2 Hektar',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-05',
+    tanggal_pengajuan: '2025-07-23',
   },
   {
     id: 'PL004',

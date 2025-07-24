@@ -75,7 +75,7 @@ export const pengantarSKCKData: SuratPengantarSKCK[] = [
     tujuan_skck: 'Melamar kerja',
     tempat_tujuan_skck: 'Polsek Cibiru',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-15',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'SKCK002',
@@ -84,7 +84,7 @@ export const pengantarSKCKData: SuratPengantarSKCK[] = [
     tujuan_skck: 'Mengurus visa',
     tempat_tujuan_skck: 'Polres Bandung',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-14',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'SKCK003',
@@ -93,7 +93,7 @@ export const pengantarSKCKData: SuratPengantarSKCK[] = [
     tujuan_skck: 'Daftar CPNS',
     tempat_tujuan_skck: 'Polda Jabar',
     status: 'Disetujui',
-    tanggal_pengajuan: '2025-07-10',
+    tanggal_pengajuan: '2025-07-23',
   },
   {
     id: 'SKCK004',

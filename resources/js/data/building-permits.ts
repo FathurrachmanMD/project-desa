@@ -50,7 +50,7 @@ export const imbData: IzinMendirikanBangunan[] = [
     jenis_bangunan: 'Ruko',
     status_tanah: 'Milik sendiri',
     status: 'Diproses',
-    tanggal_pengajuan: '2025-07-15',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'IMB002',
@@ -59,7 +59,7 @@ export const imbData: IzinMendirikanBangunan[] = [
     jenis_bangunan: 'Rumah Tinggal',
     status_tanah: 'Milik sendiri',
     status: 'Disetujui',
-    tanggal_pengajuan: '2025-07-10',
+    tanggal_pengajuan: '2025-07-24',
   },
   {
     id: 'IMB003',
@@ -68,7 +68,7 @@ export const imbData: IzinMendirikanBangunan[] = [
     jenis_bangunan: 'Warung',
     status_tanah: 'Sewa',
     status: 'Ditolak',
-    tanggal_pengajuan: '2025-07-12',
+    tanggal_pengajuan: '2025-07-23',
   },
   {
     id: 'IMB004',

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,89 +9,107 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Eye, Edit, Trash2, AlertTriangle, X } from "lucide-react";
+import { Customer, customersData, customerStatusConfig } from "@/data/customers";
+import { CustomerDetailModal } from "@/components/customer-detail-modal";
+import { CustomerEditModal } from "@/components/customer-edit-modal";
+import { useToast } from "@/contexts/ToastContext";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: 'active' | 'inactive';
-  registrationDate: string;
-  lastActivity: string;
-}
-
-const users: User[] = [
-  {
-    id: '1',
-    name: 'Ahmad Fauzi',
-    email: 'ahmad.fauzi@email.com',
-    phone: '+62 812-3456-7890',
-    status: 'active',
-    registrationDate: '2024-01-15',
-    lastActivity: '2 jam lalu'
-  },
-  {
-    id: '2',
-    name: 'Siti Nurhaliza',
-    email: 'siti.nurhaliza@email.com',
-    phone: '+62 813-2345-6789',
-    status: 'active',
-    registrationDate: '2024-01-10',
-    lastActivity: '4 jam lalu'
-  },
-  {
-    id: '3',
-    name: 'Budi Santoso',
-    email: 'budi.santoso@email.com',
-    phone: '+62 814-1234-5678',
-    status: 'inactive',
-    registrationDate: '2024-01-05',
-    lastActivity: '2 hari lalu'
-  },
-  {
-    id: '4',
-    name: 'Maya Sari',
-    email: 'maya.sari@email.com',
-    phone: '+62 815-9876-5432',
-    status: 'active',
-    registrationDate: '2024-01-20',
-    lastActivity: '1 hari lalu'
-  },
-  {
-    id: '5',
-    name: 'Andi Pratama',
-    email: 'andi.pratama@email.com',
-    phone: '+62 816-5432-1098',
-    status: 'active',
-    registrationDate: '2024-01-25',
-    lastActivity: '6 jam lalu'
-  }
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    case 'inactive':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-  }
-};
-
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'Aktif';
-    case 'inactive':
-      return 'Tidak Aktif';
-    default:
-      return status;
+// Helper function to format time ago
+const formatTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays > 0) {
+    return `${diffInDays} hari lalu`;
+  } else if (diffInHours > 0) {
+    return `${diffInHours} jam lalu`;
+  } else if (diffInMinutes > 0) {
+    return `${diffInMinutes} menit lalu`;
+  } else {
+    return 'Baru saja';
   }
 };
 
 export function UsersTable() {
+  const { showToast } = useToast();
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>(customersData);
+
+  // Get the latest 5 customers sorted by registration date
+  const latestCustomers = customers
+    .sort((a, b) => new Date(b.tanggal_daftar).getTime() - new Date(a.tanggal_daftar).getTime())
+    .slice(0, 5);
+
+  const handleViewCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (customer: Customer) => {
+    setDeletingCustomer(customer);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deletingCustomer) return;
+    
+    try {
+      // Update the customers state
+      setCustomers(prevCustomers => 
+        prevCustomers.filter(c => c.id !== deletingCustomer.id)
+      );
+      
+      showToast.success(
+        'Customer Dihapus', 
+        `${deletingCustomer.nama} berhasil dihapus dari sistem`
+      );
+      
+      setIsDeleteModalOpen(false);
+      setDeletingCustomer(null);
+    } catch {
+      showToast.error(
+        'Gagal Menghapus', 
+        'Terjadi kesalahan saat menghapus customer. Silakan coba lagi.'
+      );
+    }
+  };
+
+  const handleCustomerUpdated = (updatedCustomer: Customer) => {
+    // Update the customers state
+    setCustomers(prevCustomers => 
+      prevCustomers.map(c => c.id === updatedCustomer.id ? updatedCustomer : c)
+    );
+    
+    showToast.success(
+      'Data Diperbarui', 
+      `Data ${updatedCustomer.nama} berhasil diperbarui`
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -113,31 +132,31 @@ export function UsersTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user, index) => (
-              <TableRow key={user.id}>
+            {latestCustomers.map((customer, index) => (
+              <TableRow key={customer.id}>
                 <TableCell className="font-medium">
                   {index + 1}
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <p className="font-medium">{user.name}</p>
+                    <p className="font-medium">{customer.nama}</p>
                     <p className="text-xs text-muted-foreground">
-                      Bergabung: {new Date(user.registrationDate).toLocaleDateString('id-ID')}
+                      Bergabung: {new Date(customer.tanggal_daftar).toLocaleDateString('id-ID')}
                     </p>
                   </div>
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phone}</TableCell>
+                <TableCell>{customer.email}</TableCell>
+                <TableCell>{customer.no_telepon}</TableCell>
                 <TableCell>
                   <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${getStatusColor(user.status)}`}
+                    variant="outline" 
+                    className={`text-xs ${customerStatusConfig[customer.status_akun].className}`}
                   >
-                    {getStatusText(user.status)}
+                    {customerStatusConfig[customer.status_akun].label}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {user.lastActivity}
+                  {formatTimeAgo(customer.terakhir_login)}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -145,6 +164,8 @@ export function UsersTable() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      onClick={() => handleViewCustomer(customer)}
+                      title={`Lihat detail ${customer.nama}`}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -152,6 +173,8 @@ export function UsersTable() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      onClick={() => handleEditCustomer(customer)}
+                      title={`Edit ${customer.nama}`}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -159,6 +182,8 @@ export function UsersTable() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteClick(customer)}
+                      title={`Hapus ${customer.nama}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -169,6 +194,54 @@ export function UsersTable() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Customer Detail Modal */}
+      <CustomerDetailModal
+        customer={selectedCustomer}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+      />
+
+      {/* Customer Edit Modal */}
+      <CustomerEditModal
+        customer={editingCustomer}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSave={handleCustomerUpdated}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Hapus data pengguna
+            </DialogTitle>
+            <DialogDescription className="text-left pt-2">
+              Apakah Anda yakin ingin menghapus data pengguna untuk <strong>{deletingCustomer?.nama}</strong>? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="flex items-center gap-2"
+            >
+              <X className="h-4 w-4" />
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+              Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

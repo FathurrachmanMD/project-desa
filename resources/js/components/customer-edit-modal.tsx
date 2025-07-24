@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Customer } from '@/data/customers';
+import { X, Save } from 'lucide-react';
 
 interface CustomerEditModalProps {
   customer: Customer | null;
@@ -204,13 +205,17 @@ export function CustomerEditModal({
             variant="outline" 
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
+            className="flex items-center gap-2"
           >
+            <X className="h-4 w-4" />
             Batal
           </Button>
           <Button 
             onClick={handleSave}
             disabled={isLoading}
+            className="flex items-center gap-2"
           >
+            <Save className="h-4 w-4" />
             {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
           </Button>
         </DialogFooter>
