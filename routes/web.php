@@ -4,8 +4,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('onboarding');
+    return Inertia::render('landing');
 })->name('home');
+
+Route::get('/onboarding', function () {
+    return Inertia::render('onboarding');
+})->name('onboarding');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -32,9 +36,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('perizinan-pribadi/index');
     })->name('perizinan-pribadi.index');
     
-    Route::get('perizinan-usaha', function () {
-        return Inertia::render('perizinan-usaha/index');
-    })->name('perizinan-usaha.index');
+    Route::get('form-usaha', function () {
+        return Inertia::render('form-usaha/index');
+    })->name('form-usaha.index');
+    
+    Route::get('form-usaha/form/{type}', function (string $type) {
+        return Inertia::render('form-usaha/form', [
+            'type' => $type
+        ]);
+    })->name('form-usaha.form');
     
     Route::get('customers', function () {
         return Inertia::render('customers/index');
