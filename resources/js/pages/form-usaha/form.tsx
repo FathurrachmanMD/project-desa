@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useState } from 'react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,11 +72,13 @@ const permitFields: Record<string, string[]> = {
   iumk: ['nama_pemohon', 'nik', 'nama_usaha', 'jenis_usaha', 'modal_usaha', 'status_tempat_usaha'],
   situ: ['nama_pemohon', 'alamat_usaha', 'status_lahan', 'jenis_usaha', 'rekomendasi_rtrw'],
   nib: ['nama_pemohon', 'nik', 'nama_usaha', 'tujuan'],
+  siup: ['nama_pemohon', 'nik', 'nama_usaha', 'alamat_usaha', 'jenis_usaha', 'modal_usaha'],
 };
 
 export default function BusinessPermitForm() {
-  const router = useRouter();
-  const { jenis } = router.query as { jenis?: string };
+  // Ambil jenis dari query string
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const jenis = searchParams.get('jenis') || undefined;
   const [form, setForm] = useState<Record<string, string>>({});
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -100,7 +103,7 @@ export default function BusinessPermitForm() {
     setTimeout(() => {
       setSubmitting(false);
       alert('Pengajuan berhasil!');
-      router.push('/form-usaha');
+      window.location.href = '/form-usaha';
     }, 1200);
   };
 
