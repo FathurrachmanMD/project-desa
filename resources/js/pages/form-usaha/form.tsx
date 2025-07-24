@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { AppLayout } from '@/components/layouts/app-layout';
+import { Navbar } from '@/components/shared/navbar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,126 +47,125 @@ const permitTypes = {
     }
 };
 
-export default function FormUsahaDetail({ type }: FormProps) {
-    const permit = permitTypes[type];
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Form Usaha', href: '/form-usaha' },
-        { title: permit.title, href: `/form-usaha/form/${type}` }
-    ];
+const getCurrentDate = () => {
+  const now = new Date();
+  return now.toISOString().slice(0, 10);
+};
 
-    return (
-        <>
-            <Head title={`${permit.title} - Desa Drawati`} />
+const permitFieldMap: Record<string, { label: string; name: string; type: string; required?: boolean; }> = {
+  nama_pemohon: { label: 'Nama Pemohon', name: 'nama_pemohon', type: 'text', required: true },
+  nik: { label: 'NIK', name: 'nik', type: 'text', required: true },
+  nama_usaha: { label: 'Nama Usaha', name: 'nama_usaha', type: 'text', required: true },
+  alamat_usaha: { label: 'Alamat Usaha', name: 'alamat_usaha', type: 'text', required: true },
+  lama_usaha: { label: 'Lama Usaha', name: 'lama_usaha', type: 'text', required: true },
+  jenis_usaha: { label: 'Jenis Usaha', name: 'jenis_usaha', type: 'text', required: true },
+  modal_usaha: { label: 'Modal Usaha', name: 'modal_usaha', type: 'text', required: true },
+  status_tempat_usaha: { label: 'Status Tempat Usaha', name: 'status_tempat_usaha', type: 'text', required: true },
+  status_lahan: { label: 'Status Lahan', name: 'status_lahan', type: 'text', required: true },
+  rekomendasi_rtrw: { label: 'Rekomendasi RT/RW', name: 'rekomendasi_rtrw', type: 'text', required: true },
+  tujuan: { label: 'Tujuan', name: 'tujuan', type: 'text', required: true },
+};
 
-            <AppLayout breadcrumbs={breadcrumbs}>
-                <div className="min-h-screen pt-24 pb-10 bg-gray-50">
-                    <FadeInView>
-                        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-                            <div className="text-center mb-12">
-                                <div className={`w-16 h-16 ${permit.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                                    <permit.icon className="w-8 h-8 text-white" />
-                                </div>
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">{permit.title}</h1>
-                                <p className="text-gray-600 max-w-2xl mx-auto">{permit.description}</p>
-                            </div>
+const permitFields: Record<string, string[]> = {
+  sku: ['nama_pemohon', 'nik', 'nama_usaha', 'alamat_usaha', 'lama_usaha'],
+  iumk: ['nama_pemohon', 'nik', 'nama_usaha', 'jenis_usaha', 'modal_usaha', 'status_tempat_usaha'],
+  situ: ['nama_pemohon', 'alamat_usaha', 'status_lahan', 'jenis_usaha', 'rekomendasi_rtrw'],
+  nib: ['nama_pemohon', 'nik', 'nama_usaha', 'tujuan'],
+};
 
-                            <Card className="p-8">
-                                <form className="space-y-8">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="nama_pemilik">Nama Pemilik</Label>
-                                            <Input
-                                                id="nama_pemilik"
-                                                placeholder="Masukkan nama pemilik usaha"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="nik">NIK</Label>
-                                            <Input
-                                                id="nik"
-                                                placeholder="Masukkan NIK"
-                                            />
-                                        </div>
-                                    </div>
+export default function BusinessPermitForm() {
+  const router = useRouter();
+  const { jenis } = router.query as { jenis?: string };
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [file, setFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="nama_usaha">Nama Usaha</Label>
-                                        <Input
-                                            id="nama_usaha"
-                                            placeholder="Masukkan nama usaha"
-                                        />
-                                    </div>
+  const fields = jenis && permitFields[jenis] ? permitFields[jenis] : [];
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="alamat">Alamat Usaha</Label>
-                                        <Textarea
-                                            id="alamat"
-                                            placeholder="Masukkan alamat lengkap usaha"
-                                            rows={3}
-                                        />
-                                    </div>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="jenis_usaha">Jenis Usaha</Label>
-                                        <Input
-                                            id="jenis_usaha"
-                                            placeholder="Contoh: Toko Kelontong, Warung Makan, dll"
-                                        />
-                                    </div>
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="modal_usaha">Modal Usaha</Label>
-                                        <Input
-                                            id="modal_usaha"
-                                            type="number"
-                                            placeholder="Masukkan modal usaha dalam rupiah"
-                                        />
-                                    </div>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    setTimeout(() => {
+      setSubmitting(false);
+      alert('Pengajuan berhasil!');
+      router.push('/form-usaha');
+    }, 1200);
+  };
 
-                                    <div className="space-y-2">
-                                        <Label>Upload Dokumen Persyaratan</Label>
-                                        <div className="grid gap-6 mt-2">
-                                            <FileUpload
-                                                label="KTP Pemilik"
-                                                hint="Format: JPG, PNG, PDF (Max 2MB)"
-                                                accept=".jpg,.jpeg,.png,.pdf"
-                                            />
-                                            <FileUpload
-                                                label="NPWP"
-                                                hint="Format: JPG, PNG, PDF (Max 2MB)"
-                                                accept=".jpg,.jpeg,.png,.pdf"
-                                            />
-                                            <FileUpload
-                                                label="Foto Lokasi Usaha"
-                                                hint="Format: JPG, PNG (Max 2MB)"
-                                                accept=".jpg,.jpeg,.png"
-                                            />
-                                            {type === 'siup' && (
-                                                <FileUpload
-                                                    label="Akta Pendirian Usaha"
-                                                    hint="Format: PDF (Max 5MB)"
-                                                    accept=".pdf"
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-4">
-                                        <Button 
-                                            type="submit"
-                                            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
-                                            size="lg"
-                                        >
-                                            Submit Permohonan
-                                        </Button>
-                                    </div>
-                                </form>
-                            </Card>
-                        </div>
-                    </FadeInView>
-                </div>
-            </AppLayout>
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <main className="max-w-2xl mx-auto mt-24 px-4 pb-16">
+        <h1 className="text-2xl font-bold mb-6">Ajukan Perizinan Usaha</h1>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {fields.map((key) => (
+            <div key={key}>
+              <label className="block text-sm font-medium mb-1" htmlFor={key}>
+                {permitFieldMap[key].label}
+                {permitFieldMap[key].required && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                id={key}
+                name={key}
+                type={permitFieldMap[key].type}
+                required={permitFieldMap[key].required}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+                value={form[key] || ''}
+                onChange={handleChange}
+                disabled={submitting}
+              />
+            </div>
+          ))}
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="file_upload">
+              Upload Berkas Pendukung
+            </label>
+            <input
+              id="file_upload"
+              name="file_upload"
+              type="file"
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+              onChange={handleFileChange}
+              disabled={submitting}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" htmlFor="tanggal_pengajuan">
+              Tanggal Pengajuan
+            </label>
+            <input
+              id="tanggal_pengajuan"
+              name="tanggal_pengajuan"
+              type="text"
+              className="w-full border rounded px-3 py-2 bg-gray-100"
+              value={getCurrentDate()}
+              readOnly
+              tabIndex={-1}
+            />
+          </div>
+          {error && <div className="text-red-500 text-sm">{error}</div>}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
+            disabled={submitting}
+          >
+            {submitting ? 'Mengirim...' : 'Ajukan Sekarang'}
+          </button>
+        </form>
+      </main>
+    </>
+  );
 }
+
