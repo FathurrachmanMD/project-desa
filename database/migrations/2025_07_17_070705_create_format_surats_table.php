@@ -16,9 +16,11 @@ return new class extends Migration
             // $table->unsignedBigInteger('config_id')->nullable()->index();
 
             $table->string('nama');
+            $table->unsignedBigInteger('kategori_id')->nullable();
             $table->string('url_surat')->index();
             $table->string('kode_surat', 10)->nullable();
             $table->string('lampiran')->nullable();
+            $table->integer('biaya')->default(0);
 
             $table->boolean('kunci')->default(false);
             $table->boolean('favorit')->default(false);
@@ -30,10 +32,9 @@ return new class extends Migration
             $table->boolean('logo_garuda')->default(false);
             $table->boolean('kecamatan')->default(false);
 
-            $table->longText('syarat_surat')->nullable();
             $table->longText('template')->nullable();
             $table->longText('template_desa')->nullable();
-            $table->longText('form_isian')->nullable();
+            $table->json('form_isian')->nullable();
             $table->longText('kode_isian')->nullable();
 
             $table->enum('orientasi', ['portrait', 'landscape'])->default('portrait');
@@ -55,6 +56,8 @@ return new class extends Migration
             $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
             $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
+            
+            $table->foreign('kategori_id')->references('id')->on('kategori_surat')->nullOnDelete();
         });
     }
 

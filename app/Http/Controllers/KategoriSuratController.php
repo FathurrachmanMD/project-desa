@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\KlasifikasiSurat;
+use App\Models\KategoriSurat;
 use Illuminate\Http\Request;
 
-class KlasifikasiSuratController extends Controller
+class KategoriSuratController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class KlasifikasiSuratController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(KlasifikasiSurat $klasifikasiSurat)
+    public function show(KategoriSurat $kategoriSurat)
     {
         //
     }
@@ -42,7 +42,7 @@ class KlasifikasiSuratController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(KlasifikasiSurat $klasifikasiSurat)
+    public function edit(KategoriSurat $kategoriSurat)
     {
         //
     }
@@ -50,7 +50,7 @@ class KlasifikasiSuratController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, KlasifikasiSurat $klasifikasiSurat)
+    public function update(Request $request, KategoriSurat $kategoriSurat)
     {
         //
     }
@@ -58,7 +58,7 @@ class KlasifikasiSuratController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(KlasifikasiSurat $klasifikasiSurat)
+    public function destroy(KategoriSurat $kategoriSurat)
     {
         //
     }

@@ -28,6 +28,19 @@ class Surat extends Model
         'syarat' => 'array',
     ];
 
+    public function makePDF()
+    {
+        $template = $this->format->template;
+        $data = $this->form;
+
+        foreach ($data as $key => $value) {
+            $template = str_replace("{" . $key . "}", $value, $template);
+        }
+
+        // $template is html long text
+        return Pdf::loadHTML($template);
+    }
+
     // Relasi ke Penduduk
     public function penduduk()
     {
