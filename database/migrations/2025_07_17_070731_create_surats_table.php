@@ -28,7 +28,7 @@ return new class extends Migration
             $table->json('form')->nullable();   // isi surat
             $table->json('syarat')->nullable(); // file syarat, misal: {ktp: '...', kk: '...'}
 
-            $table->enum('status', ['draft', 'diajukan', 'disetujui', 'ditolak', 'dicetak'])->default('draft');
+            $table->enum('status', ['diproses', 'disetujui', 'ditolak', 'dicetak'])->default('diproses');
 
             $table->timestamps();
             $table->unsignedBigInteger('created_by')->nullable();
