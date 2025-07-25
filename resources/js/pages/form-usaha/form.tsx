@@ -8,10 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from '@/components/ui/file-upload';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Building2, FileText, ShoppingBag, Store, Briefcase, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/contexts/ToastContext';
 
 interface FormProps {
     type: 'siup' | 'nib' | 'situ' | 'sku' | 'iumk';
@@ -193,7 +192,7 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const { showToast } = useToast();
 
   // Get fields based on the type
   const fields = type && permitFields[type as keyof typeof permitFields] 
@@ -220,34 +219,34 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus(null);
     
     try {
       await post(route('form-usaha.submit'), {
         onSuccess: () => {
-          setSubmitStatus({
-            success: true,
-            message: 'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.'
-          });
+          showToast.success(
+            'Pengajuan Berhasil',
+            'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
+            { duration: 3000 }
+          );
           setTimeout(() => {
             window.location.href = '/form-usaha';
           }, 3000);
         },
         onError: (errors) => {
-          setSubmitStatus({
-            success: false,
-            message: 'Terjadi kesalahan. Mohon periksa kembali data yang dimasukkan.'
-          });
+          showToast.error(
+            'Kesalahan Validasi',
+            'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
+          );
         },
         onFinish: () => {
           setIsSubmitting(false);
         }
       });
     } catch (error) {
-      setSubmitStatus({
-        success: false,
-        message: 'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
-      });
+      showToast.error(
+        'Kesalahan Sistem',
+        'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
+      );
       setIsSubmitting(false);
     }
   };
@@ -303,38 +302,6 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
           </CardHeader>
           
           <CardContent className="p-6 md:p-8">
-            {/* Status Alert */}
-            {submitStatus && (
-              <Alert className={cn(
-                "mb-8 border-l-4",
-                submitStatus.success 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-red-500 bg-red-50'
-              )}>
-                <div className="flex items-start">
-                  {submitStatus.success ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                  )}
-                  <div className="ml-3">
-                    <AlertTitle className={cn(
-                      "font-medium",
-                      submitStatus.success ? 'text-green-800' : 'text-red-800'
-                    )}>
-                      {submitStatus.success ? 'Berhasil!' : 'Terjadi Kesalahan'}
-                    </AlertTitle>
-                    <AlertDescription className={cn(
-                      "mt-1",
-                      submitStatus.success ? 'text-green-700' : 'text-red-700'
-                    )}>
-                      {submitStatus.message}
-                    </AlertDescription>
-                  </div>
-                </div>
-              </Alert>
-            )}
-            
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-8">
                 {/* Form Fields */}
