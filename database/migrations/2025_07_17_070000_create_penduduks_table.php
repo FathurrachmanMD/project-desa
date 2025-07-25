@@ -16,17 +16,22 @@ return new class extends Migration
             // $table->unsignedBigInteger('config_id')->nullable();
             $table->string('nama');
             $table->string('nik')->unique();
+            $table->enum('sex', ['L', 'P']);
+            $table->string('pekerjaan')->nullable();
+            $table->string('tempatlahir')->nullable();
+            $table->date('tanggallahir')->nullable();
+            $table->enum('status', ['aktif', 'nonaktif', 'suspended'])->default('aktif');
+            $table->text('alamat_sekarang')->nullable();
+            $table->string('email')->nullable();
+            $table->string('telepon')->nullable();
+            
             $table->string('id_kk')->nullable();
             $table->string('kk_level')->nullable();
             $table->string('id_rtm')->nullable();
             $table->string('rtm_level')->nullable();
-            $table->enum('sex', ['L', 'P']);
-            $table->string('tempatlahir')->nullable();
-            $table->date('tanggallahir')->nullable();
             $table->unsignedBigInteger('agama_id')->nullable();
             $table->unsignedBigInteger('pendidikan_kk_id')->nullable();
             $table->unsignedBigInteger('pendidikan_sedang_id')->nullable();
-            $table->unsignedBigInteger('pekerjaan_id')->nullable();
             $table->string('status_kawin')->nullable();
             $table->unsignedBigInteger('warganegara_id')->nullable();
             $table->string('dokumen_pasport')->nullable();
@@ -38,9 +43,7 @@ return new class extends Migration
             $table->string('foto')->nullable();
             $table->unsignedBigInteger('golongan_darah_id')->nullable();
             $table->unsignedBigInteger('id_cluster')->nullable();
-            $table->string('status')->nullable();
             $table->text('alamat_sebelumnya')->nullable();
-            $table->text('alamat_sekarang')->nullable();
             $table->string('status_dasar')->nullable();
             $table->boolean('hamil')->nullable();
             $table->unsignedBigInteger('cacat_id')->nullable();
@@ -51,7 +54,6 @@ return new class extends Migration
             $table->string('akta_perceraian')->nullable();
             $table->date('tanggalperceraian')->nullable();
             $table->unsignedBigInteger('cara_kb_id')->nullable();
-            $table->string('telepon')->nullable();
             $table->date('tanggal_akhir_paspor')->nullable();
             $table->string('no_kk_sebelumnya')->nullable();
             $table->boolean('ktp_el')->nullable();
@@ -66,7 +68,6 @@ return new class extends Migration
             $table->string('tag_id_card')->nullable();
             $table->unsignedBigInteger('id_asuransi')->nullable();
             $table->string('no_asuransi')->nullable();
-            $table->string('email')->nullable();
             $table->string('email_token')->nullable();
             $table->date('email_tgl_kadaluarsa')->nullable();
             $table->dateTime('email_tgl_verifikasi')->nullable();

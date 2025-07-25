@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Surat;
+use App\Models\FormatSurat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -10,11 +11,17 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SuratController extends Controller
 {
-    public function index()
+    public function index($slug)
     {
-        $surats = Surat::latest()->get();
+        $surats = Surat::with('format')
+            ->whereHas('format', function ($query) use ($slug) {
+                $query->where('url_surat', $slug);
+            })
+            ->latest()
+            ->get();
+
         return response()->json([
-            'message' => 'Daftar surat berhasil ditampilkan',
+            'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
             'total' => $surats->count(),
             'data' => $surats
         ], 200);
@@ -24,7 +31,7 @@ class SuratController extends Controller
     {
         try {
             // Cari format_surat berdasarkan slug
-            $format = \App\Models\FormatSurat::where('url_surat', $slug)->firstOrFail();
+            $format = FormatSurat::where('url_surat', $slug)->firstOrFail();
 
             // Validasi data permintaan
             $validated = $request->validate([

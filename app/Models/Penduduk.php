@@ -24,7 +24,7 @@ class Penduduk extends Model
         'agama_id',
         'pendidikan_kk_id',
         'pendidikan_sedang_id',
-        'pekerjaan_id',
+        'pekerjaan',
         'status_kawin',
         'warganegara_id',
         'dokumen_pasport',
