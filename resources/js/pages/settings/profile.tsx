@@ -9,6 +9,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useCrudToast } from '@/hooks/useToast';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
@@ -32,11 +33,22 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         email: auth.user.email,
     });
 
+    const { updateSuccess, updateError } = useCrudToast();
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         patch(route('profile.update'), {
             preserveScroll: true,
+            onSuccess: () => {
+                updateSuccess('Profil pengguna');
+            },
+            onError: (errors: any) => {
+                const errorMessage = errors.name || errors.email 
+                    ? 'Periksa kembali data yang Anda masukkan' 
+                    : 'Gagal memperbarui profil';
+                updateError(errorMessage);
+            },
         });
     };
 

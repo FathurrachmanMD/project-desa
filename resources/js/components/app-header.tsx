@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -48,15 +49,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
+            <motion.div 
+                className="border-b border-sidebar-border/80"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+            >
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
-                                    <Menu className="h-5 w-5" />
-                                </Button>
+                                <motion.div whileTap={{ scale: 0.95 }}>
+                                    <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
+                                        <Menu className="h-5 w-5" />
+                                    </Button>
+                                </motion.div>
                             </SheetTrigger>
                             <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">
                                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
@@ -169,13 +177,18 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </DropdownMenu>
                     </div>
                 </div>
-            </div>
+            </motion.div>
             {breadcrumbs.length > 1 && (
-                <div className="flex w-full border-b border-sidebar-border/70">
+                <motion.div 
+                    className="flex w-full border-b border-sidebar-border/70"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                >
                     <div className="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />
                     </div>
-                </div>
+                </motion.div>
             )}
         </>
     );

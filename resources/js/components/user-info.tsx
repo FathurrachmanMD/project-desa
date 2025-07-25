@@ -9,7 +9,7 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-gray-700 text-white">
+                <AvatarFallback className="rounded-lg bg-gray-600 text-white">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
