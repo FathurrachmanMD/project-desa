@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('perizinan-pribadi/index');
     })->name('perizinan-pribadi.index');
     
+    // Form Usaha Routes
     Route::get('form-usaha', function () {
         return Inertia::render('form-usaha/index');
     })->name('form-usaha.index');
@@ -45,6 +46,50 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'type' => $type
         ]);
     })->name('form-usaha.form');
+    
+    // Form Pribadi Routes
+    Route::get('form-pribadi', function () {
+        return Inertia::render('form-pribadi/index');
+    })->name('form-pribadi.index');
+    
+    Route::get('form-pribadi/form/{type}', function (string $type) {
+        return Inertia::render('form-pribadi/form', [
+            'type' => $type
+        ]);
+    })->name('form-pribadi.form');
+    
+    // Form Pertanian Routes
+    Route::get('form-pertanian', function () {
+        return Inertia::render('form-pertanian/index');
+    })->name('form-pertanian.index');
+    
+    Route::get('form-pertanian/form/{type}', function (string $type) {
+        return Inertia::render('form-pertanian/form', [
+            'type' => $type
+        ]);
+    })->name('form-pertanian.form');
+    
+    // Form Acara Routes
+    Route::get('form-acara', function () {
+        return Inertia::render('form-acara/index');
+    })->name('form-acara.index');
+    
+    Route::get('form-acara/form/{type}', function (string $type) {
+        return Inertia::render('form-acara/form', [
+            'type' => $type
+        ]);
+    })->name('form-acara.form');
+    
+    // Form Bangunan Routes
+    Route::get('form-bangunan', function () {
+        return Inertia::render('form-bangunan/index');
+    })->name('form-bangunan.index');
+    
+    Route::get('form-bangunan/form/{type}', function (string $type) {
+        return Inertia::render('form-bangunan/form', [
+            'type' => $type
+        ]);
+    })->name('form-bangunan.form');
     
     Route::get('customers', function () {
         return Inertia::render('customers/index');
