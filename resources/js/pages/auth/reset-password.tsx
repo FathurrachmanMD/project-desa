@@ -6,6 +6,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuthToast } from '@/hooks/useToast';
 import AuthLayout from '@/layouts/auth-layout';
 
 interface ResetPasswordProps {
@@ -28,9 +29,20 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
         password_confirmation: '',
     });
 
+    const { passwordResetSuccess, registerError } = useAuthToast();
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('password.store'), {
+            onSuccess: () => {
+                passwordResetSuccess();
+            },
+            onError: (errors: any) => {
+                const errorMessage = errors.password || errors.email || errors.token
+                    ? 'Periksa kembali data yang Anda masukkan'
+                    : 'Gagal mereset password';
+                registerError(errorMessage);
+            },
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };

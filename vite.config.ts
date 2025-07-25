@@ -22,4 +22,14 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    optimizeDeps: {
+        exclude: ['react-remove-scroll-bar', 'react-remove-scroll-bar/constants'],
+        esbuildOptions: {
+            target: 'es2020'
+        }
+    },
+    ssr: {
+        noExternal: ['framer-motion', '@radix-ui/react-dialog'],
+        external: ['react-remove-scroll', 'react-remove-scroll-bar'],
+    },
 });

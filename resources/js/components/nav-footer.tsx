@@ -18,11 +18,11 @@ export function NavFooter({
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild
-                                className="text-gray-300 hover:text-white hover:bg-gray-900 transition-colors duration-200"
+                                className="text-gray-300 hover:text-white hover:bg-gray-700"
                             >
                                 <a href={item.href} target="_blank" rel="noopener noreferrer">
                                     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5 text-gray-300" />}
-                                    <span>{item.title}</span>
+                                    <span className="text-gray-300">{item.title}</span>
                                 </a>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

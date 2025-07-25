@@ -1,281 +1,86 @@
-import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Building, 
-  Hammer, 
-  Calendar,
-  User,
-  Wheat,
-  CheckCircle,
-  Settings,
-  Users,
-  ChevronDown,
-  ChevronRight,
-  Plus
-} from 'lucide-react';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
 import { NavFooter } from '@/components/nav-footer';
+import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { BookOpen, Folder } from 'lucide-react';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
+import { BookOpen, Folder, LayoutGrid, FileText, Calendar, Building2, Sprout, User, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
-interface MenuItem {
-  key: string;
-  label: string;
-  icon: React.ElementType;
-  path?: string;
-  badge?: string | number;
-  submenu?: SubMenuItem[];
-}
+const mainNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Perizinan Usaha',
+        href: '/perizinan',
+        icon: FileText,
+    },
+    {
+        title: 'Perizinan Acara',
+        href: '/perizinan-acara',
+        icon: Calendar,
+    },
+    {
+        title: 'Perizinan Bangunan',
+        href: '/perizinan-bangunan',
+        icon: Building2,
+    },
+    {
+        title: 'Perizinan Pribadi',
+        href: '/perizinan-pribadi',
+        icon: User,
+    },
+    {
+        title: 'Perizinan Pertanian',
+        href: '/perizinan-pertanian',
+        icon: Sprout,
+    },
+    {
+        title: 'Manajemen Customer',
+        href: '/customers',
+        icon: Users,
+    },
+];
 
-interface SubMenuItem {
-  key: string;
-  label: string;
-  path: string;
-  badge?: string | number;
-}
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Repository',
+        href: 'https://github.com/laravel/react-starter-kit',
+        icon: Folder,
+    },
+    {
+        title: 'Documentation',
+        href: 'https://laravel.com/docs/starter-kits#react',
+        icon: BookOpen,
+    },
+];
 
 export function AppSidebar() {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
-  const [expandedSubmenus, setExpandedSubmenus] = useState<{ [key: string]: boolean }>({});
-
-  const toggleSubmenu = (menuKey: string) => {
-    setExpandedSubmenus(prev => ({
-      ...prev,
-      [menuKey]: !prev[menuKey]
-    }));
-  };
-
-  const footerNavItems = [
-    {
-      title: 'Repository',
-      href: 'https://github.com/laravel/react-starter-kit',
-      icon: Folder,
-    },
-    {
-      title: 'Documentation',
-      href: 'https://laravel.com/docs/starter-kits#react',
-      icon: BookOpen,
-    },
-  ];
-
-  const menuItems: MenuItem[] = [
-    {
-      key: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      path: '/dashboard',
-    },
-    {
-      key: 'quick-actions',
-      label: 'Aksi Cepat',
-      icon: Plus,
-      submenu: [
-        { key: 'new-letter', label: 'Buat Surat Baru', path: '/letters/new' },
-        { key: 'priority-queue', label: 'Antrian Prioritas', path: '/queue/priority', badge: 3 }
-      ]
-    },
-    {
-      key: 'verification',
-      label: 'Verifikasi & Persetujuan',
-      icon: CheckCircle,
-      path: '/verification',
-      badge: 12
-    },
-    {
-      key: 'letters',
-      label: 'Manajemen Surat',
-      icon: FileText,
-      submenu: [
-        { key: 'all-letters', label: 'Semua Surat', path: '/letters' },
-        { key: 'drafts', label: 'Draft', path: '/letters/drafts', badge: 5 },
-        { key: 'pending', label: 'Menunggu Verifikasi', path: '/letters/pending', badge: 8 },
-        { key: 'approved', label: 'Disetujui', path: '/letters/approved' },
-        { key: 'rejected', label: 'Ditolak', path: '/letters/rejected' }
-      ]
-    },
-    {
-      key: 'business-permits',
-      label: 'Perizinan Usaha',
-      icon: Building,
-      submenu: [
-        { key: 'sku', label: 'Surat Keterangan Usaha', path: '/permits/business/sku' },
-        { key: 'iumk', label: 'Izin Usaha Mikro Kecil', path: '/permits/business/iumk' },
-        { key: 'situ', label: 'Surat Izin Tempat Usaha', path: '/permits/business/situ' },
-        { key: 'nib', label: 'Rekomendasi NIB/OSS', path: '/permits/business/nib' }
-      ]
-    },
-    {
-      key: 'building-permits',
-      label: 'Perizinan Bangunan',
-      icon: Hammer,
-      submenu: [
-        { key: 'imb', label: 'Izin Mendirikan Bangunan', path: '/permits/building/imb' },
-        { key: 'village-land', label: 'Izin Bangun di Lahan Desa', path: '/permits/building/village-land' },
-        { key: 'no-dispute', label: 'Surat Tidak Sengketa Tanah', path: '/permits/building/no-dispute' },
-        { key: 'renovation', label: 'Izin Renovasi/Perluasan', path: '/permits/building/renovation' }
-      ]
-    },
-    {
-      key: 'event-permits',
-      label: 'Perizinan Keramaian',
-      icon: Calendar,
-      submenu: [
-        { key: 'celebration', label: 'Surat Izin Hajatan', path: '/permits/event/celebration' },
-        { key: 'public-event', label: 'Surat Izin Acara Publik', path: '/permits/event/public' },
-        { key: 'facility-use', label: 'Izin Penggunaan Sarana Umum', path: '/permits/event/facility' }
-      ]
-    },
-    {
-      key: 'personal-permits',
-      label: 'Perizinan Pribadi',
-      icon: User,
-      submenu: [
-        { key: 'skck', label: 'Surat Pengantar SKCK', path: '/permits/personal/skck' },
-        { key: 'domicile', label: 'Surat Keterangan Domisili', path: '/permits/personal/domicile' },
-        { key: 'residence', label: 'Surat Izin Tinggal Pendatang', path: '/permits/personal/residence' },
-        { key: 'travel', label: 'Surat Izin Keluar Negeri', path: '/permits/personal/travel' },
-        { key: 'unemployment', label: 'Surat Keterangan Tidak Bekerja', path: '/permits/personal/unemployment' }
-      ]
-    },
-    {
-      key: 'agriculture-permits',
-      label: 'Perizinan Pertanian',
-      icon: Wheat,
-      submenu: [
-        { key: 'land-management', label: 'Izin Pengelolaan Lahan Desa', path: '/permits/agriculture/land' },
-        { key: 'farming-support', label: 'Bantuan Pupuk/Bibit/Alat', path: '/permits/agriculture/support' },
-        { key: 'farmer-certificate', label: 'Surat Keterangan Petani', path: '/permits/agriculture/certificate' },
-        { key: 'irrigation', label: 'Izin Irigasi/Penggunaan Air', path: '/permits/agriculture/irrigation' }
-      ]
-    },
-    {
-      key: 'templates',
-      label: 'Template Surat',
-      icon: FileText,
-      path: '/templates'
-    },
-    {
-      key: 'users',
-      label: 'Manajemen Pengguna',
-      icon: Users,
-      submenu: [
-        { key: 'all-users', label: 'Semua Pengguna', path: '/users' },
-        { key: 'roles', label: 'Manajemen Role', path: '/users/roles' },
-        { key: 'permissions', label: 'Hak Akses', path: '/users/permissions' },
-        { key: 'activity-log', label: 'Log Aktivitas', path: '/users/activity' }
-      ]
-    },
-    {
-      key: 'settings',
-      label: 'Pengaturan',
-      icon: Settings,
-      submenu: [
-        { key: 'general', label: 'Pengaturan Umum', path: '/settings/general' },
-        { key: 'letter-config', label: 'Konfigurasi Surat', path: '/settings/letters' },
-        { key: 'notifications', label: 'Notifikasi', path: '/settings/notifications' },
-        { key: 'backup', label: 'Backup & Restore', path: '/settings/backup' }
-      ]
-    }
-  ];
-
-  const renderMenuItem = (item: MenuItem) => {
-    const Icon = item.icon;
-    const isActive = activeMenu === item.key;
-    const hasSubmenu = item.submenu && item.submenu.length > 0;
-    const isExpanded = expandedSubmenus[item.key];
-
     return (
-      <div key={item.key} className="mb-1">
-        <div
-          className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
-            isActive 
-              ? 'bg-white text-black shadow-lg' 
-              : 'text-white hover:bg-gray-900 hover:text-white'
-          }`}
-          onClick={() => {
-            if (hasSubmenu) {
-              toggleSubmenu(item.key);
-            } else {
-              setActiveMenu(item.key);
-            }
-          }}
-        >
-          <div className="flex items-center flex-1">
-            <Icon size={18} className={`mr-3 ${isActive ? 'text-black' : 'text-white'}`} />
-            <span className={`font-medium text-sm ${isActive ? 'text-black' : 'text-white'}`}>{item.label}</span>
-            {item.badge && (
-              <Badge variant="destructive" className="ml-2 text-xs bg-red-500 text-white hover:bg-red-600">
-                {item.badge}
-              </Badge>
-            )}
-          </div>
-          {hasSubmenu && (
-            <div className="ml-2">
-              {isExpanded ? 
-                <ChevronDown size={16} className={isActive ? 'text-black' : 'text-white'} /> : 
-                <ChevronRight size={16} className={isActive ? 'text-black' : 'text-white'} />
-              }
-            </div>
-          )}
-        </div>
-        
-        {hasSubmenu && isExpanded && item.submenu && (
-          <div className="mt-1 ml-4 space-y-1">
-            {item.submenu.map((subItem) => (
-              <Link
-                key={subItem.key}
-                href={subItem.path}
-                className={`flex items-center justify-between px-3 py-2 rounded-md transition-all duration-200 ${
-                  activeMenu === subItem.key
-                    ? 'bg-gray-800 text-white shadow-md'
-                    : 'text-gray-300 hover:bg-gray-900 hover:text-white'
-                }`}
-                onClick={() => setActiveMenu(subItem.key)}
-              >
-                <span className="text-sm">{subItem.label}</span>
-                {subItem.badge && (
-                  <Badge variant="secondary" className="text-xs bg-gray-700 text-white">
-                    {subItem.badge}
-                  </Badge>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+        <Sidebar collapsible="icon" variant="sidebar">
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-gray-700">
+                            <Link href="/dashboard" prefetch>
+                                <AppLogo />
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+
+            <SidebarContent>
+                <NavMain items={mainNavItems} />
+            </SidebarContent>
+
+            <SidebarFooter>
+                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavUser />
+            </SidebarFooter>
+        </Sidebar>
     );
-  };
-
-  return (
-    <Sidebar className="bg-black border-r border-gray-800 shadow-2xl" collapsible="icon" variant="inset">
-      <SidebarHeader className="bg-black border-b border-gray-800">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" prefetch className="hover:bg-gray-900 text-white">
-                <AppLogo />
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent className="bg-black">
-        <div className="flex-1 overflow-y-auto p-4">
-          <nav className="space-y-2">
-            {menuItems.map(renderMenuItem)}
-          </nav>
-        </div>
-      </SidebarContent>
-
-      <SidebarFooter className="bg-black border-t border-gray-800">
-        <NavFooter items={footerNavItems} className="mt-auto" />
-        <NavUser />
-      </SidebarFooter>
-    </Sidebar>
-  );
 }

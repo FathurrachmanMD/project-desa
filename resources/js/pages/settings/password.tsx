@@ -10,6 +10,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuthToast, useCrudToast } from '@/hooks/useToast';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,21 +29,33 @@ export default function Password() {
         password_confirmation: '',
     });
 
+    const { passwordResetSuccess } = useAuthToast();
+    const { updateError } = useCrudToast();
+
     const updatePassword: FormEventHandler = (e) => {
         e.preventDefault();
 
         put(route('password.update'), {
             preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
+            onSuccess: () => {
+                reset();
+                passwordResetSuccess();
+            },
+            onError: (errors: any) => {
                 if (errors.password) {
                     reset('password', 'password_confirmation');
                     passwordInput.current?.focus();
+                    updateError('Password baru tidak valid');
                 }
 
                 if (errors.current_password) {
                     reset('current_password');
                     currentPasswordInput.current?.focus();
+                    updateError('Password lama tidak benar');
+                }
+                
+                if (!errors.password && !errors.current_password) {
+                    updateError('Gagal memperbarui password');
                 }
             },
         });

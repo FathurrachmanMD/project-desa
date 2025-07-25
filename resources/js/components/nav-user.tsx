@@ -17,7 +17,7 @@ export function NavUser() {
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton size="lg" className="group text-white hover:bg-gray-900 data-[state=open]:bg-gray-900 transition-colors duration-200">
+                        <SidebarMenuButton size="lg" className="group text-white hover:bg-gray-700 data-[state=open]:bg-gray-700">
                             <UserInfo user={auth.user} />
                             <ChevronsUpDown className="ml-auto size-4 text-gray-300" />
                         </SidebarMenuButton>
