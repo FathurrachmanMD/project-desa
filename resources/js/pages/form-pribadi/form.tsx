@@ -13,6 +13,51 @@ import { User, FileText, Home, MapPin, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
 
+// Define types
+type PermitType = 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja' | 'surat-pindah' | 'sktm' | 'ktp';
+
+interface FormData {
+    [key: string]: string | File | null;
+    nama_lengkap: string;
+    nik: string;
+    tempat_lahir: string;
+    tanggal_lahir: string;
+    jenis_kelamin: string;
+    agama: string;
+    status_perkawinan: string;
+    pendidikan_terakhir: string;
+    pekerjaan: string;
+    alamat: string;
+    rt: string;
+    rw: string;
+    kelurahan: string;
+    kecamatan: string;
+    kota: string;
+    provinsi: string;
+    kode_pos: string;
+    no_hp: string;
+    email: string;
+    keterangan: string;
+    dokumen_ktp: File | null;
+    dokumen_kk: File | null;
+    dokumen_pendukung: File | null;
+    tanggal_pengajuan: string;
+}
+
+type DropdownOptions = {
+    [key: string]: Array<{ value: string; label: string }>;
+};
+
+type PermitField = {
+    label: string;
+    name: string;
+    type: string;
+    required?: boolean;
+    inputType?: 'select' | 'textarea';
+    options?: Array<{ value: string; label: string }>;
+    placeholder?: string;
+};
+
 interface FormProps {
     type: 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja' | 'surat-pindah';
 }
@@ -61,7 +106,7 @@ const getCurrentDate = () => {
     return now.toISOString().slice(0, 10);
 };
 
-const dropdownOptions = {
+const dropdownOptions: DropdownOptions = {
     jenis_kelamin: [
         { value: 'laki-laki', label: 'Laki-laki' },
         { value: 'perempuan', label: 'Perempuan' },
@@ -94,20 +139,7 @@ const dropdownOptions = {
 };
 
 // Field configuration for each permit type
-const permitFieldMap: Record<string, { 
-    label: string; 
-    name: string; 
-    type: string;
-    required?: boolean;
-    inputType?: 'select' | 'textarea';
-    options?: { value: string; label: string }[];
-    placeholder?: string;
-}> = {
-    required?: boolean;
-    inputType?: 'select' | 'textarea';
-    options?: { value: string; label: string }[];
-    placeholder?: string;
-}> = {
+const permitFieldMap: Record<string, PermitField> = {
     nama_lengkap: { 
         label: 'Nama Lengkap', 
         name: 'nama_lengkap', 
@@ -262,74 +294,106 @@ const permitFields: Record<string, string[]> = {
         'nama_pemohon', 'alamat_asal', 'alamat_tujuan', 'alasan_pindah', 'rt_rw_tujuan'
     ]
 };
-
 interface PersonalPermitFormProps {
-    type: keyof typeof permitTypes;
+    type: PermitType;
 }
 
-export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { showToast } = useToast();
+const PersonalPermitForm: React.FC<{ type: PermitType }> = ({ type }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const toast = useToast();
     
-    // Initialize form data
-    const initialFormData = Object.fromEntries(
-        Object.entries(permitFields).flatMap(([_, fields]) => 
-            fields.map(field => [field, ''])
-        )
-    );
+    // Get current date in YYYY-MM-DD format
+    const getCurrentDate = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
     
-    const { data, setData, post, processing, errors } = useForm({
-        ...initialFormData,
-        dokumen_ktp: null as File | null,
-        dokumen_kk: null as File | null,
-        dokumen_pendukung: null as File | null,
+    // Initialize form data with default values
+    const initialFormData: FormData = {
+        nama_lengkap: '',
+        nik: '',
+        tempat_lahir: '',
+        tanggal_lahir: '',
+        jenis_kelamin: '',
+        agama: '',
+        status_perkawinan: '',
+        pendidikan_terakhir: '',
+        pekerjaan: '',
+        alamat: '',
+        rt: '',
+        rw: '',
+        kelurahan: '',
+        kecamatan: '',
+        kota: '',
+        provinsi: '',
+        kode_pos: '',
+        no_hp: '',
+        email: '',
+        keterangan: '',
+        dokumen_ktp: null,
+        dokumen_kk: null,
+        dokumen_pendukung: null,
         tanggal_pengajuan: getCurrentDate(),
-    });
+    };
+    
+    const { data, setData, post, processing, errors } = useForm<FormData>(initialFormData);
 
     // Get fields based on the type
     const fields = type && permitFields[type] ? permitFields[type] : [];
-    const permitType = permitTypes[type as keyof typeof permitTypes];
-    
-    const handleSelectChange = (name: string, value: string) => {
-        setData(name as keyof typeof data, value);
+    const handleInputChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setData(prevData => ({
+            ...prevData,
+            [field]: value
+        }));
     };
     
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
-        if (e.target.files?.[0]) {
-            setData(fieldName as keyof typeof data, e.target.files[0]);
-        }
+    const handleSelectChange = (field: keyof FormData) => (value: string) => {
+        setData(prevData => ({
+            ...prevData,
+            [field]: value
+        }));
+    };
+    
+    const handleFileChange = (field: 'dokumen_ktp' | 'dokumen_kk' | 'dokumen_pendukung') => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0] || null;
+        setData(prev => ({
+            ...prev,
+            [field]: file
+        }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        setIsLoading(true);
         
         try {
             await post(route(`permohonan.${type}.store`), {
                 onSuccess: () => {
-                    showToast(
-                        'success',
+                    toast.showToast.success(
                         'Pengajuan Berhasil',
-                        'Pengajuan berhasil dikirim!',
-                        { duration: 3000 }
+                        'Pengajuan berhasil dikirim!'
                     );
                     setTimeout(() => window.location.href = '/form-pribadi', 3000);
                 },
-                onError: (errors) => {
-                    showToast(
-                        'error',
+                onError: (errors: any) => {
+                    toast.showToast.error(
                         'Kesalahan Validasi',
                         'Mohon periksa kembali data yang dimasukkan.'
                     );
-                    console.error('Form errors:', errors);
+                    setIsLoading(false);
                 },
-                onFinish: () => setIsSubmitting(false),
-                forceFormData: true,
             });
         } catch (error) {
             console.error('Submission error:', error);
-            showToast('error', 'Kesalahan Sistem', 'Terjadi kesalahan teknis.');
-            setIsSubmitting(false);
+            toast.showToast.error(
+                'Kesalahan Sistem',
+                'Terjadi kesalahan teknis.'
+            );
+            setIsLoading(false);
         }
     };
 
@@ -402,13 +466,13 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                                                     )}
                                                 </div>
                                                 
-                                                {field.inputType === 'textarea' ? (
+                                                {field.type === 'textarea' ? (
                                                     <Textarea
                                                         id={field.name}
                                                         name={field.name}
                                                         value={fieldValue as string}
                                                         onChange={(e) => setData(field.name, e.target.value)}
-                                                        disabled={isSubmitting}
+                                                        disabled={isLoading}
                                                         placeholder={field.placeholder}
                                                         className={cn(
                                                             'min-h-[100px] text-sm',
@@ -423,7 +487,7 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                                                         type={field.type}
                                                         value={fieldValue as string}
                                                         onChange={(e) => setData(field.name, e.target.value)}
-                                                        disabled={isSubmitting}
+                                                        disabled={isLoading}
                                                         placeholder={field.placeholder}
                                                         className={cn(
                                                             'h-11 text-sm',
@@ -440,84 +504,104 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                                         );
                                     })}
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="kecamatan">Kecamatan</Label>
-                                        <Input
-                                            id="kecamatan"
-                                            value={data.kecamatan}
-                                            onChange={(e) => setData('kecamatan', e.target.value)}
-                                            placeholder="Masukkan kecamatan"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="kota">Kota/Kabupaten</Label>
-                                        <Input
-                                            id="kota"
-                                            value={data.kota}
-                                            onChange={(e) => setData('kota', e.target.value)}
-                                            placeholder="Masukkan kota/kabupaten"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="provinsi">Provinsi</Label>
-                                        <Input
-                                            id="provinsi"
-                                            value={data.provinsi}
-                                            onChange={(e) => setData('provinsi', e.target.value)}
-                                            placeholder="Masukkan provinsi"
-                                            required
-                                        />
-                                    </div>
-
-                                    {type === 'sktm' && (
+                                    {/* File Upload Section */}
+                                    <div className="space-y-6">
+                                        {/* KTP Upload */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="keterangan">Keterangan Keperluan</Label>
-                                            <Textarea
-                                                id="keterangan"
-                                                value={data.keterangan}
-                                                onChange={(e) => setData('keterangan', e.target.value)}
-                                                placeholder="Jelaskan keperluan surat keterangan tidak mampu"
-                                                required={type === 'sktm'}
-                                            />
+                                            <Label htmlFor="dokumen_ktp">Unggah Dokumen KTP</Label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center gap-4">
+                                                    <input
+                                                        type="file"
+                                                        id="dokumen_ktp"
+                                                        accept="image/*,.pdf"
+                                                        onChange={handleFileChange('dokumen_ktp')}
+                                                        className="hidden"
+                                                        required
+                                                    />
+                                                    <label
+                                                        htmlFor="dokumen_ktp"
+                                                        className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        Pilih File KTP
+                                                    </label>
+                                                    <span className="text-sm text-gray-500">
+                                                        {data.dokumen_ktp ? data.dokumen_ktp.name : 'Belum ada file dipilih'}
+                                                    </span>
+                                                </div>
+                                                {data.dokumen_ktp && (
+                                                    <p className="text-sm text-green-600 mt-1">
+                                                        {data.dokumen_ktp.name} ({Math.round(data.dokumen_ktp.size / 1024)} KB)
+                                                    </p>
+                                                )}
+                                                <p className="text-xs text-gray-500">Format: JPG, PNG, atau PDF (maks. 2MB)</p>
+                                            </div>
                                         </div>
-                                    )}
 
-                                    <div className="space-y-2">
-                                        <Label>Unggah Dokumen KTP</Label>
-                                        <FileUpload
-                                            file={data.dokumen_ktp}
-                                            onFileChange={(file) => setData('dokumen_ktp', file)}
-                                            accept="image/*,.pdf"
-                                            required
-                                        />
-                                        <p className="text-xs text-gray-500">Format: JPG, PNG, atau PDF (maks. 2MB)</p>
-                                    </div>
+                                        {/* KK Upload - Conditionally shown based on permit type */}
+                                        {type !== 'keterangan-tidak-mampu' && (
+                                            <div className="space-y-2">
+                                                <Label htmlFor="dokumen_kk">Unggah Dokumen KK</Label>
+                                                <div className="mt-2">
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            type="file"
+                                                            id="dokumen_kk"
+                                                            accept="image/*,.pdf"
+                                                            onChange={handleFileChange('dokumen_kk')}
+                                                            className="hidden"
+                                                            required={type !== 'keterangan-tidak-mampu'}
+                                                        />
+                                                        <label
+                                                            htmlFor="dokumen_kk"
+                                                            className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                        >
+                                                            Pilih File KK
+                                                        </label>
+                                                        <span className="text-sm text-gray-500">
+                                                            {data.dokumen_kk ? data.dokumen_kk.name : 'Belum ada file dipilih'}
+                                                        </span>
+                                                    </div>
+                                                    {data.dokumen_kk && (
+                                                        <p className="text-sm text-green-600 mt-1">
+                                                            {data.dokumen_kk.name} ({Math.round(data.dokumen_kk.size / 1024)} KB)
+                                                        </p>
+                                                    )}
+                                                    <p className="text-xs text-gray-500">Format: JPG, PNG, atau PDF (maks. 2MB)</p>
+                                                </div>
+                                            </div>
+                                        )}
 
-                                    {type !== 'ktp' && (
+                                        {/* Supporting Documents Upload */}
                                         <div className="space-y-2">
-                                            <Label>Unggah Dokumen KK</Label>
-                                            <FileUpload
-                                                file={data.dokumen_kk}
-                                                onFileChange={(file) => setData('dokumen_kk', file)}
-                                                accept="image/*,.pdf"
-                                                required={type !== 'ktp'}
-                                            />
-                                            <p className="text-xs text-gray-500">Format: JPG, PNG, atau PDF (maks. 2MB)</p>
+                                            <Label htmlFor="dokumen_pendukung">Dokumen Pendukung Lainnya (Opsional)</Label>
+                                            <div className="mt-2">
+                                                <div className="flex items-center gap-4">
+                                                    <input
+                                                        type="file"
+                                                        id="dokumen_pendukung"
+                                                        accept="image/*,.pdf"
+                                                        onChange={handleFileChange('dokumen_pendukung')}
+                                                        className="hidden"
+                                                    />
+                                                    <label
+                                                        htmlFor="dokumen_pendukung"
+                                                        className="cursor-pointer bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        Pilih Dokumen Pendukung
+                                                    </label>
+                                                    <span className="text-sm text-gray-500">
+                                                        {data.dokumen_pendukung ? data.dokumen_pendukung.name : 'Belum ada file dipilih'}
+                                                    </span>
+                                                </div>
+                                                {data.dokumen_pendukung && (
+                                                    <p className="text-sm text-green-600 mt-1">
+                                                        {data.dokumen_pendukung.name} ({Math.round(data.dokumen_pendukung.size / 1024)} KB)
+                                                    </p>
+                                                )}
+                                                <p className="text-xs text-gray-500">Format: JPG, PNG, atau PDF (maks. 2MB)</p>
+                                            </div>
                                         </div>
-                                    )}
-
-                                    <div className="space-y-2">
-                                        <Label>Dokumen Pendukung Lainnya</Label>
-                                        <FileUpload
-                                            file={data.dokumen_pendukung}
-                                            onFileChange={(file) => setData('dokumen_pendukung', file)}
-                                            accept="image/*,.pdf"
-                                        />
-                                        <p className="text-xs text-gray-500">Unggah dokumen pendukung lainnya (opsional)</p>
                                     </div>
                                 </div>
 
