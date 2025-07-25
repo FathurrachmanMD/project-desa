@@ -75,16 +75,22 @@ const permitFields: Record<string, string[]> = {
   siup: ['nama_pemohon', 'nik', 'nama_usaha', 'alamat_usaha', 'jenis_usaha', 'modal_usaha'],
 };
 
-export default function BusinessPermitForm() {
-  // Ambil jenis dari query string
-  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  const jenis = searchParams.get('jenis') || undefined;
+interface BusinessPermitFormProps {
+  type: string;
+}
+
+export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
   const [form, setForm] = useState<Record<string, string>>({});
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fields = jenis && permitFields[jenis] ? permitFields[jenis] : [];
+  // Get fields based on the type
+  const fields = type && permitFields[type as keyof typeof permitFields] 
+    ? permitFields[type as keyof typeof permitFields] 
+    : [];
+    
+  const permitType = type && permitTypes[type as keyof typeof permitTypes];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -96,40 +102,87 @@ export default function BusinessPermitForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    setTimeout(() => {
-      setSubmitting(false);
+    
+    try {
+      const formData = new FormData();
+      
+      // Add form data
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
+      // Add file if exists
+      if (file) {
+        formData.append('file', file);
+      }
+      
+      // Add type
+      formData.append('type', type);
+      
+      // Send data to server
+      const response = await fetch('/api/form-usaha/submit', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Gagal mengajukan permohonan');
+      }
+      
+      const result = await response.json();
       alert('Pengajuan berhasil!');
       window.location.href = '/form-usaha';
-    }, 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
       <Navbar />
       <main className="max-w-2xl mx-auto mt-24 px-4 pb-16">
-        <h1 className="text-2xl font-bold mb-6">Ajukan Perizinan Usaha</h1>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold mb-2">Ajukan {permitType?.title || 'Perizinan Usaha'}</h1>
+          <p className="text-gray-600">{permitType?.description || 'Silakan lengkapi formulir di bawah ini'}</p>
+        </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           {fields.map((key) => (
-            <div key={key}>
-              <label className="block text-sm font-medium mb-1" htmlFor={key}>
-                {permitFieldMap[key].label}
-                {permitFieldMap[key].required && <span className="text-red-500">*</span>}
-              </label>
-              <input
-                id={key}
-                name={key}
-                type={permitFieldMap[key].type}
-                required={permitFieldMap[key].required}
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
-                value={form[key] || ''}
-                onChange={handleChange}
-                disabled={submitting}
-              />
-            </div>
+            permitFieldMap[key] ? (
+              <div key={key}>
+                <label className="block text-sm font-medium mb-1" htmlFor={key}>
+                  {permitFieldMap[key].label}
+                  {permitFieldMap[key].required && <span className="text-red-500">*</span>}
+                </label>
+                {permitFieldMap[key].type === 'textarea' ? (
+                  <textarea
+                    id={key}
+                    name={key}
+                    required={permitFieldMap[key].required}
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring min-h-[100px]"
+                    value={form[key] || ''}
+                    onChange={handleChange}
+                    disabled={submitting}
+                  />
+                ) : (
+                  <input
+                    id={key}
+                    name={key}
+                    type={permitFieldMap[key].type}
+                    required={permitFieldMap[key].required}
+                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+                    value={form[key] || ''}
+                    onChange={handleChange}
+                    disabled={submitting}
+                  />
+                )}
+              </div>
+            ) : null
           ))}
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="file_upload">
