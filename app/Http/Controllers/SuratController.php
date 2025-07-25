@@ -18,11 +18,27 @@ class SuratController extends Controller
                 $query->where('url_surat', $slug);
             })
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($surat) {
+                $formIsian = $surat->format->form_isian ?? [];
+                $suratForm = $surat->form ?? [];
+
+                // Normalize both as associative arrays
+                $formIsianKeys = array_values($formIsian);
+                $defaultForm = array_fill_keys($formIsianKeys, null);
+
+                // Merge so missing fields from form_isian are included with null
+                $surat->form = array_merge($defaultForm, $suratForm);
+
+                return $surat;
+            });
 
         return response()->json([
             'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
             'total' => $surats->count(),
+            'diproses' => $surats->where('status', 'diproses')->count(),
+            'disetujui' => $surats->where('status', 'disetujui')->count(),
+            'ditolak' => $surats->where('status', 'ditolak')->count(),
             'data' => $surats
         ], 200);
     }
@@ -86,6 +102,9 @@ class SuratController extends Controller
         return response()->json([
             'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
             'total' => $surats->count(),
+            'diproses' => $surats->where('status', 'diproses')->count(),
+            'disetujui' => $surats->where('status', 'disetujui')->count(),
+            'ditolak' => $surats->where('status', 'ditolak')->count(),
             'data' => $surats
         ], 200);
     }
