@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, act } from 'react';
+import axios from 'axios';
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -27,6 +28,8 @@ import {
   Globe,
   ListFilter
 } from 'lucide-react';
+
+import DataTable from 'react-data-table-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -133,6 +136,7 @@ export default function PerizinanUsaha() {
     setIsDeleting(true);
     try {
       // Simulate API call (you can replace with actual API call)
+      // call http://127.0.0.1:8000/api/surat/ activeTab
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Delete the data from local state based on type
@@ -209,33 +213,63 @@ export default function PerizinanUsaha() {
     return { title, description };
   };
 
-  const getDataForTab = (tabKey: string) => {
-    switch (tabKey) {
-      case 'sku':
-        return skuData;
-      case 'iumk':
-        return iumkData;
-      case 'situ':
-        return situData;
-      case 'nib':
-        return nibData;
-      default:
-        return [];
+  type SuratItem = {
+    status: string;
+    [key: string]: any;
+  };
+
+  type StatusCounts = {
+    total: number;
+    diproses: number;
+    disetujui: number;
+    ditolak: number;
+  };
+
+  type SuratResponse = {
+    list: SuratItem[];
+    statusCounts: StatusCounts | null;
+  };
+
+  // const [activeTab, setActiveTab] = useState('sku'); // example default tab
+  const [tabData, setTabData] = useState<SuratItem[]>([]);
+  const [statusCounts, setStatusCounts] = useState<StatusCounts>({
+    total: 0,
+    diproses: 0,
+    disetujui: 0,
+    ditolak: 0,
+  });
+
+  const getDataForTab = async (tabKey: string): Promise<SuratResponse> => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/surat/${tabKey}`);
+      const list = response.data.data || [];
+
+      return {
+        list,
+        statusCounts: {
+          total: list.length,
+          diproses: response.data.diproses,
+          disetujui: response.data.disetujui,
+          ditolak: response.data.ditolak,
+        },
+      };
+    } catch (error) {
+      console.error(`Failed to fetch data for ${tabKey}:`, error);
+      return { list: [], statusCounts: null };
     }
   };
 
-  const getStatusCounts = (data: Array<{ status: string }>) => {
-    const counts = {
-      total: data.length,
-      diproses: data.filter(item => item.status === 'Diproses').length,
-      disetujui: data.filter(item => item.status === 'Disetujui').length,
-      ditolak: data.filter(item => item.status === 'Ditolak').length,
-    };
-    return counts;
-  };
 
-  const currentTabData = getDataForTab(activeTab);
-  const statusCounts = getStatusCounts(currentTabData);
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await getDataForTab(activeTab);
+      setTabData(result.list);
+      console.log(result.list)
+      if (result.statusCounts) setStatusCounts(result.statusCounts);
+    };
+
+    fetchData();
+  }, [activeTab]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -327,7 +361,8 @@ export default function PerizinanUsaha() {
               <TabsList className="grid grid-cols-4 w-full mb-8">
                 {permitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
-                  const counts = getStatusCounts(permit.data);
+                  // permit data is array of all surat in one kategori
+                  // const counts = getStatusCounts(permit.data);
                   
                   return (
                     <TabsTrigger 
@@ -342,15 +377,81 @@ export default function PerizinanUsaha() {
                         </span>
                       </div>
                       <Badge variant="secondary" className="text-xs">
-                        {counts.total}
+                        {/* {counts.total}  */}
                       </Badge>
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
+              <TabsContent key={activeTab} value={activeTab} className='mt-2'>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      {/* should be activetab label name */}
+                      <h3 className="text-lg font-semibold">{activeTab.toUpperCase()}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Total {statusCounts.total} pengajuan
+                      </p>
+                    </div>
+                  </div>
+                  {/* table here */}
+                  <DataTable
+                    data={tabData}
+                    columns={[
+                      {
+                        name: "Nama Pemohon",
+                        selector: row => row.form.nama,
+                        sortable: true
+                      },
+                      {
+                        name: "Jenis Usaha",
+                        selector: row => row.form.nama_usaha,
+                        sortable: true
+                      },
+                      {
+                        name: "Status",
+                        selector: row => row.status,
+                        sortable: true,
+                        cell: row => {
+                          const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
+                          return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
+                        }
+                      },
+                      {
+                        name: "Aksi",
+                        cell: row => (
+                          <div className="flex items-center gap-2">
+                            <button
+                              className="text-blue-500 hover:underline"
+                              onClick={() => handleView(row)}
+                            >
+                              Lihat
+                            </button>
+                            <button
+                              className="text-yellow-500 hover:underline"
+                              onClick={() => handleEdit(row)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="text-red-500 hover:underline"
+                              onClick={() => handleDelete(row)}
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        )
+                      }
+                    ]}
+                    pagination
+                    highlightOnHover
+                  />
+
+                </div>
+              </TabsContent>
               
-              {permitTypes.map((permit) => {
-                const tabData = getDataForTab(permit.key);
+              {/* {permitTypes.map((permit) => {
+                // const tabData = getDataForTab(permit.key);
                 return (
                   <TabsContent key={permit.key} value={permit.key} className="mt-2">
                     <div className="space-y-6">
@@ -358,7 +459,7 @@ export default function PerizinanUsaha() {
                         <div>
                           <h3 className="text-lg font-semibold">{permit.label}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Total {tabData.length} pengajuan
+                            Total {statusCounts.total} pengajuan
                           </p>
                         </div>
                       </div>
@@ -374,7 +475,7 @@ export default function PerizinanUsaha() {
                     </div>
                   </TabsContent>
                 );
-              })}
+              })} */}
             </Tabs>
           </CardContent>
         </Card>

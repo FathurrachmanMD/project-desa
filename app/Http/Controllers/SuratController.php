@@ -3,99 +3,112 @@
 namespace App\Http\Controllers;
 
 use App\Models\Surat;
+use App\Models\FormatSurat;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Enums\JenisSuratEnum;
-use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SuratController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index($slug)
     {
-        //
+        $surats = Surat::with('format')
+            ->whereHas('format', function ($query) use ($slug) {
+                $query->where('url_surat', $slug);
+            })
+            ->latest()
+            ->get()
+            ->map(function ($surat) {
+                $formIsian = $surat->format->form_isian ?? [];
+                $suratForm = $surat->form ?? [];
+
+                // Normalize both as associative arrays
+                $formIsianKeys = array_values($formIsian);
+                $defaultForm = array_fill_keys($formIsianKeys, null);
+
+                // Merge so missing fields from form_isian are included with null
+                $surat->form = array_merge($defaultForm, $suratForm);
+
+                return $surat;
+            });
+
+        return response()->json([
+            'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
+            'total' => $surats->count(),
+            'diproses' => $surats->where('status', 'diproses')->count(),
+            'disetujui' => $surats->where('status', 'disetujui')->count(),
+            'ditolak' => $surats->where('status', 'ditolak')->count(),
+            'data' => $surats
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, $slug)
     {
         try {
+            // Cari format_surat berdasarkan slug
+            $format = FormatSurat::where('url_surat', $slug)->firstOrFail();
+
+            // Validasi data permintaan
             $validated = $request->validate([
-                'penduduk_id'   => 'nullable|exists:penduduk,id',
-                'format_id'     => 'required|exists:format_surat,id',
+                'penduduk_id'   => 'exists:penduduk,id',
                 'nomor_surat'   => 'nullable|string|max:255',
                 'kode_surat'    => 'nullable|string|max:255',
                 'form'          => 'nullable|array',
                 'syarat'        => 'nullable|array',
-                'status'        => 'in:draft,diajukan,disetujui,ditolak,dicetak',
+                'status'        => 'nullable|in:diproses,disetujui,ditolak,dicetak',
             ]);
 
-            $validated['created_by'] = auth()->id();
-            $validated['updated_by'] = auth()->id();
+            // Tambahkan format_id dari hasil query slug
+            $validated['format_id'] = $format->id;
+            $validated['created_by'] = Auth::id();
+            $validated['updated_by'] = Auth::id();
 
+            // Simpan surat baru
             $surat = Surat::create($validated);
 
-            return response()->json($surat, 201);
+            return response()->json([
+                'message' => 'Surat berhasil disimpan',
+                'data' => $surat
+            ], 201);
 
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation error',
+                'message' => 'Validasi gagal',
                 'errors'  => $e->errors()
             ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => "Format dengan slug '{$slug}' tidak ditemukan"
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error',
+                'message' => 'Terjadi kesalahan',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Surat $surat)
+
+    public function show($slug)
     {
-        try {
-            $surats = Surat::all();
-            
-            return response()->json([
-                'message' => 'Surat berhasil ditampilkan',
-                'total' => $surats->count(),
-                'data' => $surats
-            ])->setStatusCode(200);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => 'Surat Gagal ditampilkan: ' . $th->getMessage()])->setStatusCode(500);
-        }
-        catch (\Exception $e) {
-            return response()->json(['message' => 'Surat Gagal ditampilkan: ' . $e->getMessage()])->setStatusCode(500);
-        }
+        $surats = Surat::with('format')
+            ->whereHas('format', function ($query) use ($slug) {
+                $query->where('url_surat', $slug);
+            })
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
+            'total' => $surats->count(),
+            'diproses' => $surats->where('status', 'diproses')->count(),
+            'disetujui' => $surats->where('status', 'disetujui')->count(),
+            'ditolak' => $surats->where('status', 'ditolak')->count(),
+            'data' => $surats
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Surat $surat)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -103,53 +116,53 @@ class SuratController extends Controller
 
             $validated = $request->validate([
                 'penduduk_id'   => 'nullable|exists:penduduk,id',
-                'format_id'     => 'nullable|exists:format_surat,id',
+                // 'format_id'     => 'nullable|exists:format_surat,id',
                 'nomor_surat'   => 'nullable|string|max:255',
                 'kode_surat'    => 'nullable|string|max:255',
                 'form'          => 'nullable|array',
                 'syarat'        => 'nullable|array',
-                'status'        => 'in:draft,diajukan,disetujui,ditolak,dicetak',
+                'status'        => 'nullable|in:diproses,disetujui,ditolak,dicetak',
             ]);
 
-            $validated['updated_by'] = auth()->id();
+            $validated['updated_by'] = Auth::id();
 
             $item->update($validated);
 
-            return response()->json($item);
-
+            return response()->json([
+                'message' => 'Surat berhasil diperbarui',
+                'data' => $item
+            ]);
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation error',
-                'errors'  => $e->errors()
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
             ], 422);
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Data not found'
-            ], 404);
+            return response()->json(['message' => 'Data tidak ditemukan'], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error',
+                'message' => 'Terjadi kesalahan',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Surat $surat, $id)
+    public function destroy($id)
     {
         try {
             $surat = Surat::findOrFail($id);
             $surat->delete();
 
             return response()->json([
-            'message' => 'Surat berhasil dihapus',
-            ])->setStatusCode(200);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => 'Surat gagal dihapus: ' . $th->getMessage()])->setStatusCode(500);
+                'message' => 'Surat berhasil dihapus'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Surat tidak ditemukan'], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Surat gagal dihapus: ' . $e->getMessage()])->setStatusCode(500);
+            return response()->json([
+                'message' => 'Gagal menghapus surat',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }
