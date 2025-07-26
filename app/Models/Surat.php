@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\SyaratSurat;
+
 class Surat extends Model
 {
     use HasFactory;
@@ -27,6 +29,23 @@ class Surat extends Model
         'form' => 'array',
         'syarat' => 'array',
     ];
+
+    public function getSyarat()
+    {
+        $result = [];
+
+        foreach ($this->syarat as $id => $href) {
+            $syarat = SyaratSurat::find($id);
+            if ($syarat) {
+                $result[] = [
+                    'nama' => $syarat->nama,
+                    'href' => $href,
+                ];
+            }
+        }
+
+        return $result;
+    }
 
     public function makePDF()
     {

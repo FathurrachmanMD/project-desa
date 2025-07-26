@@ -27,6 +27,7 @@ import {
   Wrench,
   ListFilter
 } from 'lucide-react';
+import NewButton from '@/components/new-button';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -316,8 +317,9 @@ export default function PerizinanBangunan() {
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle>Data Perizinan Bangunan</CardTitle>
-            <CardDescription>
-              Kelola semua jenis perizinan bangunan yang diajukan warga
+            <CardDescription className='flex items-center align-middle'>
+              <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
+              <NewButton href={`form/create/${activeTab}`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">

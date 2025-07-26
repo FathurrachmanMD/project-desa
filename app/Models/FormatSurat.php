@@ -17,6 +17,22 @@ class FormatSurat extends Model
         'form_isian' => 'array',
     ];
 
+    public function getPDF () {
+        $default_template = `
+
+        `;
+        // foreach($row $this->form_isian) {
+        //     $default_template .= `
+            
+        //     `;
+        // }
+        // $default_template .= `
+        
+        // `;
+
+        return $this->template ?? $default_template;
+    }
+
     public function getForm()
     {
         return $this->form_isian ?? [];

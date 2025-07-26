@@ -122,9 +122,53 @@ class SuratController extends Controller
         }
     }
 
-    public function show($slug)
+    public function show($id)
     {
-        
+        try {
+            $surat = Surat::with('format')->findOrFail($id);
+            $surat->syarat = $surat->getSyarat();
+            return response()->json($surat, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateStatus(Request $request, $id) {
+        try {
+            $validated = $request->validate([
+                'status'        => 'in:diproses,disetujui,ditolak,dicetak',
+            ]);
+
+            $surat = Surat::findOrFail($id);
+
+            $updateData = $validated;
+            $updateData['updated_by'] = Auth::id();
+            $surat->status = $request->status;
+            $surat->save();
+
+            return response()->json([
+                'message' => 'Surat berhasil diperbarui',
+                'data' => $surat
+            ], 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors'  => $e->errors()
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => "Surat dengan ID '{$id}' tidak ditemukan"
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)

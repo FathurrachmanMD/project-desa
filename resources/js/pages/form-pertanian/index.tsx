@@ -1,43 +1,43 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Head, Link } from '@inertiajs/react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Building2, FileText, ShoppingBag, Store, Briefcase, ArrowRight } from 'lucide-react';
+import axios from 'axios';
+import { LandPlot, Sprout, Tractor, Droplets, FileText, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const icons = [Store, FileText, Building2, ShoppingBag, Briefcase];
+const icons = [LandPlot, Sprout, Tractor, Droplets];
 const colors = [
-  'bg-gradient-to-br from-blue-500 to-purple-500',    // SIUP
-  'bg-gradient-to-br from-orange-500 to-red-500',     // NIB
-  'bg-gradient-to-br from-pink-500 to-rose-500',      // SITU
-  'bg-gradient-to-br from-emerald-500 to-teal-500',   // SKU
-  'bg-gradient-to-br from-cyan-500 to-blue-500',      // IUMK
+    'bg-gradient-to-br from-blue-500 to-purple-500',    
+    'bg-gradient-to-br from-orange-500 to-red-500',     
+    'bg-gradient-to-br from-pink-500 to-rose-500',      
+    'bg-gradient-to-br from-emerald-500 to-teal-500',   
+    'bg-gradient-to-br from-cyan-500 to-blue-500',      
 ];
 
 interface Syarat {
-  id: number | string;
-  nama: string;
+    id: number | string;
+    nama: string;
 }
 
 interface FormatSurat {
-  id: number | string;
-  nama: string;
-  url_surat: string;
-  deskripsi: string;
-  form: string[];
-  syarat: Syarat[];
+    id: number | string;
+    nama: string;
+    url_surat: string;
+    deskripsi: string;
+    form: string[];
+    syarat: Syarat[];
 }
 
-export default function FormUsaha() {
+export default function FormPertanian() {
     const API_URL = import.meta.env.VITE_API_URL;
-    
+        
     const [data, setData] = useState([]);
     
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${API_URL}/format-surat/1`);
+            const response = await axios.get(`${API_URL}/format-surat/5`);
             setData(response.data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -47,17 +47,16 @@ export default function FormUsaha() {
     useEffect(() => {
         fetchData();
     }, []);
-
+    
     return (
         <>
-            <Head title="Form Perizinan Usaha - Desa Drawati" />
+            <Head title="Perizinan Pertanian - Desa Drawati" />
 
             <Navbar />
-            {/* Section: Perizinan Usaha Modern */}
-            <section className="bg-white dark:bg-black w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
+            <section className="bg-white w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
                 <div className="max-w-4xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] dark:text-white mb-2">Perizinan Usaha Modern</h2>
-                    <p className="text-gray-600 dark:text-white text-lg max-w-2xl mx-auto">Layanan perizinan usaha digital yang mudah, cepat, dan transparan untuk mendukung pelaku usaha di Desa Drawati.</p>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Pertanian</h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan pertanian digital untuk mendukung petani dan pelaku usaha pertanian di Desa Drawati.</p>
                 </div>
             </section>
             <div className="min-h-screen">
@@ -71,10 +70,10 @@ export default function FormUsaha() {
                                     Pilih Jenis Perizinan
                                 </Badge>
                                 <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                                    Form Perizinan Usaha
+                                    Form Perizinan Pertanian
                                 </h1>
                                 <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-                                    Pilih jenis perizinan usaha yang sesuai dengan kebutuhan Anda. 
+                                    Pilih jenis perizinan pertanian yang sesuai dengan kebutuhan Anda. 
                                     Setiap jenis perizinan memiliki persyaratan dan ketentuan yang berbeda.
                                 </p>
                             </div>
@@ -87,7 +86,7 @@ export default function FormUsaha() {
                     
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
-                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
                                 {data.map((row: FormatSurat, index) => {
                                     const Icon = icons[index % icons.length];
                                     return (
