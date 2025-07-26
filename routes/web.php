@@ -88,9 +88,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('form-bangunan.form');
     
-    // Form Surat Edit
+    // Form Surat
+    Route::get('form/create/{id}', function ($id) {
+        return Inertia::render('surat/form-create', [
+            'id' => $id
+        ]);
+    });
     Route::get('form/view/{id}', function ($id) {
-        return Inertia::render('form-view', [
+        return Inertia::render('surat/form-view', [
             'id' => $id
         ]);
     });

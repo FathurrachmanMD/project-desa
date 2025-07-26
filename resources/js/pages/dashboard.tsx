@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { useState, useEffect, ElementType } from 'react';
 import { FadeInView, StaggerAnimation, StaggerItem, Typewriter } from '@/components/animations';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
@@ -96,7 +98,37 @@ const calculateStats = () => {
     };
 };
 
+type TotalDashboardData = {
+    total_izin_usaha: number;
+    total_izin_bangunan: number;
+    total_izin_acara: number;
+    total_izin_pribadi: number;
+    total_izin_pertanian: number;
+    diproses: number;
+    disetujui: number;
+    approval_percentage: number;
+    total_penduduk: number;
+    total_surat: number;
+};
+
 export default function Dashboard() {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    const [total, setTotal] = useState<TotalDashboardData | null>(null);
+    
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/dashboard`);
+            setTotal(response.data);
+        }
+        catch(error) {
+            console.error(error)
+        }
+    }
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
     const stats = calculateStats();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -131,9 +163,9 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalAllPermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_surat : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
-                                            {stats.approvedPermits} disetujui, {stats.pendingPermits} diproses
+                                            {total ? total.disetujui : 0} disetujui, {total ? total.diproses : 0} diproses
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -151,7 +183,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalEventPermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_acara : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             Hajatan, Publik, Sarana
                                         </p>
@@ -171,7 +203,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalBuildingPermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_bangunan : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             IMB, Renovasi, Lahan Desa
                                         </p>
@@ -191,7 +223,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalPersonalPermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_pribadi : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             SKCK, Domisili, Keluar Negeri
                                         </p>
@@ -211,7 +243,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalBusinessPermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_usaha : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             SKU, IUMK, SITU, NIB
                                         </p>
@@ -231,7 +263,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalAgriculturePermits}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_pertanian : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             Lahan, Pupuk, Keterangan Petani
                                         </p>
@@ -251,9 +283,9 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{stats.totalCustomers}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_penduduk : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
-                                            {stats.activeCustomers} aktif
+                                            {/* {stats.activeCustomers} aktif */}
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -339,7 +371,7 @@ export default function Dashboard() {
                                         Menunggu Persetujuan
                                     </p>
                                     <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
-                                        {stats.pendingPermits}
+                                        {total?.diproses}
                                     </p>
                                 </div>
                             </div>
@@ -355,7 +387,7 @@ export default function Dashboard() {
                                         Disetujui Total
                                     </p>
                                     <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                                        {stats.approvedPermits}
+                                        {total?.disetujui}
                                     </p>
                                 </div>
                             </div>
@@ -371,7 +403,7 @@ export default function Dashboard() {
                                         Tingkat Persetujuan
                                     </p>
                                     <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                                        {stats.approvalRate}%
+                                        {total?.approval_percentage}%
                                     </p>
                                 </div>
                             </div>

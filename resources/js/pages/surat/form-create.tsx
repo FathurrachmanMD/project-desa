@@ -66,10 +66,14 @@ interface PersonalPermitFormProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'View Surat',
-        href: '/form-pribadi/view',
-    },
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+  },
+  {
+    title: 'Buat Surat',
+    href: '/dashboard',
+  },
 ];
 
 export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
@@ -169,8 +173,6 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
       }
     };
 
-    console.log(data)
-
     return (
       <AppLayout breadcrumbs={breadcrumbs}>
         {/* change to sidebar */}
@@ -208,20 +210,11 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
           </div>
 
           {/* Form Section */}
-          <Card className="overflow-hidden border border-gray-100 shadow-sm">
-            {/* <CardHeader className="p-6">
-              <div className="space-y-1">
-                <CardTitle className="flex flex-row items-center align-center gap-2 text-xl font-semibold">
-                  
-                </CardTitle>                
-              </div>
-            </CardHeader> */}
-
-            
+          <Card className="overflow-hidden border border-gray-100 shadow-sm">            
             <CardContent className="">
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="space-y-8">
-                  Status
+                  {/* Status
                   <Select
                     value={status}
                     onValueChange={(value) => {
@@ -243,7 +236,7 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                   {/* Form Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {formatSurat?.form?.map((field, index) => {
@@ -261,7 +254,7 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
                             <Select
                               value={data.form?.[field.name] || ''}
                               onValueChange={(value) => handleSelectChange(field.name, value)}
-                              disabled={true}
+                              disabled={isSubmitting}
                               required={field.required}
                             >
                               <SelectTrigger 
@@ -290,7 +283,7 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
                               name={field.name}
                               value={data.form?.[field.name] || ''}
                               onChange={handleChange}
-                              disabled={true}
+                              disabled={isSubmitting}
                               placeholder={field.placeholder}
                               required={field.required}
                               className={cn(
@@ -305,7 +298,7 @@ export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
                               type={field.type}
                               value={data.form?.[field.name] || ''}
                               onChange={handleChange}
-                              disabled={true}
+                              disabled={isSubmitting}
                               placeholder={field.placeholder}
                               required={field.required}
                               className={cn(

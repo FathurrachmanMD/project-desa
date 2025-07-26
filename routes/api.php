@@ -2,9 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\FormatSuratController;
+
+Route::get('dashboard', [DashboardController::class, 'index']);
 
 Route::get('/surat/form/{id}', [SuratController::class, 'show']); // get specific surat
 Route::put('/surat/status/{id}', [SuratController::class, 'updateStatus']);

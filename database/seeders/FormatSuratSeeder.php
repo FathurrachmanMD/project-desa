@@ -12,7 +12,8 @@ class FormatSuratSeeder extends Seeder
     public function run()
     {
         $formats = [
-            ['kategori_id' => 1, 'nama' => 'Surat Keterangan Usaha (SKU)', 'slug' => 'sku', 'deskripsi' => 'Surat keterangan yang menyatakan keberadaan usaha', 'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>',
+            ['kategori_id' => 1, 'nama' => 'Surat Keterangan Usaha (SKU)', 'slug' => 'sku', 'deskripsi' => 'Surat keterangan yang menyatakan keberadaan usaha',
+            'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],

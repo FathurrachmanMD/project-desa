@@ -10,6 +10,7 @@ import { BusinessPermitDetailModal } from '@/components/business-permit-detail-m
 import { BusinessPermitEditModal } from '@/components/business-permit-edit-modal';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
 import { useCrudToast, usePermitToast } from '@/hooks/useToast';
+import NewButton from '@/components/new-button';
 import { 
   skuData as originalSkuData, 
   iumkData as originalIumkData, 
@@ -352,8 +353,9 @@ export default function PerizinanUsaha() {
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle>Data Perizinan</CardTitle>
-            <CardDescription>
-              Kelola semua jenis perizinan usaha yang diajukan warga
+            <CardDescription className='flex items-center align-middle'>
+              <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
+              <NewButton href=''/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
