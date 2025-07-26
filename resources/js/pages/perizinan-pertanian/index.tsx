@@ -1,23 +1,14 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect, act } from 'react';
+import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AgriculturalPermitTable } from '@/components/agricultural-permit-table';
-import { AgriculturalPermitDetailModal } from '@/components/agricultural-permit-detail-modal';
-import { AgriculturalPermitEditModal } from '@/components/agricultural-permit-edit-modal';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/contexts/ToastContext';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
-import { 
-  pengelolaanLahanData as originalPengelolaanLahanData, 
-  permohonanBantuanData as originalPermohonanBantuanData, 
-  suratKeteranganPetaniData as originalSuratKeteranganPetaniData,
-  suratIzinIrigasiData as originalSuratIzinIrigasiData,
-  IzinPengelolaanLahan,
-  PermohonanBantuan,
-  SuratKeteranganPetani,
-  SuratIzinIrigasi
-} from '@/data/agricultural-permits';
+import NewButton from '@/components/new-button';
 import { type BreadcrumbItem } from '@/types';
 import { 
   Sprout, 
@@ -26,7 +17,8 @@ import {
   Droplets, 
   ListFilter
 } from 'lucide-react';
-import NewButton from '@/components/new-button';
+
+import DataTable from 'react-data-table-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -46,194 +38,106 @@ const permitIcons = {
   'surat-izin-irigasi': Droplets,
 };
 
-export default function PerizinanPertanian() {
+type SuratItem = {
+    status: string;
+    [key: string]: any;
+  };
+
+  type StatusCounts = {
+    total: number;
+    diproses: number;
+    disetujui: number;
+    ditolak: number;
+  };
+
+  type SuratResponse = {
+    list: SuratItem[];
+    statusCounts: StatusCounts | null;
+  };
+
+export default function PerizinanBangunan() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [activeTab, setActiveTab] = useState('pengelolaan-lahan');
-  const [selectedData, setSelectedData] = useState<IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [dataToDelete, setDataToDelete] = useState<IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [idDelete, setIdDelete] = useState(0);
   
-  // State management for each data type
-  const [pengelolaanLahanData, setPengelolaanLahanData] = useState<IzinPengelolaanLahan[]>(originalPengelolaanLahanData);
-  const [permohonanBantuanData, setPermohonanBantuanData] = useState<PermohonanBantuan[]>(originalPermohonanBantuanData);
-  const [suratKeteranganPetaniData, setSuratKeteranganPetaniData] = useState<SuratKeteranganPetani[]>(originalSuratKeteranganPetaniData);
-  const [suratIzinIrigasiData, setSuratIzinIrigasiData] = useState<SuratIzinIrigasi[]>(originalSuratIzinIrigasiData);
-  
-  // Create a agricultural permits array that always uses the latest state
-  const agriculturalPermitTypes = [
-    { key: 'pengelolaan-lahan', label: 'Izin Pengelolaan Lahan Desa / Tanah Negara', data: pengelolaanLahanData },
-    { key: 'permohonan-bantuan', label: 'Permohonan Bantuan Pupuk / Bibit / Alat', data: permohonanBantuanData },
-    { key: 'surat-keterangan-petani', label: 'Surat Keterangan Petani atau Buruh Tani', data: suratKeteranganPetaniData },
-    { key: 'surat-izin-irigasi', label: 'Surat Izin Irigasi / Air Pertanian', data: suratIzinIrigasiData },
+  const { showToast } = useToast();
+
+  // Create a permits array that always uses the latest state
+  const permitTypes = [
+    { key: 'pengelolaan-lahan' },
+    { key: 'permohonan-bantuan' },
+    { key: 'surat-keterangan-petani' },
+    { key: 'surat-izin-irigasi' },
   ];
 
-  const handleView = (data: IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi) => {
-    setSelectedData(data);
-    setIsDetailModalOpen(true);
-  };
+  // const [activeTab, setActiveTab] = useState('sku'); // example default tab
+  const [tabData, setTabData] = useState<SuratItem[]>([]);
+  const [statusCounts, setStatusCounts] = useState<StatusCounts>({
+    total: 0,
+    diproses: 0,
+    disetujui: 0,
+    ditolak: 0,
+  });
 
-  const handleEdit = (data: IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi) => {
-    setSelectedData(data);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (data: IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi) => {
-    setDataToDelete(data);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveEdit = (updatedData: IzinPengelolaanLahan | PermohonanBantuan | SuratKeteranganPetani | SuratIzinIrigasi) => {
-    // Update the data in local state based on type
-    switch (activeTab) {
-      case 'pengelolaan-lahan': {
-        const newData = pengelolaanLahanData.map(item => 
-          item.id === updatedData.id ? updatedData as IzinPengelolaanLahan : item
-        );
-        setPengelolaanLahanData(newData);
-        break;
-      }
-      case 'permohonan-bantuan': {
-        const newData = permohonanBantuanData.map(item => 
-          item.id === updatedData.id ? updatedData as PermohonanBantuan : item
-        );
-        setPermohonanBantuanData(newData);
-        break;
-      }
-      case 'surat-keterangan-petani': {
-        const newData = suratKeteranganPetaniData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratKeteranganPetani : item
-        );
-        setSuratKeteranganPetaniData(newData);
-        break;
-      }
-      case 'surat-izin-irigasi': {
-        const newData = suratIzinIrigasiData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratIzinIrigasi : item
-        );
-        setSuratIzinIrigasiData(newData);
-        break;
-      }
-    }
-    
-    setIsEditModalOpen(false);
-    alert('Data berhasil diperbarui');
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!dataToDelete) return;
-    
-    setIsDeleting(true);
+  const getDataForTab = async (tabKey: string): Promise<SuratResponse> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Delete the data from the state based on type
-      switch (activeTab) {
-        case 'pengelolaan-lahan': {
-          const newData = pengelolaanLahanData.filter(item => item.id !== dataToDelete.id);
-          setPengelolaanLahanData(newData);
-          break;
-        }
-        case 'permohonan-bantuan': {
-          const newData = permohonanBantuanData.filter(item => item.id !== dataToDelete.id);
-          setPermohonanBantuanData(newData);
-          break;
-        }
-        case 'surat-keterangan-petani': {
-          const newData = suratKeteranganPetaniData.filter(item => item.id !== dataToDelete.id);
-          setSuratKeteranganPetaniData(newData);
-          break;
-        }
-        case 'surat-izin-irigasi': {
-          const newData = suratIzinIrigasiData.filter(item => item.id !== dataToDelete.id);
-          setSuratIzinIrigasiData(newData);
-          break;
-        }
-      }
-      
-      setIsDeleteModalOpen(false);
-      setDataToDelete(null);
-      alert('Data berhasil dihapus');
-    } catch {
-      alert('Terjadi kesalahan saat menghapus data');
+      const response = await axios.get(`${API_URL}/surat/${tabKey}`);
+      const list = response.data.data || [];
+      showToast.success(response.data.message);
+      return {
+        list,
+        statusCounts: {
+          total: list.length,
+          diproses: response.data.diproses,
+          disetujui: response.data.disetujui,
+          ditolak: response.data.ditolak,
+        },
+      };
+    } catch (error) {
+      console.error(`Failed to fetch data for ${tabKey}:`, error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
     } finally {
-      setIsDeleting(false);
+      setIsLoading(false);
     }
   };
 
-  const getDeleteModalContent = () => {
-    if (!dataToDelete) return { title: '', description: '' };
-    
-    let title = '';
-    let description = '';
-    
-    switch (activeTab) {
-      case 'pengelolaan-lahan': {
-        const lahanData = dataToDelete as IzinPengelolaanLahan;
-        title = 'Hapus Izin Pengelolaan Lahan';
-        description = `Apakah Anda yakin ingin menghapus izin pengelolaan lahan untuk ${lahanData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'permohonan-bantuan': {
-        const bantuanData = dataToDelete as PermohonanBantuan;
-        title = 'Hapus Permohonan Bantuan';
-        description = `Apakah Anda yakin ingin menghapus permohonan bantuan "${bantuanData.jenis_bantuan}" dari ${bantuanData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'surat-keterangan-petani': {
-        const keteranganData = dataToDelete as SuratKeteranganPetani;
-        title = 'Hapus Surat Keterangan Petani';
-        description = `Apakah Anda yakin ingin menghapus surat keterangan petani untuk ${keteranganData.nama}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'surat-izin-irigasi': {
-        const irigasiData = dataToDelete as SuratIzinIrigasi;
-        title = 'Hapus Surat Izin Irigasi';
-        description = `Apakah Anda yakin ingin menghapus surat izin irigasi untuk ${irigasiData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      default: {
-        title = 'Hapus Data';
-        description = 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.';
-      }
+  const handleDeleteModal = (id: number) => {
+    setIdDelete(id);
+    setIsDeleteModalOpen(true);
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
+      showToast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
+    } finally {
+      fetchData();
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
     }
-    
-    return { title, description };
+  }
+
+  const fetchData = async () => {
+    const result = await getDataForTab(activeTab);
+    setTabData(result.list);
+    if (result.statusCounts) setStatusCounts(result.statusCounts);
   };
 
-  const getDataForTab = (tabKey: string) => {
-    switch (tabKey) {
-      case 'pengelolaan-lahan':
-        return pengelolaanLahanData;
-      case 'permohonan-bantuan':
-        return permohonanBantuanData;
-      case 'surat-keterangan-petani':
-        return suratKeteranganPetaniData;
-      case 'surat-izin-irigasi':
-        return suratIzinIrigasiData;
-      default:
-        return [];
-    }
-  };
-
-  const getStatusCounts = (data: Array<{ status: string }>) => {
-    const counts = {
-      total: data.length,
-      diproses: data.filter(item => item.status === 'Diproses').length,
-      disetujui: data.filter(item => item.status === 'Disetujui').length,
-      ditolak: data.filter(item => item.status === 'Ditolak').length,
-    };
-    return counts;
-  };
-
-  const currentTabData = getDataForTab(activeTab);
-  const statusCounts = getStatusCounts(currentTabData);
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Manajemen Perizinan Pertanian" />
+      <Head title="Manajemen Perizinan Usaha" />
       
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
@@ -311,7 +215,7 @@ export default function PerizinanPertanian() {
         {/* Main Content */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle>Data Perizinan Pertanian</CardTitle>
+            <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
               <NewButton href={`form/create/${activeTab}`}/>
@@ -320,9 +224,10 @@ export default function PerizinanPertanian() {
           <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 w-full mb-8">
-                {agriculturalPermitTypes.map((permit) => {
+                {permitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
-                  const counts = getStatusCounts(permit.data);
+                  // permit data is array of all surat in one kategori
+                  // const counts = getStatusCounts(permit.data);
                   
                   return (
                     <TabsTrigger 
@@ -333,76 +238,94 @@ export default function PerizinanPertanian() {
                       <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4" />
                         <span className="text-xs font-medium">
-                          {permit.key === 'pengelolaan-lahan' && 'LAHAN'}
-                          {permit.key === 'permohonan-bantuan' && 'BANTUAN'}
-                          {permit.key === 'surat-keterangan-petani' && 'KETERANGAN'}
-                          {permit.key === 'surat-izin-irigasi' && 'IRIGASI'}
+                          {permit.key.toUpperCase()}
                         </span>
                       </div>
                       <Badge variant="secondary" className="text-xs">
-                        {counts.total}
+                        {/* {counts.total}  */}
                       </Badge>
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
-              
-              {agriculturalPermitTypes.map((permit) => {
-                const tabData = getDataForTab(permit.key);
-                return (
-                  <TabsContent key={permit.key} value={permit.key} className="mt-2">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold">{permit.label}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Total {tabData.length} pengajuan
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <AgriculturalPermitTable
-                        type={permit.key as 'pengelolaan-lahan' | 'permohonan-bantuan' | 'surat-keterangan-petani' | 'surat-izin-irigasi'}
-                        data={permit.data}
-                        searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                      />
+              <TabsContent key={activeTab} value={activeTab} className='mt-2'>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      {/* should be activetab label name */}
+                      <h3 className="text-lg font-semibold">{activeTab.toUpperCase()}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Total {statusCounts.total} pengajuan
+                      </p>
                     </div>
-                  </TabsContent>
-                );
-              })}
+                  </div>
+                  {
+                    isLoading ? (
+                      <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                    )
+                    : (
+                      <DataTable
+                        data={tabData}
+                        columns={[
+                          {
+                            name: "ID",
+                            selector: row => row.id,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Pemohon",
+                            selector: row => row.form.nama,
+                            sortable: true
+                          },
+                          {
+                            name: "NIK",
+                            selector: row => row.form.nik,
+                            sortable: true
+                          },
+                          {
+                            name: "Alamat",
+                            selector: row => row.form.alamat,
+                            sortable: true
+                          },
+                          {
+                            name: "Status",
+                            selector: row => row.status,
+                            sortable: true,
+                            cell: row => {
+                              const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
+                              return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
+                            }
+                          },
+                          {
+                            name: "Aksi",
+                            cell: row => (
+                              <div className="flex items-center gap-2">
+                                <Link href={`form/view/${row.id}`}>
+                                  <Button className='bg-gray-500' type='button'>Lihat</Button>
+                                </Link>
+                                <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>
+                              </div>
+                            )
+                          }
+                        ]}
+                        pagination
+                        highlightOnHover
+                      />
+                    )
+                  }
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
-
-      {/* Detail Modal */}
-      <AgriculturalPermitDetailModal
-        data={selectedData}
-        type={activeTab as 'pengelolaan-lahan' | 'permohonan-bantuan' | 'surat-keterangan-petani' | 'surat-izin-irigasi'}
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-      />
-
-      {/* Edit Modal */}
-      <AgriculturalPermitEditModal
-        data={selectedData}
-        type={activeTab as 'pengelolaan-lahan' | 'permohonan-bantuan' | 'surat-keterangan-petani' | 'surat-izin-irigasi'}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onSave={handleSaveEdit}
-      />
-
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        title={getDeleteModalContent().title}
-        description={getDeleteModalContent().description}
-        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        title={"Hapus Surat"}
+        description={`Apakah anda yakin akan menghapus data id:${idDelete}`}
+        isLoading={isLoading}
       />
     </AppLayout>
   );

@@ -1,26 +1,14 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect, act } from 'react';
+import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PersonalPermitTable } from '@/components/personal-permit-table';
-import { PersonalPermitDetailModal } from '@/components/personal-permit-detail-modal';
-import { PersonalPermitEditModal } from '@/components/personal-permit-edit-modal';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/contexts/ToastContext';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
-import { useCrudToast, usePermitToast } from '@/hooks/useToast';
-import { 
-  pengantarSKCKData as originalPengantarSKCKData, 
-  keteranganDomisiliData as originalKeteranganDomisiliData, 
-  izinTinggalPendatangData as originalIzinTinggalPendatangData,
-  izinKeluarNegeriData as originalIzinKeluarNegeriData,
-  keteranganTidakBekerjaData as originalKeteranganTidakBekerjaData,
-  SuratPengantarSKCK,
-  SuratKeteranganDomisili,
-  SuratIzinTinggalPendatang,
-  SuratIzinKeluarNegeri,
-  SuratKeteranganTidakBekerja
-} from '@/data/personal-permits';
+import NewButton from '@/components/new-button';
 import { type BreadcrumbItem } from '@/types';
 import { 
   FileText, 
@@ -30,7 +18,8 @@ import {
   UserX,
   ListFilter
 } from 'lucide-react';
-import NewButton from '@/components/new-button';
+
+import DataTable from 'react-data-table-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -51,220 +40,107 @@ const permitIcons = {
   'keterangan-tidak-bekerja': UserX,
 };
 
-export default function PerizinanPribadi() {
+type SuratItem = {
+    status: string;
+    [key: string]: any;
+  };
+
+  type StatusCounts = {
+    total: number;
+    diproses: number;
+    disetujui: number;
+    ditolak: number;
+  };
+
+  type SuratResponse = {
+    list: SuratItem[];
+    statusCounts: StatusCounts | null;
+  };
+
+export default function PerizinanBangunan() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [activeTab, setActiveTab] = useState('pengantar-skck');
-  const [selectedData, setSelectedData] = useState<SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [dataToDelete, setDataToDelete] = useState<SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [idDelete, setIdDelete] = useState(0);
   
-  // Toast hooks
-  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
-  const { approveSuccess } = usePermitToast();
-  
-  // State management for each data type
-  const [pengantarSKCKData, setPengantarSKCKData] = useState<SuratPengantarSKCK[]>(originalPengantarSKCKData);
-  const [keteranganDomisiliData, setKeteranganDomisiliData] = useState<SuratKeteranganDomisili[]>(originalKeteranganDomisiliData);
-  const [izinTinggalPendatangData, setIzinTinggalPendatangData] = useState<SuratIzinTinggalPendatang[]>(originalIzinTinggalPendatangData);
-  const [izinKeluarNegeriData, setIzinKeluarNegeriData] = useState<SuratIzinKeluarNegeri[]>(originalIzinKeluarNegeriData);
-  const [keteranganTidakBekerjaData, setKeteranganTidakBekerjaData] = useState<SuratKeteranganTidakBekerja[]>(originalKeteranganTidakBekerjaData);
-  
-  // Create a personal permits array that always uses the latest state
-  const personalPermitTypes = [
-    { key: 'pengantar-skck', label: 'Surat Pengantar SKCK', data: pengantarSKCKData },
-    { key: 'keterangan-domisili', label: 'Surat Keterangan Domisili', data: keteranganDomisiliData },
-    { key: 'izin-tinggal-pendatang', label: 'Surat Izin Tinggal Pendatang', data: izinTinggalPendatangData },
-    { key: 'izin-keluar-negeri', label: 'Surat Izin Keluar Negeri (Informal)', data: izinKeluarNegeriData },
-    { key: 'keterangan-tidak-bekerja', label: 'Surat Keterangan Tidak Bekerja', data: keteranganTidakBekerjaData },
+  const { showToast } = useToast();
+
+  // Create a permits array that always uses the latest state
+  const permitTypes = [
+    { key: 'pengantar-skck' },
+    { key: 'keterangan-domisili' },
+    { key: 'izin-tinggal-pendatang' },
+    { key: 'izin-keluar-negeri' },
+    { key: 'keterangan-tidak-bekerja' },
   ];
 
-  const handleView = (data: SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja) => {
-    setSelectedData(data);
-    setIsDetailModalOpen(true);
-  };
+  // const [activeTab, setActiveTab] = useState('sku'); // example default tab
+  const [tabData, setTabData] = useState<SuratItem[]>([]);
+  const [statusCounts, setStatusCounts] = useState<StatusCounts>({
+    total: 0,
+    diproses: 0,
+    disetujui: 0,
+    ditolak: 0,
+  });
 
-  const handleEdit = (data: SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja) => {
-    setSelectedData(data);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (data: SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja) => {
-    setDataToDelete(data);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveEdit = (updatedData: SuratPengantarSKCK | SuratKeteranganDomisili | SuratIzinTinggalPendatang | SuratIzinKeluarNegeri | SuratKeteranganTidakBekerja) => {
-    // Update the data in local state based on type
-    switch (activeTab) {
-      case 'pengantar-skck': {
-        const newData = pengantarSKCKData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratPengantarSKCK : item
-        );
-        setPengantarSKCKData(newData);
-        break;
-      }
-      case 'keterangan-domisili': {
-        const newData = keteranganDomisiliData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratKeteranganDomisili : item
-        );
-        setKeteranganDomisiliData(newData);
-        break;
-      }
-      case 'izin-tinggal-pendatang': {
-        const newData = izinTinggalPendatangData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratIzinTinggalPendatang : item
-        );
-        setIzinTinggalPendatangData(newData);
-        break;
-      }
-      case 'izin-keluar-negeri': {
-        const newData = izinKeluarNegeriData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratIzinKeluarNegeri : item
-        );
-        setIzinKeluarNegeriData(newData);
-        break;
-      }
-      case 'keterangan-tidak-bekerja': {
-        const newData = keteranganTidakBekerjaData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratKeteranganTidakBekerja : item
-        );
-        setKeteranganTidakBekerjaData(newData);
-        break;
-      }
-    }
-    
-    setIsEditModalOpen(false);
-    updateSuccess('Data perizinan pribadi');
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!dataToDelete) return;
-    
-    setIsDeleting(true);
+  const getDataForTab = async (tabKey: string): Promise<SuratResponse> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Delete the data from the state based on type
-      switch (activeTab) {
-        case 'pengantar-skck': {
-          const newData = pengantarSKCKData.filter(item => item.id !== dataToDelete.id);
-          setPengantarSKCKData(newData);
-          break;
-        }
-        case 'keterangan-domisili': {
-          const newData = keteranganDomisiliData.filter(item => item.id !== dataToDelete.id);
-          setKeteranganDomisiliData(newData);
-          break;
-        }
-        case 'izin-tinggal-pendatang': {
-          const newData = izinTinggalPendatangData.filter(item => item.id !== dataToDelete.id);
-          setIzinTinggalPendatangData(newData);
-          break;
-        }
-        case 'izin-keluar-negeri': {
-          const newData = izinKeluarNegeriData.filter(item => item.id !== dataToDelete.id);
-          setIzinKeluarNegeriData(newData);
-          break;
-        }
-        case 'keterangan-tidak-bekerja': {
-          const newData = keteranganTidakBekerjaData.filter(item => item.id !== dataToDelete.id);
-          setKeteranganTidakBekerjaData(newData);
-          break;
-        }
-      }
-      
-      setIsDeleteModalOpen(false);
-      setDataToDelete(null);
-      deleteSuccess('Data perizinan pribadi');
-    } catch {
-      deleteError('Terjadi kesalahan saat menghapus data perizinan pribadi');
+      const response = await axios.get(`${API_URL}/surat/${tabKey}`);
+      const list = response.data.data || [];
+      showToast.success(response.data.message);
+      return {
+        list,
+        statusCounts: {
+          total: list.length,
+          diproses: response.data.diproses,
+          disetujui: response.data.disetujui,
+          ditolak: response.data.ditolak,
+        },
+      };
+    } catch (error) {
+      console.error(`Failed to fetch data for ${tabKey}:`, error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
     } finally {
-      setIsDeleting(false);
+      setIsLoading(false);
     }
   };
 
-  const getDeleteModalContent = () => {
-    if (!dataToDelete) return { title: '', description: '' };
-    
-    let title = '';
-    let description = '';
-    
-    switch (activeTab) {
-      case 'pengantar-skck': {
-        const pengantarData = dataToDelete as SuratPengantarSKCK;
-        title = 'Hapus Surat Pengantar SKCK';
-        description = `Apakah Anda yakin ingin menghapus surat pengantar SKCK untuk ${pengantarData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'keterangan-domisili': {
-        const domisiliData = dataToDelete as SuratKeteranganDomisili;
-        title = 'Hapus Surat Keterangan Domisili';
-        description = `Apakah Anda yakin ingin menghapus surat keterangan domisili untuk ${domisiliData.nama_warga}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'izin-tinggal-pendatang': {
-        const pendatangData = dataToDelete as SuratIzinTinggalPendatang;
-        title = 'Hapus Surat Izin Tinggal Pendatang';
-        description = `Apakah Anda yakin ingin menghapus surat izin tinggal pendatang untuk ${pendatangData.nama_pendatang}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'izin-keluar-negeri': {
-        const keluarNegeriData = dataToDelete as SuratIzinKeluarNegeri;
-        title = 'Hapus Surat Izin Keluar Negeri';
-        description = `Apakah Anda yakin ingin menghapus surat izin keluar negeri untuk ${keluarNegeriData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'keterangan-tidak-bekerja': {
-        const tidakBekerjaData = dataToDelete as SuratKeteranganTidakBekerja;
-        title = 'Hapus Surat Keterangan Tidak Bekerja';
-        description = `Apakah Anda yakin ingin menghapus surat keterangan tidak bekerja untuk ${tidakBekerjaData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      default: {
-        title = 'Hapus Data';
-        description = 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.';
-      }
+  const handleDeleteModal = (id: number) => {
+    setIdDelete(id);
+    setIsDeleteModalOpen(true);
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
+      showToast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
+    } finally {
+      fetchData();
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
     }
-    
-    return { title, description };
+  }
+
+  const fetchData = async () => {
+    const result = await getDataForTab(activeTab);
+    setTabData(result.list);
+    if (result.statusCounts) setStatusCounts(result.statusCounts);
   };
 
-  const getDataForTab = (tabKey: string) => {
-    switch (tabKey) {
-      case 'pengantar-skck':
-        return pengantarSKCKData;
-      case 'keterangan-domisili':
-        return keteranganDomisiliData;
-      case 'izin-tinggal-pendatang':
-        return izinTinggalPendatangData;
-      case 'izin-keluar-negeri':
-        return izinKeluarNegeriData;
-      case 'keterangan-tidak-bekerja':
-        return keteranganTidakBekerjaData;
-      default:
-        return [];
-    }
-  };
-
-  const getStatusCounts = (data: Array<{ status: string }>) => {
-    const counts = {
-      total: data.length,
-      diproses: data.filter(item => item.status === 'Diproses').length,
-      disetujui: data.filter(item => item.status === 'Disetujui').length,
-      ditolak: data.filter(item => item.status === 'Ditolak').length,
-    };
-    return counts;
-  };
-
-  const currentTabData = getDataForTab(activeTab);
-  const statusCounts = getStatusCounts(currentTabData);
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Manajemen Perizinan Pribadi" />
+      <Head title="Manajemen Perizinan Usaha" />
       
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
@@ -342,7 +218,7 @@ export default function PerizinanPribadi() {
         {/* Main Content */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle>Data Perizinan Pribadi</CardTitle>
+            <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
               <NewButton href={`form/create/${activeTab}`}/>
@@ -351,9 +227,10 @@ export default function PerizinanPribadi() {
           <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-5 w-full mb-8">
-                {personalPermitTypes.map((permit) => {
+                {permitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
-                  const counts = getStatusCounts(permit.data);
+                  // permit data is array of all surat in one kategori
+                  // const counts = getStatusCounts(permit.data);
                   
                   return (
                     <TabsTrigger 
@@ -364,77 +241,89 @@ export default function PerizinanPribadi() {
                       <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4" />
                         <span className="text-xs font-medium">
-                          {permit.key === 'pengantar-skck' && 'SKCK'}
-                          {permit.key === 'keterangan-domisili' && 'DOMISILI'}
-                          {permit.key === 'izin-tinggal-pendatang' && 'PENDATANG'}
-                          {permit.key === 'izin-keluar-negeri' && 'LUAR NEGERI'}
-                          {permit.key === 'keterangan-tidak-bekerja' && 'TIDAK BEKERJA'}
+                          {permit.key.toUpperCase()}
                         </span>
                       </div>
                       <Badge variant="secondary" className="text-xs">
-                        {counts.total}
+                        {/* {counts.total}  */}
                       </Badge>
                     </TabsTrigger>
                   );
                 })}
               </TabsList>
-              
-              {personalPermitTypes.map((permit) => {
-                const tabData = getDataForTab(permit.key);
-                return (
-                  <TabsContent key={permit.key} value={permit.key} className="mt-2">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold">{permit.label}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Total {tabData.length} pengajuan
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <PersonalPermitTable
-                        type={permit.key as 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja'}
-                        data={permit.data}
-                        searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                      />
+              <TabsContent key={activeTab} value={activeTab} className='mt-2'>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      {/* should be activetab label name */}
+                      <h3 className="text-lg font-semibold">{activeTab.toUpperCase()}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Total {statusCounts.total} pengajuan
+                      </p>
                     </div>
-                  </TabsContent>
-                );
-              })}
+                  </div>
+                  {
+                    isLoading ? (
+                      <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                    )
+                    : (
+                      <DataTable
+                        data={tabData}
+                        columns={[
+                          {
+                            name: "ID",
+                            selector: row => row.id,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Pemohon",
+                            selector: row => row.form.nama,
+                            sortable: true
+                          },
+                          {
+                            name: "NIK",
+                            selector: row => row.form.nik,
+                            sortable: true
+                          },
+                          {
+                            name: "Status",
+                            selector: row => row.status,
+                            sortable: true,
+                            cell: row => {
+                              const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
+                              return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
+                            }
+                          },
+                          {
+                            name: "Aksi",
+                            cell: row => (
+                              <div className="flex items-center gap-2">
+                                <Link href={`form/view/${row.id}`}>
+                                  <Button className='bg-gray-500' type='button'>Lihat</Button>
+                                </Link>
+                                <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>
+                              </div>
+                            )
+                          }
+                        ]}
+                        pagination
+                        highlightOnHover
+                      />
+                    )
+                  }
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
-
-      {/* Detail Modal */}
-      <PersonalPermitDetailModal
-        data={selectedData}
-        type={activeTab as 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja'}
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-      />
-
-      {/* Edit Modal */}
-      <PersonalPermitEditModal
-        data={selectedData}
-        type={activeTab as 'pengantar-skck' | 'keterangan-domisili' | 'izin-tinggal-pendatang' | 'izin-keluar-negeri' | 'keterangan-tidak-bekerja'}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onSave={handleSaveEdit}
-      />
-
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        title={getDeleteModalContent().title}
-        description={getDeleteModalContent().description}
-        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        title={"Hapus Surat"}
+        description={`Apakah anda yakin akan menghapus data id:${idDelete}`}
+        isLoading={isLoading}
       />
     </AppLayout>
   );
