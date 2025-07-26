@@ -20,4 +20,23 @@ class FormUsahaController extends Controller
 
         return response()->json($formats);
     }
+
+    public function show ($slug) {
+        $format = FormatSurat::with('syarat')
+            ->where('url_surat', $slug)
+            ->first();
+
+        return response()->json([
+            'id' => $format->id,
+            'nama' => $format->nama,
+            'url_surat' => $format->url_surat,
+            'deskripsi' => $format->deskripsi,
+            'form' => $format->form_isian,
+            'syarat' => $format->syarat
+        ], 200);
+    }
+
+    public function store (Request $req) {
+
+    }
 }

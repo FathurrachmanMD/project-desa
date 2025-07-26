@@ -9,13 +9,61 @@ use Illuminate\Support\Facades\DB;
 
 class FormatSuratSeeder extends Seeder
 {
+    function buildInput(string $name, string $type = 'text', string $placeholder = ''): array {
+        return [
+            'name' => $name,
+            'value' => '',             // default empty string
+            'required' => true,        // default to true, adjust as needed
+            'label' => ucfirst($name), // capitalize first letter for label
+            'placeholder' => $placeholder ?: 'Masukkan ' . $name,
+            'type' => $type,
+            'minLength' => null,       // set if needed, otherwise null
+            'maxLength' => null,
+            'pattern' => null,         // regex pattern, null if none
+            'options' => null,         // array for select options, null if none
+            'disabled' => false,
+            'readOnly' => false,
+            'inputMode' => null,       // e.g. 'numeric', 'email', null if none
+        ];
+    }
+
+
     public function run()
     {
         $formats = [
-            ['kategori_id' => 1, 'nama' => 'Surat Keterangan Usaha (SKU)', 'slug' => 'sku', 'deskripsi' => 'Surat keterangan yang menyatakan keberadaan usaha', 'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>', 'form_isian' => ['nama', 'jk']],
-            ['kategori_id' => 1, 'nama' => 'Izin Usaha Mikro Kecil (IUMK)', 'slug' => 'iumk', 'deskripsi' => 'Izin untuk usaha mikro dan kecil'],
-            ['kategori_id' => 1, 'nama' => 'Surat Izin Tempat Usaha (SITU)', 'slug' => 'situ', 'deskripsi' => 'Izin yang menyatakan keabsahan lokasi tempat usaha'],
-            ['kategori_id' => 1, 'nama' => 'Nomor Induk Berusaha (NIB)', 'slug' => 'nib', 'deskripsi' => 'Identitas pelaku usaha untuk memulai dan menjalankan usaha'],
+            ['kategori_id' => 1, 'nama' => 'Surat Keterangan Usaha (SKU)', 'slug' => 'sku', 'deskripsi' => 'Surat keterangan yang menyatakan keberadaan usaha', 'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>',
+            'form_isian' => [
+                ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
+                ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],
+                ['name' => 'nama_usaha', 'label' => 'Nama Usaha', 'placeholder' => 'Masukkan Nama Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'alamat_usaha', 'label' => 'Alamat Usaha', 'placeholder' => 'Masukkan Alamat Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'lama_usaha', 'label' => 'Lama Usaha', 'placeholder' => 'Contoh: 2 Tahun', 'type' => 'text', 'required' => true],
+            ]],
+            ['kategori_id' => 1, 'nama' => 'Izin Usaha Mikro Kecil (IUMK)', 'slug' => 'iumk', 'deskripsi' => 'Izin untuk usaha mikro dan kecil',
+            'form_isian' => [
+                ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
+                ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],
+                ['name' => 'nama_usaha', 'label' => 'Nama Usaha', 'placeholder' => 'Masukkan Nama Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'alamat_usaha', 'label' => 'Alamat Usaha', 'placeholder' => 'Masukkan Alamat Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'jenis_usaha', 'label' => 'Jenis Usaha', 'placeholder' => 'Masukkan Jenis Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'modal_usaha', 'label' => 'Modal Usaha', 'placeholder' => 'Masukkan Modal Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'status_tempat_usaha', 'label' => 'Status Tempat Usaha', 'type' => 'select', 'required' => true, 'options' => ['Sewa', 'Milik Sendiri']],
+            ]],
+            ['kategori_id' => 1, 'nama' => 'Surat Izin Tempat Usaha (SITU)', 'slug' => 'situ', 'deskripsi' => 'Izin yang menyatakan keabsahan lokasi tempat usaha',
+            'form_isian' => [
+                ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
+                ['name' => 'alamat_usaha', 'label' => 'Alamat Usaha', 'placeholder' => 'Masukkan Alamat Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'status_tanah', 'label' => 'Status Tanah', 'type' => 'select', 'required' => true, 'options' => ['Sewa', 'Hibah', 'Milik Sendiri']],
+                ['name' => 'jenis_usaha', 'label' => 'Jenis Usaha', 'placeholder' => 'Masukkan Jenis Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'rekom_rt_rw', 'label' => 'Rekomendasi RT/RW', 'type' => 'select', 'required' => true, 'options' => ['Sudah', 'Belum']],
+            ]],
+            ['kategori_id' => 1, 'nama' => 'Nomor Induk Berusaha (NIB)', 'slug' => 'nib', 'deskripsi' => 'Identitas pelaku usaha untuk memulai dan menjalankan usaha',
+            'form_isian' => [
+                ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
+                ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],
+                ['name' => 'nama_usaha', 'label' => 'Nama Usaha', 'placeholder' => 'Masukkan Nama Usaha', 'type' => 'text', 'required' => true],
+                ['name' => 'tujuan', 'label' => 'Tujuan Pendaftaran NIB', 'placeholder' => 'Contoh: Legalitas Usaha', 'type' => 'text', 'required' => true],
+            ]],
 
             ['kategori_id' => 2, 'nama' => 'hajatan'],
             ['kategori_id' => 2, 'nama' => 'acara publik'],

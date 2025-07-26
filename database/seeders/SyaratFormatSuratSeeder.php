@@ -10,10 +10,10 @@ class SyaratFormatSuratSeeder extends Seeder
     public function run(): void
     {
         $formats = [
-            1 => [1, 2, 17, 16], // SKU
-            2 => [1, 2, 17, 16], // IUMK
-            3 => [1, 12, 13, 10], // SITU
-            4 => [1, 12, 13, 14], // NIB
+            1 => [1, 2, 16, 17], // SKU
+            2 => [1, 2, 16, 17], // IUMK
+            3 => [2, 14, 15, 16], // SITU
+            4 => [2, 12, 13, 14], // NIB
         ];
 
         foreach ($formats as $formatId => $syaratIds) {

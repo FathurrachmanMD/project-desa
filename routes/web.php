@@ -40,9 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('form-usaha/index');
     })->name('form-usaha.index');
     
-    Route::get('form-usaha/form/{type}', function (string $type) {
+    Route::get('form-usaha/form/{slug}', function (string $slug) {
         return Inertia::render('form-usaha/form', [
-            'type' => $type
+            'slug' => $slug
         ]);
     })->name('form-usaha.form');
     

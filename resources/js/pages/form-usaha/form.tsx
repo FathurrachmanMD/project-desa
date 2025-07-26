@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import axios from 'axios';
+import { useState, useEffect, ElementType } from 'react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,244 +13,257 @@ import { Building2, FileText, ShoppingBag, Store, Briefcase, ArrowLeft } from 'l
 import { cn } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
 
-interface FormProps {
-    type: 'siup' | 'nib' | 'situ' | 'sku' | 'iumk';
+const icons = [Store, FileText, Building2, ShoppingBag, Briefcase];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    // SIUP
+  'bg-gradient-to-br from-orange-500 to-red-500',     // NIB
+  'bg-gradient-to-br from-pink-500 to-rose-500',      // SITU
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   // SKU
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      // IUMK
+];
+
+interface InputField {
+  name: string;
+  value: string;
+  required: boolean;
+  label?: string;
+  placeholder?: string;
+  type?: string;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  options?: string[];
+  disabled?: boolean;
+  readOnly?: boolean;
+  inputMode?: string;
 }
 
-const permitTypes = {
-    siup: {
-        title: 'Surat Izin Usaha Perdagangan (SIUP)',
-        description: 'Izin untuk menjalankan kegiatan usaha perdagangan',
-        icon: Store,
-        color: 'bg-gradient-to-br from-blue-500 to-purple-500',
-    },
-    nib: {
-        title: 'Nomor Induk Berusaha (NIB)',
-        description: 'Identitas pelaku usaha untuk memulai dan menjalankan usaha',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-orange-500 to-red-500',
-    },
-    situ: {
-        title: 'Surat Izin Tempat Usaha (SITU)',
-        description: 'Izin yang menyatakan keabsahan lokasi tempat usaha',
-        icon: Building2,
-        color: 'bg-gradient-to-br from-pink-500 to-rose-500',
-    },
-    sku: {
-        title: 'Surat Keterangan Usaha (SKU)',
-        description: 'Surat keterangan yang menyatakan keberadaan usaha',
-        icon: ShoppingBag,
-        color: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    },
-    iumk: {
-        title: 'Izin Usaha Mikro Kecil (IUMK)',
-        description: 'Izin untuk usaha mikro dan kecil',
-        icon: Briefcase,
-        color: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-    }
-};
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number;
+  nama: string;
+  url_surat: string;
+  deskripsi: string;
+  form: InputField[];
+  syarat: Syarat[];
+}
+
+interface FormData {
+  slug: string;
+  form: InputField[];
+}
 
 const getCurrentDate = () => {
   const now = new Date();
   return now.toISOString().slice(0, 10);
 };
 
-const dropdownOptions = {
-  rekomendasi_rtrw: [
-    { value: 'sudah', label: 'Sudah' },
-    { value: 'belum', label: 'Belum' },
-  ],
-  status_kepemilikan: [
-    { value: 'sewa', label: 'Sewa' },
-    { value: 'milik_sendiri', label: 'Milik Sendiri' },
-  ],
-  status_tanah: [
-    { value: 'milik_sendiri', label: 'Milik Sendiri' },
-    { value: 'sewa', label: 'Sewa' },
-    { value: 'hibah', label: 'Hibah' },
-  ],
-  jenis_renovasi: [
-    { value: 'renovasi', label: 'Renovasi' },
-    { value: 'perluasan', label: 'Perluasan' },
-    { value: 'tambah_lantai', label: 'Tambah Lantai' },
-  ],
-};
-
-const permitFieldMap: Record<string, { 
-  label: string; 
-  name: string; 
-  type: string; 
-  required?: boolean;
-  inputType?: 'select';
-  options?: { value: string; label: string }[];
-  placeholder?: string;
-}> = {
-  nama_pemohon: { 
-    label: 'Nama Pemohon', 
-    name: 'nama_pemohon', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan nama lengkap pemohon'
-  },
-  nik: { 
-    label: 'NIK', 
-    name: 'nik', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan NIK sesuai KTP'
-  },
-  nama_usaha: { 
-    label: 'Nama Usaha', 
-    name: 'nama_usaha', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan nama usaha'
-  },
-  alamat_usaha: { 
-    label: 'Alamat Usaha', 
-    name: 'alamat_usaha', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alamat lengkap usaha'
-  },
-  lama_usaha: { 
-    label: 'Lama Usaha', 
-    name: 'lama_usaha', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Contoh: 2 tahun'
-  },
-  jenis_usaha: { 
-    label: 'Jenis Usaha', 
-    name: 'jenis_usaha', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Contoh: Makanan, Jasa, dll.'
-  },
-  modal_usaha: { 
-    label: 'Modal Usaha', 
-    name: 'modal_usaha', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Contoh: Rp 50.000.000'
-  },
-  status_tempat_usaha: { 
-    label: 'Status Tempat Usaha', 
-    name: 'status_tempat_usaha', 
-    type: 'select',
-    options: dropdownOptions.status_kepemilikan,
-    required: true
-  },
-  status_lahan: { 
-    label: 'Status Tanah', 
-    name: 'status_lahan', 
-    type: 'select',
-    options: dropdownOptions.status_tanah,
-    required: true
-  },
-  rekomendasi_rtrw: { 
-    label: 'Rekomendasi RT/RW', 
-    name: 'rekomendasi_rtrw', 
-    type: 'select',
-    options: dropdownOptions.rekomendasi_rtrw,
-    required: true
-  },
-  tujuan: { 
-    label: 'Tujuan', 
-    name: 'tujuan', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Jelaskan tujuan pengajuan izin usaha'
-  },
-  jenis_renovasi: {
-    label: 'Jenis Renovasi',
-    name: 'jenis_renovasi',
-    type: 'select',
-    options: dropdownOptions.jenis_renovasi,
-    required: true
-  }
-};
-
-const permitFields: Record<string, string[]> = {
-  sku: ['nama_pemohon', 'nik', 'nama_usaha', 'alamat_usaha', 'lama_usaha'],
-  iumk: ['nama_pemohon', 'nik', 'nama_usaha', 'jenis_usaha', 'modal_usaha', 'status_tempat_usaha'],
-  situ: ['nama_pemohon', 'alamat_usaha', 'status_lahan', 'jenis_usaha', 'rekomendasi_rtrw'],
-  nib: ['nama_pemohon', 'nik', 'nama_usaha', 'tujuan'],
-  siup: ['nama_pemohon', 'nik', 'nama_usaha', 'alamat_usaha', 'jenis_usaha', 'modal_usaha'],
-};
+// const permitFieldMap: Record<string, { 
+//   label: string; 
+//   name: string; 
+//   type: string; 
+//   required?: boolean;
+//   inputType?: 'select';
+//   options?: { value: string; label: string }[];
+//   placeholder?: string;
+// }> = {
+//   nama_pemohon: { 
+//     label: 'Nama Pemohon', 
+//     name: 'nama_pemohon', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Masukkan nama lengkap pemohon'
+//   },
+//   nik: { 
+//     label: 'NIK', 
+//     name: 'nik', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Masukkan NIK sesuai KTP'
+//   },
+//   nama_usaha: { 
+//     label: 'Nama Usaha', 
+//     name: 'nama_usaha', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Masukkan nama usaha'
+//   },
+//   alamat_usaha: { 
+//     label: 'Alamat Usaha', 
+//     name: 'alamat_usaha', 
+//     type: 'textarea', 
+//     required: true,
+//     placeholder: 'Masukkan alamat lengkap usaha'
+//   },
+//   lama_usaha: { 
+//     label: 'Lama Usaha', 
+//     name: 'lama_usaha', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Contoh: 2 tahun'
+//   },
+//   jenis_usaha: { 
+//     label: 'Jenis Usaha', 
+//     name: 'jenis_usaha', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Contoh: Makanan, Jasa, dll.'
+//   },
+//   modal_usaha: { 
+//     label: 'Modal Usaha', 
+//     name: 'modal_usaha', 
+//     type: 'text', 
+//     required: true,
+//     placeholder: 'Contoh: Rp 50.000.000'
+//   },
+//   status_tempat_usaha: { 
+//     label: 'Status Tempat Usaha', 
+//     name: 'status_tempat_usaha', 
+//     type: 'select',
+//     options: dropdownOptions.status_kepemilikan,
+//     required: true
+//   },
+//   status_lahan: { 
+//     label: 'Status Tanah', 
+//     name: 'status_lahan', 
+//     type: 'select',
+//     options: dropdownOptions.status_tanah,
+//     required: true
+//   },
+//   rekomendasi_rtrw: { 
+//     label: 'Rekomendasi RT/RW', 
+//     name: 'rekomendasi_rtrw', 
+//     type: 'select',
+//     options: dropdownOptions.rekomendasi_rtrw,
+//     required: true
+//   },
+//   tujuan: { 
+//     label: 'Tujuan', 
+//     name: 'tujuan', 
+//     type: 'textarea', 
+//     required: true,
+//     placeholder: 'Jelaskan tujuan pengajuan izin usaha'
+//   },
+//   jenis_renovasi: {
+//     label: 'Jenis Renovasi',
+//     name: 'jenis_renovasi',
+//     type: 'select',
+//     options: dropdownOptions.jenis_renovasi,
+//     required: true
+//   }
+// };
 
 interface BusinessPermitFormProps {
-  type: string;
+  slug: string;
 }
 
-export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
-  const { data, setData, post, processing, errors, reset } = useForm({
-    type,
-    file: null as File | null,
-    ...Object.fromEntries(
-      Object.values(permitFieldMap).map(field => [field.name, ''])
-    )
-  });
+export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
+  // const {data, setData} = useForm<FormData>()
+  // const { data, setData, post, processing, errors, reset } = useForm({
+  //   slug,
+  //   file: null as File | null,
+  //   ...Object.fromEntries(
+  //     Object.values(permitFieldMap).map(field => [field.name, ''])
+  //   )
+  // });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
+  // const { showToast } = useToast();
 
-  // Get fields based on the type
-  const fields = type && permitFields[type as keyof typeof permitFields] 
-    ? permitFields[type as keyof typeof permitFields] 
-    : [];
+  // Get fields based on the slug
+  // const fields = slug && permitFields[slug as keyof typeof permitFields] 
+  //   ? permitFields[slug as keyof typeof permitFields] 
+  //   : [];
     
-  const permitType = type && permitTypes[type as keyof typeof permitTypes];
+  // const permitType = slug && permitTypes[slug as keyof typeof permitTypes];
   
   const handleSelectChange = (name: string, value: string) => {
-    setData(name as keyof typeof data, value);
+  //   setData(name as keyof typeof data, value);
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setData('file', e.target.files[0]);
-    }
+  //   if (e.target.files && e.target.files[0]) {
+  //     setData('file', e.target.files[0]);
+  //   }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setData(name as keyof typeof data, value);
+  //   const { name, value } = e.target;
+  //   setData(name as keyof typeof data, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
     
-    try {
-      await post(route('form-usaha.submit'), {
-        onSuccess: () => {
-          showToast.success(
-            'Pengajuan Berhasil',
-            'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
-            { duration: 3000 }
-          );
-          setTimeout(() => {
-            window.location.href = '/form-usaha';
-          }, 3000);
-        },
-        onError: (errors) => {
-          showToast.error(
-            'Kesalahan Validasi',
-            'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
-          );
-        },
-        onFinish: () => {
-          setIsSubmitting(false);
-        }
-      });
-    } catch (error) {
-      showToast.error(
-        'Kesalahan Sistem',
-        'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
-      );
-      setIsSubmitting(false);
-    }
+  //   try {
+  //     await post(route('form-usaha.submit'), {
+  //       onSuccess: () => {
+  //         showToast.success(
+  //           'Pengajuan Berhasil',
+  //           'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
+  //           { duration: 3000 }
+  //         );
+  //         setTimeout(() => {
+  //           window.location.href = '/form-usaha';
+  //         }, 3000);
+  //       },
+  //       onError: (errors) => {
+  //         showToast.error(
+  //           'Kesalahan Validasi',
+  //           'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
+  //         );
+  //       },
+  //       onFinish: () => {
+  //         setIsSubmitting(false);
+  //       }
+  //     });
+  //   } catch (error) {
+  //     showToast.error(
+  //       'Kesalahan Sistem',
+  //       'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
+  //     );
+  //     setIsSubmitting(false);
+  //   }
   };
+
+  const API_URL = import.meta.env.VITE_API_URL;
+      
+  const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
+  const [Icon, setIcon] = useState<ElementType>(icons[0]);
+  
+  const fetchFormatSurat = async () => {
+      try {
+          const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
+          console.log(response);
+          setFormatSurat(response.data);
+          // setFormatSurat({
+          //   id: response.data.id,
+          //   nama: response.data.nama,
+          //   url_surat: response.data.url_surat,
+          //   deskripsi: response.data.deskripsi,
+          //   // form: response.data.form,
+          //   form: () => {
+          //     {
+          //       name: response.data.nama,
+          //       type: string
+          //     }
+          //   }
+          //   syarat: response.data.syarat,
+          // });
+          setIcon(icons[response.data.id % icons.length]);
+      } catch (error) {
+          console.error('Error fetching data:', error);
+      }
+  }
+  
+  useEffect(() => {
+      fetchFormatSurat();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -271,20 +285,20 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className={cn(
               "w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center text-white shadow-md",
-              permitType?.color || 'bg-gradient-to-br from-gray-500 to-gray-700'
+              colors[(formatSurat?.id || 0) % colors.length - 1] || 'bg-gradient-to-br from-gray-500 to-gray-700'
             )}>
-              {permitType?.icon ? (
-                <permitType.icon className="w-9 h-9" />
+              {icons[(formatSurat?.id || 0) % icons.length - 1] ? (
+                <Icon className="w-9 h-9" />
               ) : (
                 <FileText className="w-9 h-9" />
               )}
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">
-                Ajukan {permitType?.title || 'Perizinan Usaha'}
+                Ajukan {formatSurat?.nama || 'Perizinan Usaha'}
               </h1>
               <p className="text-gray-600 max-w-2xl">
-                {permitType?.description || 'Silakan lengkapi formulir di bawah ini dengan data yang valid dan lengkap untuk proses pengajuan perizinan.'}
+                {formatSurat?.deskripsi || 'Silakan lengkapi formulir di bawah ini dengan data yang valid dan lengkap untuk proses pengajuan perizinan.'}
               </p>
             </div>
           </div>
@@ -306,14 +320,9 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
               <div className="space-y-8">
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {fields.map((key) => {
-                    const field = permitFieldMap[key];
-                    if (!field) return null;
-                    
-                    const error = errors[field.name as keyof typeof errors];
-                    
+                  {formatSurat?.form?.map((field, index) => {
                     return (
-                      <div key={key} className="space-y-2">
+                      <div key={field.name} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
                             {field.label}
@@ -322,29 +331,29 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                             <span className="text-xs text-red-500">Wajib diisi</span>
                           )}
                         </div>
-                        
                         {field.type === 'select' && field.options ? (
                           <Select
-                            value={data[field.name] as string || ''}
+                          // dont forget to change
+                            value={''}
                             onValueChange={(value) => handleSelectChange(field.name, value)}
                             disabled={isSubmitting}
                           >
                             <SelectTrigger 
                               className={cn(
                                 'w-full h-11',
-                                error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                                // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                               )}
                             >
-                              <SelectValue placeholder={`Pilih ${field.label.toLowerCase()}`} />
+                              <SelectValue placeholder={`Pilih ${field?.label || ''}`} />
                             </SelectTrigger>
                             <SelectContent>
                               {field.options.map((option) => (
                                 <SelectItem 
-                                  key={option.value} 
-                                  value={option.value}
+                                  key={option} 
+                                  value={option}
                                   className="text-gray-700"
                                 >
-                                  {option.label}
+                                  {option}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -353,13 +362,14 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                           <Textarea
                             id={field.name}
                             name={field.name}
-                            value={data[field.name] as string || ''}
+                            // this too
+                            value={''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
                             className={cn(
                               'min-h-[120px] text-sm',
-                              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                              // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                             )}
                           />
                         ) : (
@@ -367,20 +377,20 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                             id={field.name}
                             name={field.name}
                             type={field.type}
-                            value={data[field.name] as string || ''}
+                            value={''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
                             className={cn(
                               'h-11',
-                              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                              // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                             )}
                           />
                         )}
                         
-                        {error && (
+                        {/* {error && (
                           <p className="text-sm text-red-600 mt-1">{error}</p>
-                        )}
+                        )} */}
                       </div>
                     );
                   })}
@@ -390,33 +400,38 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                 <div className="border-t border-gray-200 pt-6 md:col-span-2">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Berkas Pendukung</h3>
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="file" className="text-sm font-medium text-gray-700">
-                          Unggah Dokumen
-                        </Label>
-                        <span className="text-xs text-red-500">Wajib diisi</span>
-                      </div>
-                      <Input
-                        id="file"
-                        name="file"
-                        type="file"
-                        onChange={handleFileChange}
-                        disabled={isSubmitting}
-                        accept=".pdf,.doc,.docx,image/*"
-                        className={cn(
-                          'border-dashed border-2',
-                          errors.file ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-                        )}
-                      />
-                      {errors.file && (
-                        <p className="text-sm text-red-600 mt-1">{errors.file}</p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
-                      </p>
-                    </div>
-                    
+                      {
+                        formatSurat?.syarat?.map((row, index) => {
+                          return (
+                            <div className="space-y-2">
+                              <div key={index} className='flex items-center justify-between'>
+                                <Label htmlFor="file" className="text-sm font-medium text-gray-700">
+                                  {row.nama}
+                                </Label>
+                                <span className="text-xs text-red-500">Wajib diisi</span>
+                              </div>
+                              <Input
+                                id="file"
+                                name="file"
+                                type="file"
+                                onChange={handleFileChange}
+                                disabled={isSubmitting}
+                                accept=".pdf,.doc,.docx,image/*"
+                                className={cn(
+                                  'border-dashed border-2',
+                                  // errors.file ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                                )}
+                              />
+                              {/* {errors.file && (
+                                <p className="text-sm text-red-600 mt-1">{errors.file}</p>
+                              )} */}
+                              <p className="text-xs text-gray-500 mt-1">
+                                Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
+                              </p>
+                            </div>
+                          );
+                        })
+                      }
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-gray-700">
                         Tanggal Pengajuan
@@ -460,9 +475,9 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                   <Button 
                     type="submit" 
                     className="w-full sm:w-auto px-8 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    disabled={isSubmitting || processing}
+                    // disabled={isSubmitting || processing}
                   >
-                    {isSubmitting || processing ? (
+                    {/* {isSubmitting || processing ? ( */}
                       <div className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -470,7 +485,7 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
                         </svg>
                         Mengirim...
                       </div>
-                    ) : 'Ajukan Sekarang'}
+                    {/* ) : 'Ajukan Sekarang'} */}
                   </Button>
                 </div>
               </div>

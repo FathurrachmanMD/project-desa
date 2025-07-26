@@ -17,3 +17,4 @@ Route::put('/penduduk/{id}', [PendudukController::class, 'update']);
 Route::delete('/penduduk/{id}', [PendudukController::class, 'destroy']);
 
 Route::get('/form-usaha', [FormUsahaController::class, 'index']);
+Route::get('/form-usaha/form/{slug}', [FormUsahaController::class, 'show']);
