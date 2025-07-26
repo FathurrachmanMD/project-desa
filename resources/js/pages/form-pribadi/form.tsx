@@ -133,20 +133,125 @@ const permitFieldMap: Record<string, {
   inputType?: 'select';
   options?: { value: string; label: string }[];
   placeholder?: string;
+  pattern?: string;
+  title?: string;
 }> = {
+  // SKCK Fields
   nama_pemohon: { 
     label: 'Nama Pemohon', 
     name: 'nama_pemohon', 
     type: 'text', 
     required: true,
-    placeholder: 'Masukkan nama lengkap pemohon'
+    placeholder: 'Nama lengkap sesuai KTP'
   },
   nik: { 
     label: 'NIK', 
     name: 'nik', 
     type: 'text', 
     required: true,
-    placeholder: 'Masukkan NIK sesuai KTP'
+    placeholder: 'Nomor KTP',
+    pattern: '^[0-9]{16}$',
+    title: 'NIK harus terdiri dari 16 digit angka'
+  },
+  tujuan_skck: {
+    label: 'Tujuan SKCK',
+    name: 'tujuan_skck',
+    type: 'select',
+    required: true,
+    options: dropdownOptions.tujuan_skck,
+    placeholder: 'Pilih tujuan pembuatan SKCK'
+  },
+  tempat_tujuan_skck: {
+    label: 'Tempat Tujuan SKCK',
+    name: 'tempat_tujuan_skck',
+    type: 'text',
+    required: true,
+    placeholder: 'Nama Polsek tujuan'
+  },
+  
+  // Domisili Fields
+  alamat_domisili: {
+    label: 'Alamat Domisili',
+    name: 'alamat_domisili',
+    type: 'textarea',
+    required: true,
+    placeholder: 'Alamat tinggal saat ini'
+  },
+  lama_tinggal: {
+    label: 'Lama Tinggal',
+    name: 'lama_tinggal',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: sejak tahun 2020'
+  },
+  rt_rw: {
+    label: 'RT/RW',
+    name: 'rt_rw',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: 001/002'
+  },
+  
+  // Izin Tinggal Pendatang Fields
+  alamat_asal: {
+    label: 'Alamat Asal',
+    name: 'alamat_asal',
+    type: 'text',
+    required: true,
+    placeholder: 'Alamat asal daerah/kota'
+  },
+  tujuan_pindah: {
+    label: 'Tujuan Pindah',
+    name: 'tujuan_pindah',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: Bekerja, sekolah, dll'
+  },
+  rt_rw_tujuan: {
+    label: 'RT/RW Tujuan',
+    name: 'rt_rw_tujuan',
+    type: 'text',
+    required: true,
+    placeholder: 'RT/RW lokasi tujuan tinggal'
+  },
+  
+  // Izin Keluar Negeri Fields
+  tujuan_keberangkatan: {
+    label: 'Tujuan Keberangkatan',
+    name: 'tujuan_keberangkatan',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: TKI, Umrah, Studi, dll'
+  },
+  negara_tujuan: {
+    label: 'Negara Tujuan',
+    name: 'negara_tujuan',
+    type: 'text',
+    required: true,
+    placeholder: 'Negara yang dituju'
+  },
+  periode_waktu: {
+    label: 'Periode / Waktu',
+    name: 'periode_waktu',
+    type: 'text',
+    required: true,
+    placeholder: 'Estimasi waktu berangkat dan durasi'
+  },
+  
+  // Keterangan Tidak Bekerja Fields
+  alasan_tidak_bekerja: {
+    label: 'Alasan Tidak Bekerja',
+    name: 'alasan_tidak_bekerja',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: Sakit, pengangguran, dll'
+  },
+  tujuan_surat: {
+    label: 'Tujuan Surat',
+    name: 'tujuan_surat',
+    type: 'text',
+    required: true,
+    placeholder: 'Contoh: Bantuan sosial, KIS, dll'
   },
   jenis_kelamin: { 
     label: 'Jenis Kelamin', 
@@ -361,81 +466,43 @@ const permitFieldMap: Record<string, {
 };
 
 const permitFields: Record<string, string[]> = {
+  // Surat Pengantar SKCK
   skck: [
-    'nama',
+    'nama_pemohon',
     'nik',
-    'jenis_kelamin',
-    'tempat_lahir',
-    'tanggal_lahir',
-    'agama',
-    'status_perkawinan',
-    'pendidikan_terakhir',
-    'alamat',
-    'tujuan_skck'
+    'tujuan_skck',
+    'tempat_tujuan_skck'
   ],
+  
+  // Surat Keterangan Domisili
   domisili: [
-    'nama',
-    'nik',
-    'jenis_kelamin',
-    'tempat_lahir',
-    'tanggal_lahir',
-    'agama',
-    'status_perkawinan',
-    'pendidikan_terakhir',
-    'alamat',
-    'status_kepemilikan_rumah',
-    'lama_tinggal'
-  ],
-  'izin-tinggal': [
-    'nama',
-    'nik',
-    'jenis_kelamin',
-    'tempat_lahir',
-    'tanggal_lahir',
-    'agama',
-    'status_perkawinan',
-    'pendidikan_terakhir',
-    'alamat_asal',
+    'nama_pemohon',
     'alamat_domisili',
+    'lama_tinggal',
+    'rt_rw'
+  ],
+  
+  // Surat Izin Tinggal Pendatang
+  'izin-tinggal': [
+    'nama_pemohon',
+    'alamat_asal',
     'tujuan_pindah',
-    'lama_tinggal'
+    'rt_rw_tujuan'
   ],
+  
+  // Surat Izin Keluar Negeri
   'izin-keluar-negeri': [
-    'nama',
-    'nik',
-    'jenis_kelamin',
-    'tempat_lahir',
-    'tanggal_lahir',
-    'agama',
-    'status_perkawinan',
-    'pendidikan_terakhir',
-    'alamat',
-    'tujuan_keluar_negeri',
-    'negara_tujuan',
-    'tgl_berangkat',
-    'tgl_kembali',
+    'nama_pemohon',
     'tujuan_keberangkatan',
-    'nama_kontak_darurat',
-    'telp_kontak_darurat',
-    'hubungan_kontak_darurat'
+    'negara_tujuan',
+    'periode_waktu'
   ],
+  
+  // Surat Keterangan Tidak Bekerja
   'keterangan-tidak-kerja': [
-    'nama',
-    'nik',
-    'jenis_kelamin',
-    'tempat_lahir',
-    'tanggal_lahir',
-    'agama',
-    'status_perkawinan',
-    'pendidikan_terakhir',
-    'alamat',
+    'nama_pemohon',
     'alasan_tidak_bekerja',
-    'tujuan_pembuatan_surat',
-    'terakhir_bekerja',
-    'nama_perusahaan_terakhir',
-    'jabatan_terakhir',
-    'lama_bekerja',
-    'alasan_berhenti'
+    'tujuan_surat'
   ]
 };
 
