@@ -52,6 +52,49 @@ class SuratController extends Controller
         ], 200);
     }
 
+    public function getByFormatId(Request $request)
+    {
+        $surats = Surat::with(['format', 'penduduk']) // tambahkan penduduk di sini
+            ->whereHas('format', function ($query) use ($request) {
+                $query->where('format_id', $request->format_id);
+            })
+            ->latest()
+            ->get()
+            ->map(function ($surat) {
+                $formIsian = $surat->format->form_isian ?? [];
+                $suratForm = $surat->form ?? [];
+
+                // Extract 'name' values from the form_isian array of objects
+                $formIsianKeys = [];
+                foreach ($formIsian as $item) {
+                    if (isset($item['name'])) {
+                        $formIsianKeys[] = $item['name'];
+                    }
+                }
+
+                // Create a default form array with all expected keys set to null
+                $defaultForm = array_fill_keys($formIsianKeys, null);
+
+                // Merge so missing fields from form_isian are included with null
+                // existing values from suratForm will override nulls from defaultForm
+                $surat->form = array_merge($defaultForm, $suratForm);
+
+                // Tambahkan nama penduduk (jika ada)
+                $surat->nama_penduduk = $surat->penduduk->nama ?? null;
+
+                return $surat;
+            });
+
+        return response()->json([
+            'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
+            'total' => $surats->count(),
+            'diproses' => $surats->where('status', 'diproses')->count(),
+            'disetujui' => $surats->where('status', 'disetujui')->count(),
+            'ditolak' => $surats->where('status', 'ditolak')->count(),
+            'data' => $surats
+        ], 200);
+    }
+
     public function store(Request $request, $slug)
     {
         try {
@@ -122,53 +165,9 @@ class SuratController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        try {
-            $surat = Surat::with('format')->findOrFail($id);
-            $surat->syarat = $surat->getSyarat();
-            return response()->json($surat, 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function updateStatus(Request $request, $id) {
-        try {
-            $validated = $request->validate([
-                'status'        => 'in:diproses,disetujui,ditolak,dicetak',
-            ]);
-
-            $surat = Surat::findOrFail($id);
-
-            $updateData = $validated;
-            $updateData['updated_by'] = Auth::id();
-            $surat->status = $request->status;
-            $surat->save();
-
-            return response()->json([
-                'message' => 'Surat berhasil diperbarui',
-                'data' => $surat
-            ], 200);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Validasi gagal',
-                'errors'  => $e->errors()
-            ], 422);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => "Surat dengan ID '{$id}' tidak ditemukan"
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        
     }
 
     public function update(Request $request, $id)

@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-use App\Models\SyaratSurat;
-
 class Surat extends Model
 {
     use HasFactory;
@@ -30,23 +28,6 @@ class Surat extends Model
         'syarat' => 'array',
     ];
 
-    public function getSyarat()
-    {
-        $result = [];
-
-        foreach ($this->syarat as $id => $href) {
-            $syarat = SyaratSurat::find($id);
-            if ($syarat) {
-                $result[] = [
-                    'nama' => $syarat->nama,
-                    'href' => $href,
-                ];
-            }
-        }
-
-        return $result;
-    }
-
     public function makePDF()
     {
         $template = $this->format->template;
@@ -63,7 +44,7 @@ class Surat extends Model
     // Relasi ke Penduduk
     public function penduduk()
     {
-        return $this->belongsTo(Penduduk::class);
+        return $this->belongsTo(\App\Models\Penduduk::class, 'penduduk_id');
     }
 
     // Relasi ke FormatSurat
