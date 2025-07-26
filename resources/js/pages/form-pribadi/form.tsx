@@ -439,25 +439,18 @@ const permitFields: Record<string, string[]> = {
   ]
 };
 
-interface BusinessPermitFormProps {
+interface PersonalPermitFormProps {
   type: string;
 }
 
-export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
-  const { data, setData, post, processing, errors, reset } = useForm({
-    type,
-    file: null as File | null,
-    ...Object.fromEntries(
-      Object.values(permitFieldMap).map(field => [field.name, ''])
-    )
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
-
+export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
+  // Get the permit type details
+  const permitType = permitTypes[type as keyof typeof permitTypes];
   
   // Initialize form data with all possible fields
   const initialFormData: FormData = {
+    type,
+    file: null as File | null,
     nama: '',
     nik: '',
     jenis_kelamin: '',
@@ -489,9 +482,14 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
     jabatan_terakhir: '',
     lama_bekerja: '',
     alasan_berhenti: '',
+    ...Object.fromEntries(
+      Object.values(permitFieldMap).map(field => [field.name, ''])
+    )
   };
 
-  const { data, setData, post, processing } = useForm(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+  const { data, setData, post, processing, errors, reset } = useForm(initialFormData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -614,10 +612,11 @@ export default function BusinessPermitForm({ type }: BusinessPermitFormProps) {
               <div className="space-y-8">
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {fields.map((key) => {
-                    const field = permitFieldMap[key];
+                  {permitFields[type]?.map((key: string) => {
+                    const field = permitFieldMap[key as keyof typeof permitFieldMap];
                     if (!field) return null;
                     
+                    const permitType = permitTypes[type as keyof typeof permitTypes];
                     const error = errors[field.name as keyof typeof errors];
                     
                     return (

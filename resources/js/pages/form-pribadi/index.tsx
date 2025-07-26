@@ -122,7 +122,7 @@ export default function FormPribadi() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    <Link href={`/form-usaha/form/${permit.id}`}>
+                                    <Link href={`/form-pribadi/form/${permit.id}`}>
                                         <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
                                             <CardHeader className="space-y-4">
                                                 <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>

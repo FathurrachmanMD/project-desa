@@ -227,7 +227,7 @@ export default function Landing() {
                         }} />
                     </div>
 
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <div className="mt-7 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                         <div className="max-w-4xl mx-auto">
                             <FadeInView direction="up" delay={0.2}>
                                 <motion.div
@@ -235,9 +235,6 @@ export default function Landing() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.8, delay: 0.2 }}
                                 >
-                                    <Badge className="mb-6 bg-[#1E4359]/10 text-[#1E4359] border-[#1E4359]/20 hover:bg-[#1E4359]/15">
-                                        🚀 Pelayanan Digital Terdepan
-                                    </Badge>
                                 </motion.div>
                             </FadeInView>
 
