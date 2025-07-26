@@ -54,10 +54,10 @@ export default function FormPribadi() {
 
             <Navbar />
             {/* Section: Perizinan Usaha Modern */}
-            <section className="bg-white w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
+            <section className="bg-white dark:bg-black w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
                 <div className="max-w-4xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Pribadi</h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan pribadi digital yang mudah, cepat, dan transparan untuk mendukung pelaku pribadi di Desa Drawati.</p>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] dark:text-white mb-2">Perizinan Pribadi</h2>
+                    <p className="text-gray-600 dark:text-white text-lg max-w-2xl mx-auto">Layanan perizinan pribadi digital yang mudah, cepat, dan transparan untuk mendukung pelaku pribadi di Desa Drawati.</p>
                 </div>
             </section>
             <div className="min-h-screen">

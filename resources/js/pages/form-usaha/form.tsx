@@ -150,7 +150,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
   
         // Success handling here
         console.log("Submitted:", response.data);
-        showToast.sucess("Data Berhasil Disimpan");
+        showToast.success("Data Berhasil Disimpan");
       } catch (error) {
         // Error handling here
         console.error("Submission failed:", error);

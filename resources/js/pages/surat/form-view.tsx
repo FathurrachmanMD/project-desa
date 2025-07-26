@@ -61,7 +61,7 @@ const getCurrentDate = () => {
   return now.toISOString().slice(0, 10);
 };
 
-interface PersonalPermitFormProps {
+interface PermitFormProps {
   id: number;
 }
 
@@ -76,7 +76,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function PersonalPermitForm({ id }: PersonalPermitFormProps) {
+export default function PermitForm({ id }: PermitFormProps) {
   const API_URL = import.meta.env.VITE_API_URL;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
