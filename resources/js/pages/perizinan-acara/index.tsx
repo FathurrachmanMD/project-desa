@@ -141,10 +141,10 @@ export default function PerizinanUsaha() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Manajemen Perizinan Usaha
+              Manajemen Perizinan Acara
             </h1>
             <p className="text-muted-foreground mt-1">
-              Kelola semua jenis perizinan usaha dalam satu dashboard
+              Kelola semua jenis perizinan acara dalam satu dashboard
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export default function PerizinanUsaha() {
           </CardHeader>
           <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 w-full mb-8">
+              <TabsList className="grid grid-cols-3 w-full mb-8">
                 {permitTypes.map((permit) => {
                   const Icon = permitIcons[permit.key as keyof typeof permitIcons];
                   // permit data is array of all surat in one kategori
