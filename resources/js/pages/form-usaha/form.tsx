@@ -177,9 +177,10 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
   
   
   const handleSubmit = async (e: React.FormEvent) => {
-    //   e.preventDefault();
-    //   setIsSubmitting(true);
-    
+      e.preventDefault();
+      setIsSubmitting(true);
+
+      console.log(data);
     //   try {
       //     await post(route('form-usaha.submit'), {
         //       onSuccess: () => {
@@ -209,21 +210,21 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                         //     );
                         //     setIsSubmitting(false);
                         //   }
-                      };
+    };
                       
-                      const API_URL = import.meta.env.VITE_API_URL;
-                      
-                      const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
-                      const [Icon, setIcon] = useState<ElementType>(icons[0]);
-                      
-                      const fetchFormatSurat = async () => {
-                        try {
-                          const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
-                          console.log(response);
-                          setFormatSurat(response.data);
-                          setIcon(icons[response.data.id % icons.length]);
-                        } catch (error) {
-                          console.error('Error fetching data:', error);
+    const API_URL = import.meta.env.VITE_API_URL;
+    
+    const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
+    const [Icon, setIcon] = useState<ElementType>(icons[0]);
+    
+    const fetchFormatSurat = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
+        console.log(response);
+        setFormatSurat(response.data);
+        setIcon(icons[response.data.id % icons.length]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     }
     
@@ -248,10 +249,16 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
       }));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      //   if (e.target.files && e.target.files[0]) {
-      //     setData('file', e.target.files[0]);
-      //   }
+    const handleFileChange = (id: number | string, e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0] ?? null;
+
+      setData((prev) => ({
+        ...prev,
+        file: {
+          ...prev.file,
+          [id]: file,
+        },
+      }));
     };
     
     return (
@@ -403,7 +410,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                                 id="file"
                                 name="file"
                                 type="file"
-                                onChange={handleFileChange}
+                                onChange={e => handleFileChange(row.id, e)}
                                 disabled={isSubmitting}
                                 accept=".pdf,.doc,.docx,image/*"
                                 className={cn(
@@ -464,9 +471,9 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                   <Button 
                     type="submit" 
                     className="w-full sm:w-auto px-8 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    // disabled={isSubmitting || processing}
+                    disabled={isSubmitting}
                   >
-                    {/* {isSubmitting || processing ? ( */}
+                    {isSubmitting ? (
                       <div className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -474,7 +481,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                         </svg>
                         Mengirim...
                       </div>
-                    {/* ) : 'Ajukan Sekarang'} */}
+                    ) : 'Ajukan Sekarang'}
                   </Button>
                 </div>
               </div>
