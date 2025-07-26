@@ -1,5 +1,7 @@
+// index.tsx
+
 import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 // Import komponen UI yang diperlukan
 import { Button } from '@/components/ui/button';
@@ -9,10 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// Import toast dan Toaster
 import toast, { Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 // Import Ikon
-import { Utensils, Coffee, HandMetal, Package, MessageCircle, PlusCircle } from 'lucide-react';
+import { Utensils, Coffee, HandMetal, Package, MessageCircle, PlusCircle, ChevronDown, 
+    Building,
+    FileText,
+    Briefcase,
+    Calendar,
+    TreePine,
+} from 'lucide-react';
 
 // Interface dan Data Produk (Tidak ada perubahan)
 interface Product {
@@ -29,7 +40,7 @@ interface Product {
 const initialProducts: Product[] = [
     {
         id: 1,
-        imgSrc: '/images/beras.jpg',
+        imgSrc: 'https://fahum.umsu.ac.id/blog/wp-content/uploads/2024/08/10-manfaat-beras-untuk-kecantikan-750x375.webp',
         title: 'Beras Pulen Organik',
         price: 'Rp 16.000 / L',
         category: 'pangan',
@@ -49,7 +60,7 @@ const initialProducts: Product[] = [
     },
     {
         id: 3,
-        imgSrc: '/images/kopi-luwak.jpg',
+        imgSrc: 'https://dikemas.com/uploads/2020/08/dikemas-ria-dia-3.jpg',
         title: 'Kopi Luwak Asli Drawati',
         price: 'Rp 25.000 / 100g',
         category: 'minuman',
@@ -67,6 +78,26 @@ const initialProducts: Product[] = [
         sellerPhone: '6281234567890',
         description: 'Madu murni yang diambil langsung dari hutan di sekitar Desa Drawati. Memiliki banyak khasiat untuk kesehatan dan stamina.',
     },
+    {
+        id: 5,
+        title: 'Madu Hutan Murni',
+        imgSrc: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=1974&auto=format&fit=crop',
+        price: 'Rp 85.000 / botol',
+        category: 'pangan',
+        sellerName: 'Kelompok Tani Makmur',
+        sellerPhone: '6281234567890',
+        description: 'Madu murni yang diambil langsung dari hutan di sekitar Desa Drawati. Memiliki banyak khasiat untuk kesehatan dan stamina.',
+    },
+    {
+        id: 6,
+        title: 'Madu Hutan Murni',
+        imgSrc: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=1974&auto=format&fit=crop',
+        price: 'Rp 85.000 / botol',
+        category: 'pangan',
+        sellerName: 'Kelompok Tani Makmur',
+        sellerPhone: '6281234567890',
+        description: 'Madu murni yang diambil langsung dari hutan di sekitar Desa Drawati. Memiliki banyak khasiat untuk kesehatan dan stamina.',
+    },
 ];
 
 type NewProductForm = Partial<Omit<Product, 'id'>>;
@@ -74,6 +105,18 @@ type NewProductForm = Partial<Omit<Product, 'id'>>;
 const LapakUsaha: React.FC = () => {
     
     const [activeCategory, setActiveCategory] = useState<'semua' | 'pangan' | 'minuman' | 'kerajinan'>('semua');
+
+    const scrollToSection = (sectionId: string) => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const perizinanServices = [
+        { name: "Perizinan Pribadi", href: "/login", icon: FileText },
+        { name: "Perizinan Bangunan", href: "/login", icon: Building },
+        { name: "Perizinan Acara", href: "/login", icon: Calendar },
+        { name: "Perizinan Usaha", href: "/login", icon: Briefcase },
+        { name: "Perizinan Pertanian", href: "/login", icon: TreePine },
+    ];
     
     const initialFormState: NewProductForm = {
         title: '',
@@ -110,12 +153,112 @@ const LapakUsaha: React.FC = () => {
 
     return (
         <>
+            {/* Navigation */}
+                <motion.nav 
+                    className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
+                    initial={{ y: -100 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                >
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            {/* Logo */}
+                            <motion.div 
+                                className="flex items-center space-x-3"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <div className="w-10 h-10 bg-gradient-to-br from-[#1E4359] to-[#2A5B73] rounded-xl flex items-center justify-center">
+                                    <img 
+                                        src="/logo-drawati.png" 
+                                        alt="Logo Desa Drawati" 
+                                        className="w-6 h-6 object-contain"
+                                    />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-[#1E4359]">Desa Drawati</h2>
+                                </div>
+                            </motion.div>
+
+                            {/* Navigation Links */}
+                            <div className="hidden md:flex items-center space-x-8">
+                                <button 
+                                    onClick={() => scrollToSection('home')}
+                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                >
+                                    Beranda
+                                </button>
+                                
+                                {/* Perizinan Dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium flex items-center space-x-1">
+                                            <span>Perizinan</span>
+                                            <ChevronDown className="w-4 h-4" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg rounded-lg p-2">
+                                        {perizinanServices.map((service, index) => (
+                                            <DropdownMenuItem key={index} asChild>
+                                                <Link 
+                                                    href={service.href}
+                                                    className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-[#1E4359]/5 transition-colors cursor-pointer"
+                                                >
+                                                    <service.icon className="w-4 h-4 text-[#1E4359]" />
+                                                    <span className="text-gray-700">{service.name}</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <button 
+                                    onClick={() => scrollToSection('store')}
+                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                >
+                                    Lapak
+                                </button>
+                                <button 
+                                    onClick={() => scrollToSection('services')}
+                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                >
+                                    Layanan
+                                </button>
+                                <button 
+                                    onClick={() => scrollToSection('about')}
+                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                >
+                                    Tentang
+                                </button>
+                                <button 
+                                    onClick={() => scrollToSection('contact')}
+                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                >
+                                    Kontak
+                                </button>
+                            </div>
+
+                            {/* Auth Buttons */}
+                            <div className="flex items-center space-x-4">
+                                <Link href="/login">
+                                    <Button variant="ghost" size="sm" className="text-[#1E4359] hover:bg-[#1E4359]/5">
+                                        Masuk
+                                    </Button>
+                                </Link>
+                                <Link href="/register">
+                                    <Button size="sm" className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
+                                        Daftar
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </motion.nav>
             <Head title="Lapak Usaha Desa Drawati" />
             
             <main className="bg-gray-50">
                 <section
                     className="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-center text-white"
-                    style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
+                    style={{ backgroundImage: "url('https://asset-2.tstatic.net/wartakota/foto/bank/images/Suasana-persawahan-di-Desa-Drawati-Paseh-Kabupaten-Bandung.jpg')" }}
                 >
                     <div className="absolute inset-0 bg-black/50"></div>
                     <div className="relative z-10 px-4">
@@ -162,7 +305,7 @@ const LapakUsaha: React.FC = () => {
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[600px]">
                                     <form>
-                                        {/* <DialogHeader>
+                                        <DialogHeader>
                                             <DialogTitle className="text-2xl">Form Pengajuan Produk Baru</DialogTitle>
                                             <DialogDescription>
                                                 Isi detail produk Anda. Data akan diperiksa oleh admin sebelum ditampilkan.
@@ -206,9 +349,9 @@ const LapakUsaha: React.FC = () => {
                                                 <Label htmlFor="imgSrc" className="text-right">Link Gambar</Label>
                                                 <Input id="imgSrc" name="imgSrc" value={newProduct.imgSrc} onChange={handleInputChange} placeholder="https://url-gambar-produk.com/gambar.jpg" className="col-span-3" required />
                                             </div>
-                                        </div> */}
+                                        </div>
                                         <DialogFooter>
-                                            <Button onClick={() => toast.success('Pengajuan produk berhasil dikirim!')}>
+                                            <Button>
                                                 Kirim untuk Persetujuan
                                             </Button>
                                         </DialogFooter>
