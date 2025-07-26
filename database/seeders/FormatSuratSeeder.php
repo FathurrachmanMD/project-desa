@@ -57,23 +57,37 @@ class FormatSuratSeeder extends Seeder
 
             ['kategori_id' => 4, 'nama' => 'Surat Pengantar SKCK', 'slug' => 'skck', 'deskripsi' => 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian', 
             'form_isian' => [
-                
+                ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
+                ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan Nomor Induk Kependudukan', 'type' => 'text', 'required' => true],
+                ['name' => 'tujuan_skck', 'label' => 'Tujuan SKCK', 'placeholder' => 'Masukkan Tujuan Pembuatan SKCK', 'type' => 'text', 'required' => true],
+                ['name' => 'tempat_tujuan', 'label' => 'Tempat Tujuan SKCK', 'placeholder' => 'Masukkan Tempat Tujuan', 'type' => 'text', 'required' => true]    
             ]],
             ['kategori_id' => 4, 'nama' => 'Surat Keterangan Domisili', 'slug' => 'domisili', 'deskripsi' => 'Surat keterangan tempat tinggal resmi', 
             'form_isian' => [
-                
+                ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
+                ['name' => 'alamat', 'label' => 'Alamat Domisili', 'placeholder' => 'Masukkan Alamat Domisili', 'type' => 'text', 'required' => true],
+                ['name' => 'lama_tinggal', 'label' => 'Lama Tinggal', 'placeholder' => 'Masukkan Lama Tinggal (misal: 2 tahun)', 'type' => 'text', 'required' => true],
+                ['name' => 'rt_rw', 'label' => 'RT/RW', 'placeholder' => 'Contoh: 04/09', 'type' => 'text', 'required' => true],    
             ]],
             ['kategori_id' => 4, 'nama' => 'Surat Izin Tinggal Pendatang', 'slug' => 'pendatang', 'deskripsi' => 'Surat izin tinggal untuk pendatang', 
             'form_isian' => [
-                
+                ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Pendatang', 'type' => 'text', 'required' => true],
+                ['name' => 'alamat_asal', 'label' => 'Alamat Asal', 'placeholder' => 'Masukkan Alamat Asal', 'type' => 'text', 'required' => true],
+                ['name' => 'tujuan_pindah', 'label' => 'Tujuan Pindah', 'placeholder' => 'Masukkan Tujuan Pindah', 'type' => 'text', 'required' => true],
+                ['name' => 'rt_rw_tujuan', 'label' => 'RT/RW Tujuan', 'placeholder' => 'Contoh: 01/05', 'type' => 'text', 'required' => true],    
             ]],
             ['kategori_id' => 4, 'nama' => 'Surat Izin Keluar Negeri', 'slug' => 'luar-negeri', 'deskripsi' => 'Surat izin untuk keperluan keluar negeri', 
             'form_isian' => [
-                
+                ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
+                ['name' => 'tujuan_keberangkatan', 'label' => 'Tujuan Keberangkatan', 'placeholder' => 'Misal: Studi, Liburan, dll.', 'type' => 'text', 'required' => true],
+                ['name' => 'negara_tujuan', 'label' => 'Negara Tujuan', 'placeholder' => 'Masukkan Negara Tujuan', 'type' => 'text', 'required' => true],
+                ['name' => 'periode', 'label' => 'Periode/Waktu', 'placeholder' => 'Masukkan Periode Keberangkatan', 'type' => 'text', 'required' => true],    
             ]],
             ['kategori_id' => 4, 'nama' => 'Surat Keterangan Tidak Bekerja', 'slug' => 'tidak-bekerja', 'deskripsi' => 'Surat keterangan status tidak bekerja', 
             'form_isian' => [
-                
+                ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
+                ['name' => 'alasan', 'label' => 'Alasan Tidak Bekerja', 'placeholder' => 'Masukkan Alasan Tidak Bekerja', 'type' => 'text', 'required' => true],
+                ['name' => 'tujuan_surat', 'label' => 'Tujuan Surat', 'placeholder' => 'Contoh: Bantuan Sosial', 'type' => 'text', 'required' => true],        
             ]],
 
             ['kategori_id' => 5, 'nama' => 'lahan'],
