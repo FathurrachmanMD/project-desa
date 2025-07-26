@@ -50,7 +50,7 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'jenis_usaha', 'label' => 'Jenis Usaha', 'placeholder' => 'Masukkan Jenis Usaha', 'type' => 'text', 'required' => true],
                 ['name' => 'tujuan', 'label' => 'Tujuan Pendaftaran NIB', 'placeholder' => 'Contoh: Legalitas Usaha', 'type' => 'text', 'required' => true],
             ]],
-            ['kategori_id' => 2, 'nama' => 'Izin Mendirikan Bangunan (IMB / PBG)', 'slug' => 'imb-pbg', 'deskripsi' => 'Perizinan untuk mendirikan bangunan baru',
+            ['kategori_id' => 2, 'nama' => 'Izin Mendirikan Bangunan (IMB / PBG)', 'slug' => 'imb', 'deskripsi' => 'Perizinan untuk mendirikan bangunan baru',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],
@@ -84,7 +84,7 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'tinggi_bangunan', 'label' => 'Tinggi Bangunan (meter)', 'placeholder' => 'Contoh: 10', 'type' => 'number', 'required' => true],
                 ['name' => 'jumlah_lantai', 'label' => 'Jumlah Lantai', 'placeholder' => 'Contoh: 2', 'type' => 'number', 'required' => true],
             ]],
-            ['kategori_id' => 2, 'nama' => 'Surat Tidak Sengketa Tanah', 'slug' => 'sengketa', 'deskripsi' => 'Surat pernyataan tidak adanya sengketa tanah',
+            ['kategori_id' => 2, 'nama' => 'Surat Tidak Sengketa Tanah', 'slug' => 'tidak-sengketa', 'deskripsi' => 'Surat pernyataan tidak adanya sengketa tanah',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda..', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda..', 'type' => 'text', 'required' => true, 'minLength' => 16, 'maxLength' => 16, 'pattern' => '/^\d{16}$/', 'inputMode' => 'numeric'],
@@ -159,42 +159,42 @@ class FormatSuratSeeder extends Seeder
                     ['name' => 'lokasi_fasilitas', 'label' => 'Lokasi Fasilitas', 'placeholder' => 'Masukkan Lokasi Fasilitas Desa', 'type' => 'text', 'required' => true]
             ]],
 
-            ['kategori_id' => 4, 'nama' => 'Surat Pengantar SKCK', 'slug' => 'skck', 'deskripsi' => 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian', 
+            ['kategori_id' => 4, 'nama' => 'Surat Pengantar SKCK', 'slug' => 'pengantar-skck', 'deskripsi' => 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian', 
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan Nomor Induk Kependudukan', 'type' => 'text', 'required' => true],
                 ['name' => 'tujuan_skck', 'label' => 'Tujuan SKCK', 'placeholder' => 'Masukkan Tujuan Pembuatan SKCK', 'type' => 'text', 'required' => true],
                 ['name' => 'tempat_tujuan', 'label' => 'Tempat Tujuan SKCK', 'placeholder' => 'Masukkan Tempat Tujuan', 'type' => 'text', 'required' => true]    
             ]],
-            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Domisili', 'slug' => 'domisili', 'deskripsi' => 'Surat keterangan tempat tinggal resmi', 
+            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Domisili', 'slug' => 'keterangan-domisili', 'deskripsi' => 'Surat keterangan tempat tinggal resmi', 
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'alamat', 'label' => 'Alamat Domisili', 'placeholder' => 'Masukkan Alamat Domisili', 'type' => 'text', 'required' => true],
                 ['name' => 'lama_tinggal', 'label' => 'Lama Tinggal', 'placeholder' => 'Masukkan Lama Tinggal (misal: 2 tahun)', 'type' => 'text', 'required' => true],
                 ['name' => 'rt_rw', 'label' => 'RT/RW', 'placeholder' => 'Contoh: 04/09', 'type' => 'text', 'required' => true],    
             ]],
-            ['kategori_id' => 4, 'nama' => 'Surat Izin Tinggal Pendatang', 'slug' => 'pendatang', 'deskripsi' => 'Surat izin tinggal untuk pendatang', 
+            ['kategori_id' => 4, 'nama' => 'Surat Izin Tinggal Pendatang', 'slug' => 'izin-tinggal-pendatang', 'deskripsi' => 'Surat izin tinggal untuk pendatang', 
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Pendatang', 'type' => 'text', 'required' => true],
                 ['name' => 'alamat_asal', 'label' => 'Alamat Asal', 'placeholder' => 'Masukkan Alamat Asal', 'type' => 'text', 'required' => true],
                 ['name' => 'tujuan_pindah', 'label' => 'Tujuan Pindah', 'placeholder' => 'Masukkan Tujuan Pindah', 'type' => 'text', 'required' => true],
                 ['name' => 'rt_rw_tujuan', 'label' => 'RT/RW Tujuan', 'placeholder' => 'Contoh: 01/05', 'type' => 'text', 'required' => true],    
             ]],
-            ['kategori_id' => 4, 'nama' => 'Surat Izin Keluar Negeri', 'slug' => 'luar-negeri', 'deskripsi' => 'Surat izin untuk keperluan keluar negeri', 
+            ['kategori_id' => 4, 'nama' => 'Surat Izin Keluar Negeri', 'slug' => 'izin-keluar-negeri', 'deskripsi' => 'Surat izin untuk keperluan keluar negeri', 
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'tujuan_keberangkatan', 'label' => 'Tujuan Keberangkatan', 'placeholder' => 'Misal: Studi, Liburan, dll.', 'type' => 'text', 'required' => true],
                 ['name' => 'negara_tujuan', 'label' => 'Negara Tujuan', 'placeholder' => 'Masukkan Negara Tujuan', 'type' => 'text', 'required' => true],
                 ['name' => 'periode', 'label' => 'Periode/Waktu', 'placeholder' => 'Masukkan Periode Keberangkatan', 'type' => 'text', 'required' => true],    
             ]],
-            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Tidak Bekerja', 'slug' => 'tidak-bekerja', 'deskripsi' => 'Surat keterangan status tidak bekerja', 
+            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Tidak Bekerja', 'slug' => 'keterangan-tidak-bekerja', 'deskripsi' => 'Surat keterangan status tidak bekerja', 
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Lengkap', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'alasan', 'label' => 'Alasan Tidak Bekerja', 'placeholder' => 'Masukkan Alasan Tidak Bekerja', 'type' => 'text', 'required' => true],
                 ['name' => 'tujuan_surat', 'label' => 'Tujuan Surat', 'placeholder' => 'Contoh: Bantuan Sosial', 'type' => 'text', 'required' => true],        
             ]],
 
-            ['kategori_id' => 5, 'nama' => 'Izin Pengelolaan Lahan', 'slug' => 'lahan', 'deskripsi' => 'Izin pengelolaan lahan desa atau tanah negara untuk pertanian',
+            ['kategori_id' => 5, 'nama' => 'Izin Pengelolaan Lahan', 'slug' => 'pengelolaan-lahan', 'deskripsi' => 'Izin pengelolaan lahan desa atau tanah negara untuk pertanian',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda', 'type' => 'text', 'required' => true],
@@ -205,7 +205,7 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'durasi_jumlah', 'label' => 'Durasi Pengelolaan', 'placeholder' => 'Contoh: 3', 'type' => 'number', 'required' => true],
                 ['name' => 'durasi_satuan', 'label' => 'Satuan Durasi', 'type' => 'select', 'options' => ['Bulan', 'Tahun'], 'required' => true],
             ]],
-            ['kategori_id' => 5, 'nama' => 'Permohonan Bantuan Pertanian', 'slug' => 'bantuan', 'deskripsi' => 'Permohonan bantuan pupuk, bibit, atau alat pertanian',
+            ['kategori_id' => 5, 'nama' => 'Permohonan Bantuan Pertanian', 'slug' => 'permohonan-bantuan', 'deskripsi' => 'Permohonan bantuan pupuk, bibit, atau alat pertanian',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda', 'type' => 'text', 'required' => true],
@@ -215,7 +215,7 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'tujuan', 'label' => 'Tujuan Penggunaan', 'placeholder' => 'Contoh: Tanaman Padi', 'type' => 'text', 'required' => true],
                 ['name' => 'pengalaman', 'label' => 'Pengalaman Bertani', 'type' => 'select', 'options' => ['Kurang dari 1 tahun', '1-3 tahun', 'Lebih dari 3 tahun'], 'required' => true],        
             ]],
-            ['kategori_id' => 5, 'nama' => 'Surat Keterangan Petani', 'slug' => 'keterangan', 'deskripsi' => 'Surat keterangan sebagai petani atau buruh tani',
+            ['kategori_id' => 5, 'nama' => 'Surat Keterangan Petani', 'slug' => 'surat-keterangan-petani', 'deskripsi' => 'Surat keterangan sebagai petani atau buruh tani',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda', 'type' => 'text', 'required' => true],
@@ -224,7 +224,7 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'komoditas', 'label' => 'Komoditas yang Ditanam', 'placeholder' => 'Contoh: Padi, Jagung', 'type' => 'text', 'required' => true],
                 ['name' => 'lama_bertani', 'label' => 'Lama Menjadi Petani', 'placeholder' => 'Contoh: 5 Tahun', 'type' => 'text', 'required' => true],        
             ]],
-            ['kategori_id' => 5, 'nama' => 'Surat Izin Irigasi', 'slug' => 'irigasi', 'deskripsi' => 'Surat izin penggunaan air untuk keperluan pertanian',
+            ['kategori_id' => 5, 'nama' => 'Surat Izin Irigasi', 'slug' => 'surat-izin-irigasi', 'deskripsi' => 'Surat izin penggunaan air untuk keperluan pertanian',
             'form_isian' => [
                 ['name' => 'nama', 'label' => 'Nama Pemohon', 'placeholder' => 'Masukkan Nama Anda', 'type' => 'text', 'required' => true],
                 ['name' => 'nik', 'label' => 'NIK', 'placeholder' => 'Masukkan NIK Anda', 'type' => 'text', 'required' => true],
