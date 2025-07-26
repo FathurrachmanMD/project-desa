@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import './toast.css';
 
 @plugin 'tailwindcss-animate';
 

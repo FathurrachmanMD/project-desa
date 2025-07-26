@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
+
 Route::get('/', function () {
     return Inertia::render('landing');
 })->name('home');
@@ -59,6 +61,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('test-toast', function () {
         return Inertia::render('test-toast');
     })->name('test.toast');
+});
+
+Route::get('/lapak-usaha', function () {
+    return Inertia::render('lapak-usaha/index');
 });
 
 require __DIR__.'/settings.php';
