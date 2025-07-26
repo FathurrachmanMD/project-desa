@@ -1,162 +1,153 @@
 import { Head, Link } from '@inertiajs/react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { TreePine, Wheat, Droplets, Tractor, ArrowRight } from 'lucide-react';
+import { LandPlot, Sprout, Tractor, Droplets, FileText, ArrowRight } from 'lucide-react';
 
 const permitTypes = [
     {
-        id: 'saprodi',
-        title: 'Sarana Produksi Pertanian',
-        description: 'Permohonan bantuan sarana produksi pertanian seperti benih, pupuk, dan pestisida',
-        icon: Wheat,
-        color: 'bg-gradient-to-br from-green-600 to-emerald-500',
+        id: 'pengelolaan-lahan',
+        title: 'Izin Pengelolaan Lahan',
+        description: 'Izin pengelolaan lahan desa atau tanah negara untuk pertanian',
+        icon: LandPlot,
+        color: 'bg-gradient-to-br from-green-500 to-teal-500',
         requirements: [
             'Fotokopi KTP',
             'Fotokopi KK',
-            'Surat Pengantar dari Kelompok Tani',
-            'Surat Keterangan Lahan'
+            'Surat pengantar RT/RW',
+            'Surat pernyataan pengelolaan lahan',
+            'Denah lokasi lahan'
         ]
     },
     {
-        id: 'alsintan',
-        title: 'Alat dan Mesin Pertanian',
-        description: 'Permohonan bantuan alat dan mesin pertanian (ALSINTAN) untuk meningkatkan produktivitas',
+        id: 'bantuan-pertanian',
+        title: 'Permohonan Bantuan Pertanian',
+        description: 'Permohonan bantuan pupuk, bibit, atau alat pertanian',
+        icon: Sprout,
+        color: 'bg-gradient-to-br from-amber-500 to-orange-500',
+        requirements: [
+            'Fotokopi KTP',
+            'Fotokopi KK',
+            'Surat pengantar kelompok tani',
+            'Proposal permohonan bantuan',
+            'Surat pernyataan tanggung jawab'
+        ]
+    },
+    {
+        id: 'keterangan-petani',
+        title: 'Surat Keterangan Petani',
+        description: 'Surat keterangan sebagai petani atau buruh tani',
         icon: Tractor,
-        color: 'bg-gradient-to-br from-amber-600 to-orange-500',
-        requirements: [
-            'Proposal Permohonan',
-            'Fotokopi KTP dan KK',
-            'Surat Keterangan Kelompok Tani',
-            'Surat Pernyataan Tanggung Jawab Mutlak'
-        ]
-    },
-    {
-        id: 'bibit',
-        title: 'Bibit Tanaman',
-        description: 'Permohonan bantuan bibit tanaman pangan, hortikultura, atau perkebunan',
-        icon: TreePine,
-        color: 'bg-gradient-to-br from-lime-600 to-green-500',
+        color: 'bg-gradient-to-br from-blue-500 to-indigo-500',
         requirements: [
             'Fotokopi KTP',
-            'Surat Pengantar dari Kelompok Tani',
-            'Surat Pernyataan Lahan',
-            'Rencana Tanam'
+            'Fotokopi KK',
+            'Surat pengantar RT/RW',
+            'Surat pernyataan sebagai petani',
+            'Bukti kepemilikan lahan/sewa'
         ]
     },
     {
-        id: 'pupuk',
-        title: 'Pupuk Bersubsidi',
-        description: 'Permohonan pengajuan pupuk bersubsidi untuk petani',
+        id: 'izin-irigasi',
+        title: 'Surat Izin Irigasi',
+        description: 'Surat izin penggunaan air untuk keperluan pertanian',
         icon: Droplets,
-        color: 'bg-gradient-to-br from-blue-600 to-cyan-500',
+        color: 'bg-gradient-to-br from-cyan-500 to-blue-500',
         requirements: [
-            'Kartu Tani',
             'Fotokopi KTP',
-            'Surat Keterangan Lahan',
-            'Rekomendasi dari Penyuluh Pertanian'
+            'Fotokopi sertifikat lahan',
+            'Surat pengantar kelompok tani',
+            'Denah lokasi lahan',
+            'Rencana penggunaan air'
         ]
     }
 ];
 
 export default function FormPertanian() {
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Head title="Layanan Pertanian" />
+        <>
+            <Head title="Perizinan Pertanian - Desa Drawati" />
+
             <Navbar />
-            
-            <div className="container mx-auto px-4 py-8">
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Layanan Pertanian</h1>
-                    <p className="text-gray-600">Pilih layanan pertanian yang Anda butuhkan</p>
+            <section className="bg-white w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Pertanian</h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan pertanian digital untuk mendukung petani dan pelaku usaha pertanian di Desa Drawati.</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    {permitTypes.map((permit, index) => (
-                        <motion.div
-                            key={permit.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                        >
-                            <Link href={`/layanan/pertanian/${permit.id}`} className="group">
-                                <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                    <CardHeader className={cn("text-white rounded-t-lg", permit.color)}>
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="text-xl font-bold">{permit.title}</CardTitle>
-                                            <div className="p-2 rounded-full bg-white/20">
-                                                <permit.icon className="w-5 h-5" />
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-6">
-                                        <p className="text-gray-600 mb-4">{permit.description}</p>
-                                        
-                                        <div className="mt-4">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-2">Persyaratan:</h4>
-                                            <ul className="space-y-1 text-sm text-gray-600">
-                                                {permit.requirements.map((req, i) => (
-                                                    <li key={i} className="flex items-start">
-                                                        <span className="mr-2">•</span>
-                                                        <span>{req}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-
-                                        <div className="mt-6 flex items-center justify-between">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Subsidi Pemerintah
-                                            </span>
-                                            <span className="inline-flex items-center text-sm font-medium text-blue-600 group-hover:text-blue-800">
-                                                Ajukan Sekarang
-                                                <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                            </span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
-
-                <div className="mt-12 bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Informasi Penting</h3>
-                    <ul className="space-y-3 text-gray-600">
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Pastikan semua dokumen persyaratan telah dipersiapkan sebelum mengajukan permohonan.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Proses verifikasi dokumen dan penilaian membutuhkan waktu 7-14 hari kerja.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Penerima bantuan akan diumumkan melalui pengumuman resmi dan akan dihubungi oleh petugas.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Untuk pertanyaan lebih lanjut, silakan hubungi Dinas Pertanian setempat.</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
+            </section>
+            <div className="min-h-screen">
+                <div className="relative isolate overflow-hidden pt-24">
+                    <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+                        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#1E4359] to-[#2A5B73] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+                        
+                        <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+                            <div className="text-center">
+                                <Badge className="mb-4 bg-[#1E4359]/10 text-[#1E4359] border-[#1E4359]/20 hover:bg-[#1E4359]/15">
+                                    Pilih Jenis Perizinan
+                                </Badge>
+                                <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                                    Form Perizinan Pertanian
+                                </h1>
+                                <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+                                    Pilih jenis perizinan pertanian yang sesuai dengan kebutuhan Anda. 
+                                    Setiap jenis perizinan memiliki persyaratan dan ketentuan yang berbeda.
+                                </p>
+                            </div>
                         </div>
-                        <div className="ml-3">
-                            <p className="text-sm text-blue-700">
-                                Pastikan data yang Anda berikan akurat dan lengkap. Data yang tidak sesuai dengan fakta dapat mengakibatkan pembatalan permohonan.
-                            </p>
+                        
+                        <div className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
+                            <div className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#2A5B73] to-[#1E4359] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]" />
+                        </div>
+                    </div>
+                    
+                    <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
+                        <div className="mx-auto max-w-4xl">
+                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+                                {permitTypes.map((permit) => (
+                                    <motion.div
+                                        key={permit.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <Link href={`/form-pertanian/form/${permit.id}`}>
+                                            <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                                <CardHeader className="space-y-4">
+                                                    <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                        <permit.icon className="w-8 h-8 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
+                                                        <p className="text-gray-600 text-sm">{permit.description}</p>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-3">
+                                                        <h4 className="text-sm font-semibold">Persyaratan:</h4>
+                                                        <ul className="space-y-2">
+                                                            {permit.requirements.map((req, index) => (
+                                                                <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
+                                                                    <span>{req}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
+                                                        <span>Ajukan Sekarang</span>
+                                                        <ArrowRight className="w-4 h-4" />
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
