@@ -1,26 +1,14 @@
+import { Head, Link } from '@inertiajs/react';
 import React, { useState, useEffect, act } from 'react';
 import axios from 'axios';
-import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PermitTable } from '@/components/permit-table';
-import { BusinessPermitDetailModal } from '@/components/business-permit-detail-modal';
-import { BusinessPermitEditModal } from '@/components/business-permit-edit-modal';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/contexts/ToastContext';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
-import { useCrudToast, usePermitToast } from '@/hooks/useToast';
 import NewButton from '@/components/new-button';
-import { 
-  skuData as originalSkuData, 
-  iumkData as originalIumkData, 
-  situData as originalSituData, 
-  nibData as originalNibData,
-  SuratKeteranganUsaha,
-  IzinUsahaMikroKecil,
-  SuratIzinTempatUsaha,
-  RekomendasiNIB
-} from '@/data/business-permits';
 import { type BreadcrumbItem } from '@/types';
 import { 
   FileText, 
@@ -50,171 +38,7 @@ const permitIcons = {
   nib: Globe,
 };
 
-export default function PerizinanUsaha() {
-  const [activeTab, setActiveTab] = useState('sku');
-  const [selectedData, setSelectedData] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [dataToDelete, setDataToDelete] = useState<SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Toast hooks
-  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
-  const { approveSuccess } = usePermitToast();
-  
-  // Manage data state locally
-  const [skuData, setSkuData] = useState<SuratKeteranganUsaha[]>(originalSkuData);
-  const [iumkData, setIumkData] = useState<IzinUsahaMikroKecil[]>(originalIumkData);
-  const [situData, setSituData] = useState<SuratIzinTempatUsaha[]>(originalSituData);
-  const [nibData, setNibData] = useState<RekomendasiNIB[]>(originalNibData);
-  
-  // Create a permits array that always uses the latest state
-  const permitTypes = [
-    { key: 'sku', label: 'Surat Keterangan Usaha (SKU)', data: skuData },
-    { key: 'iumk', label: 'Izin Usaha Mikro Kecil (IUMK)', data: iumkData },
-    { key: 'situ', label: 'Surat Izin Tempat Usaha (SITU)', data: situData },
-    { key: 'nib', label: 'Rekomendasi NIB/OSS', data: nibData },
-  ];
-
-  const handleView = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
-    setSelectedData(data);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleEdit = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
-    setSelectedData(data);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (data: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
-    setDataToDelete(data);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveEdit = (updatedData: SuratKeteranganUsaha | IzinUsahaMikroKecil | SuratIzinTempatUsaha | RekomendasiNIB) => {
-    // Update the data in local state based on type
-    switch (activeTab) {
-      case 'sku': {
-        const newData = skuData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratKeteranganUsaha : item
-        );
-        setSkuData(newData);
-        break;
-      }
-      case 'iumk': {
-        const newData = iumkData.map(item => 
-          item.id === updatedData.id ? updatedData as IzinUsahaMikroKecil : item
-        );
-        setIumkData(newData);
-        break;
-      }
-      case 'situ': {
-        const newData = situData.map(item => 
-          item.id === updatedData.id ? updatedData as SuratIzinTempatUsaha : item
-        );
-        setSituData(newData);
-        break;
-      }
-      case 'nib': {
-        const newData = nibData.map(item => 
-          item.id === updatedData.id ? updatedData as RekomendasiNIB : item
-        );
-        setNibData(newData);
-        break;
-      }
-    }
-
-    // Close the modal and show success message
-    setIsEditModalOpen(false);
-    setSelectedData(null);
-    updateSuccess('Data perizinan');
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!dataToDelete) return;
-    
-    setIsDeleting(true);
-    try {
-      // Simulate API call (you can replace with actual API call)
-      // call http://127.0.0.1:8000/api/surat/ activeTab
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Delete the data from local state based on type
-      switch (activeTab) {
-        case 'sku': {
-          const newData = skuData.filter(item => item.id !== dataToDelete.id);
-          setSkuData(newData);
-          break;
-        }
-        case 'iumk': {
-          const newData = iumkData.filter(item => item.id !== dataToDelete.id);
-          setIumkData(newData);
-          break;
-        }
-        case 'situ': {
-          const newData = situData.filter(item => item.id !== dataToDelete.id);
-          setSituData(newData);
-          break;
-        }
-        case 'nib': {
-          const newData = nibData.filter(item => item.id !== dataToDelete.id);
-          setNibData(newData);
-          break;
-        }
-      }
-      
-      setIsDeleteModalOpen(false);
-      setDataToDelete(null);
-      deleteSuccess('Data perizinan');
-    } catch {
-      deleteError('Terjadi kesalahan saat menghapus data perizinan');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const getDeleteModalContent = () => {
-    if (!dataToDelete) return { title: '', description: '' };
-    
-    let title = '';
-    let description = '';
-    
-    switch (activeTab) {
-      case 'sku': {
-        const skuData = dataToDelete as SuratKeteranganUsaha;
-        title = 'Hapus Surat Keterangan Usaha';
-        description = `Apakah Anda yakin ingin menghapus surat keterangan usaha "${skuData.nama_usaha}" milik ${skuData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'iumk': {
-        const iumkData = dataToDelete as IzinUsahaMikroKecil;
-        title = 'Hapus Izin Usaha Mikro Kecil';
-        description = `Apakah Anda yakin ingin menghapus izin usaha mikro kecil "${iumkData.nama_usaha}" milik ${iumkData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'situ': {
-        const situData = dataToDelete as SuratIzinTempatUsaha;
-        title = 'Hapus Surat Izin Tempat Usaha';
-        description = `Apakah Anda yakin ingin menghapus surat izin tempat usaha untuk ${situData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      case 'nib': {
-        const nibData = dataToDelete as RekomendasiNIB;
-        title = 'Hapus Rekomendasi NIB/OSS';
-        description = `Apakah Anda yakin ingin menghapus rekomendasi NIB/OSS "${nibData.nama_usaha}" milik ${nibData.nama_pemohon}? Tindakan ini tidak dapat dibatalkan.`;
-        break;
-      }
-      default: {
-        title = 'Hapus Data';
-        description = 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.';
-      }
-    }
-    
-    return { title, description };
-  };
-
-  type SuratItem = {
+type SuratItem = {
     status: string;
     [key: string]: any;
   };
@@ -231,6 +55,24 @@ export default function PerizinanUsaha() {
     statusCounts: StatusCounts | null;
   };
 
+export default function PerizinanUsaha() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const [activeTab, setActiveTab] = useState('sku');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [idDelete, setIdDelete] = useState(0);
+  
+  const { showToast } = useToast();
+
+  // Create a permits array that always uses the latest state
+  const permitTypes = [
+    { key: 'sku' },
+    { key: 'iumk' },
+    { key: 'situ' },
+    { key: 'nib' },
+  ];
+
   // const [activeTab, setActiveTab] = useState('sku'); // example default tab
   const [tabData, setTabData] = useState<SuratItem[]>([]);
   const [statusCounts, setStatusCounts] = useState<StatusCounts>({
@@ -242,9 +84,9 @@ export default function PerizinanUsaha() {
 
   const getDataForTab = async (tabKey: string): Promise<SuratResponse> => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/surat/${tabKey}`);
+      const response = await axios.get(`${API_URL}/surat/${tabKey}`);
       const list = response.data.data || [];
-
+      showToast.success(response.data.message);
       return {
         list,
         statusCounts: {
@@ -256,19 +98,40 @@ export default function PerizinanUsaha() {
       };
     } catch (error) {
       console.error(`Failed to fetch data for ${tabKey}:`, error);
+      showToast.error("Terjadi kesalahan");
       return { list: [], statusCounts: null };
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleDeleteModal = (id: number) => {
+    setIdDelete(id);
+    setIsDeleteModalOpen(true);
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
+      showToast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
+    } finally {
+      fetchData();
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
+    }
+  }
+
+  const fetchData = async () => {
+    const result = await getDataForTab(activeTab);
+    setTabData(result.list);
+    if (result.statusCounts) setStatusCounts(result.statusCounts);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const result = await getDataForTab(activeTab);
-      setTabData(result.list);
-      console.log(result.list)
-      if (result.statusCounts) setStatusCounts(result.statusCounts);
-    };
-
     fetchData();
   }, [activeTab]);
 
@@ -396,118 +259,73 @@ export default function PerizinanUsaha() {
                       </p>
                     </div>
                   </div>
-                  {/* table here */}
-                  <DataTable
-                    data={tabData}
-                    columns={[
-                      {
-                        name: "Nama Pemohon",
-                        selector: row => row.form.nama,
-                        sortable: true
-                      },
-                      {
-                        name: "Jenis Usaha",
-                        selector: row => row.form.nama_usaha,
-                        sortable: true
-                      },
-                      {
-                        name: "Status",
-                        selector: row => row.status,
-                        sortable: true,
-                        cell: row => {
-                          const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
-                          return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
-                        }
-                      },
-                      {
-                        name: "Aksi",
-                        cell: row => (
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="text-blue-500 hover:underline"
-                              onClick={() => handleView(row)}
-                            >
-                              Lihat
-                            </button>
-                            <button
-                              className="text-yellow-500 hover:underline"
-                              onClick={() => handleEdit(row)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="text-red-500 hover:underline"
-                              onClick={() => handleDelete(row)}
-                            >
-                              Hapus
-                            </button>
-                          </div>
-                        )
-                      }
-                    ]}
-                    pagination
-                    highlightOnHover
-                  />
-
+                  {
+                    isLoading ? (
+                      <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                    )
+                    : (
+                      <DataTable
+                        data={tabData}
+                        columns={[
+                          {
+                            name: "ID",
+                            selector: row => row.id,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Pemohon",
+                            selector: row => row.form.nama,
+                            sortable: true
+                          },
+                          {
+                            name: "NIK",
+                            selector: row => row.form.nik,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Usaha",
+                            selector: row => row.form.nama_usaha,
+                            sortable: true
+                          },
+                          {
+                            name: "Status",
+                            selector: row => row.status,
+                            sortable: true,
+                            cell: row => {
+                              const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
+                              return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
+                            }
+                          },
+                          {
+                            name: "Aksi",
+                            cell: row => (
+                              <div className="flex items-center gap-2">
+                                <Link href={`form/view/${row.id}`}>
+                                  <Button className='bg-gray-500' type='button'>Lihat</Button>
+                                </Link>
+                                <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>
+                              </div>
+                            )
+                          }
+                        ]}
+                        pagination
+                        highlightOnHover
+                      />
+                    )
+                  }
                 </div>
               </TabsContent>
-              
-              {/* {permitTypes.map((permit) => {
-                // const tabData = getDataForTab(permit.key);
-                return (
-                  <TabsContent key={permit.key} value={permit.key} className="mt-2">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold">{permit.label}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Total {statusCounts.total} pengajuan
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <PermitTable
-                        type={permit.key as 'sku' | 'iumk' | 'situ' | 'nib'}
-                        data={permit.data}
-                        searchPlaceholder={`Cari ${permit.label.toLowerCase()}...`}
-                        onView={handleView}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                      />
-                    </div>
-                  </TabsContent>
-                );
-              })} */}
             </Tabs>
           </CardContent>
         </Card>
       </div>
-
-      {/* Detail Modal */}
-      <BusinessPermitDetailModal
-        data={selectedData}
-        type={activeTab as 'sku' | 'iumk' | 'situ' | 'nib'}
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-      />
-
-      {/* Edit Modal */}
-      <BusinessPermitEditModal
-        data={selectedData}
-        type={activeTab as 'sku' | 'iumk' | 'situ' | 'nib'}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onSave={handleSaveEdit}
-      />
-
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        title={getDeleteModalContent().title}
-        description={getDeleteModalContent().description}
-        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        title={"Hapus Surat"}
+        description={`Apakah anda yakin akan menghapus data id:${idDelete}`}
+        isLoading={isLoading}
       />
     </AppLayout>
   );
