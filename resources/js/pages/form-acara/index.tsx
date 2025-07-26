@@ -1,144 +1,203 @@
 import { Head, Link } from '@inertiajs/react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { CalendarDays, Music, Medal, Church, ArrowRight } from 'lucide-react';
+import { Calendar, Users, Home, FileText, User, MapPin, Globe, Briefcase, ArrowRight } from 'lucide-react';
 
-const eventTypes = [
+const permitTypes = [
     {
-        id: 'umum',
-        title: 'Kegiatan Umum',
-        description: 'Izin penyelenggaraan kegiatan umum seperti seminar, pameran, atau bazar',
-        icon: CalendarDays,
-        color: 'bg-gradient-to-br from-blue-600 to-indigo-500',
-        requirements: [
-            'Proposal kegiatan',
-            'Susunan panitia',
-            'Surat permohonan',
-            'Denah lokasi'
+        id: 'izin-hajatan',
+        title: 'Surat Izin Hajatan',
+        description: 'Izin penyelenggaraan hajatan atau acara keluarga',
+        icon: Calendar,
+        color: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+        fields: [
+            'Nama Pemohon',
+            'Jenis Acara',
+            'Tanggal Acara',
+            'Waktu Kegiatan',
+            'Lokasi Acara',
+            'Dampak Keramaian (Ya/Tidak)'
         ]
     },
     {
-        id: 'hiburan',
-        title: 'Hiburan Rakyat',
-        description: 'Izin penyelenggaraan hiburan seperti konser, pentas seni, atau festival',
-        icon: Music,
-        color: 'bg-gradient-to-br from-pink-600 to-rose-500',
-        requirements: [
-            'Proposal acara',
-            'Daftar penampil',
-            'Surat izin musik',
-            'Rencana pengamanan'
+        id: 'acara-publik',
+        title: 'Surat Izin Acara Publik',
+        description: 'Izin penyelenggaraan acara untuk umum',
+        icon: Users,
+        color: 'bg-gradient-to-br from-green-500 to-teal-600',
+        fields: [
+            'Nama Penyelenggara',
+            'Nama Acara',
+            'Tanggal & Waktu Acara',
+            'Lokasi Acara',
+            'Rekomendasi Keamanan (Sudah/Belum)'
         ]
     },
     {
-        id: 'olahraga',
-        title: 'Kegiatan Olahraga',
-        description: 'Izin penyelenggaraan turnamen atau event olahraga',
-        icon: Medal,
-        color: 'bg-gradient-to-br from-green-600 to-emerald-500',
-        requirements: [
-            'Proposal kegiatan',
-            'Jadwal pertandingan',
-            'Daftar peserta',
-            'Surat pernyataan'
+        id: 'sarana-umum',
+        title: 'Izin Penggunaan Sarana Umum Desa',
+        description: 'Izin penggunaan fasilitas umum milik desa',
+        icon: Home,
+        color: 'bg-gradient-to-br from-amber-500 to-orange-500',
+        fields: [
+            'Nama Pemohon',
+            'Jenis Fasilitas',
+            'Tanggal Penggunaan',
+            'Keperluan'
         ]
     },
     {
-        id: 'keagamaan',
-        title: 'Kegiatan Keagamaan',
-        description: 'Izin penyelenggaraan acara keagamaan',
-        icon: Church,
-        color: 'bg-gradient-to-br from-amber-600 to-orange-500',
-        requirements: [
-            'Surat permohonan',
-            'Jadwal acara',
-            'Dokumen pendukung',
-            'Surat rekomendasi'
+        id: 'skck',
+        title: 'Surat Pengantar SKCK',
+        description: 'Surat pengantar untuk keperluan administrasi kepolisian',
+        icon: FileText,
+        color: 'bg-gradient-to-br from-purple-500 to-pink-500',
+        fields: [
+            'Nama Pemohon',
+            'NIK',
+            'Tujuan SKCK',
+            'Tempat Tujuan SKCK'
+        ]
+    },
+    {
+        id: 'domisili',
+        title: 'Surat Keterangan Domisili',
+        description: 'Surat keterangan tempat tinggal resmi',
+        icon: MapPin,
+        color: 'bg-gradient-to-br from-red-500 to-rose-500',
+        fields: [
+            'Nama Pemohon',
+            'Alamat Domisili',
+            'Lama Tinggal',
+            'RT/RW'
+        ]
+    },
+    {
+        id: 'izin-tinggal',
+        title: 'Surat Izin Tinggal Pendatang',
+        description: 'Surat izin tinggal untuk pendatang baru',
+        icon: User,
+        color: 'bg-gradient-to-br from-emerald-500 to-cyan-500',
+        fields: [
+            'Nama Pendatang',
+            'Alamat Asal',
+            'Tujuan Pindah',
+            'RT/RW Tujuan'
+        ]
+    },
+    {
+        id: 'izin-keluar-negeri',
+        title: 'Surat Izin Keluar Negeri',
+        description: 'Surat izin untuk keperluan ke luar negeri',
+        icon: Globe,
+        color: 'bg-gradient-to-br from-violet-500 to-purple-600',
+        fields: [
+            'Nama Pemohon',
+            'Tujuan Keberangkatan',
+            'Negara Tujuan',
+            'Periode / Waktu'
+        ]
+    },
+    {
+        id: 'keterangan-tidak-kerja',
+        title: 'Surat Keterangan Tidak Bekerja',
+        description: 'Surat keterangan status tidak bekerja',
+        icon: Briefcase,
+        color: 'bg-gradient-to-br from-slate-600 to-gray-600',
+        fields: [
+            'Nama Pemohon',
+            'Alasan Tidak Bekerja',
+            'Tujuan Surat'
         ]
     }
 ];
 
 export default function FormAcara() {
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Head title="Layanan Perizinan Acara" />
+        <>
+            <Head title="Form Perizinan Acara - Desa Drawati" />
+
             <Navbar />
-            
-            <div className="container mx-auto px-4 py-8">
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Layanan Perizinan Acara</h1>
-                    <p className="text-gray-600">Pilih jenis acara yang akan diselenggarakan</p>
+            {/* Section: Perizinan Acara */}
+            <section className="bg-white w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Acara & Administrasi</h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan acara dan administrasi warga yang mudah, cepat, dan transparan.</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {eventTypes.map((event, index) => (
-                        <motion.div
-                            key={event.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                        >
-                            <Link href={`/layanan/acara/${event.id}`} className="group">
-                                <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                    <CardHeader className={cn("text-white rounded-t-lg", event.color)}>
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="text-xl font-bold">{event.title}</CardTitle>
-                                            <div className="p-2 rounded-full bg-white/20">
-                                                <event.icon className="w-5 h-5" />
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-6">
-                                        <p className="text-gray-600 mb-4">{event.description}</p>
-                                        
-                                        <div className="mt-4">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-2">Persyaratan:</h4>
-                                            <ul className="space-y-1 text-sm text-gray-600">
-                                                {event.requirements.map((req, i) => (
-                                                    <li key={i} className="flex items-start">
-                                                        <span className="mr-2">•</span>
-                                                        <span>{req}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-
-                                        <div className="mt-6 flex items-center justify-end">
-                                            <span className="inline-flex items-center text-sm font-medium text-blue-600 group-hover:text-blue-800">
-                                                Ajukan Sekarang
-                                                <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                            </span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
-
-                <div className="mt-12 bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Informasi Penting</h3>
-                    <ul className="space-y-3 text-gray-600">
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Ajukan permohonan minimal 14 hari sebelum acara dilaksanakan.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Pastikan semua dokumen persyaratan telah dipersiapkan dalam format PDF.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Status permohonan dapat dicek melalui halaman status permohonan.</span>
-                        </li>
-                        <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Untuk acara dengan peserta lebih dari 500 orang, wajib melampirkan rencana pengamanan.</span>
-                        </li>
-                    </ul>
+            </section>
+            <div className="min-h-screen">
+                <div className="relative isolate overflow-hidden pt-24">
+                    <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+                        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#1E4359] to-[#2A5B73] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+                        
+                        <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+                            <div className="text-center">
+                                <Badge className="mb-4 bg-[#1E4359]/10 text-[#1E4359] border-[#1E4359]/20 hover:bg-[#1E4359]/15">
+                                    Pilih Jenis Layanan
+                                </Badge>
+                                <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                                    Form Perizinan Acara & Administrasi
+                                </h1>
+                                <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+                                    Pilih jenis layanan yang Anda butuhkan. Pastikan data yang Anda berikan sesuai dengan dokumen resmi.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
+                            <div className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#2A5B73] to-[#1E4359] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]" />
+                        </div>
+                    </div>
+                    
+                    <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
+                        <div className="mx-auto max-w-4xl">
+                            <div className="grid gap-8 sm:grid-cols-2">
+                                {permitTypes.map((permit) => (
+                                    <motion.div
+                                        key={permit.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <Link href={`/form-acara/form/${permit.id}`}>
+                                            <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                                <CardHeader className="space-y-4">
+                                                    <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                        <permit.icon className="w-8 h-8 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
+                                                        <p className="text-gray-600 text-sm">{permit.description}</p>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-3">
+                                                        <h4 className="text-sm font-semibold">Data yang Dibutuhkan:</h4>
+                                                        <ul className="space-y-2">
+                                                            {permit.fields.map((field, index) => (
+                                                                <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
+                                                                    <span>{field}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
+                                                        <span>Ajukan Sekarang</span>
+                                                        <ArrowRight className="w-4 h-4" />
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
