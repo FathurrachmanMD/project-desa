@@ -14,6 +14,11 @@ class SyaratFormatSuratSeeder extends Seeder
             2 => [1, 2, 16, 17], // IUMK
             3 => [2, 14, 15, 16], // SITU
             4 => [2, 12, 13, 14], // NIB
+            12 => [1, 2, 17, 22], // SKCK
+            13 => [1, 2, 17, 21], // Domisili
+            14 => [1, 2, 17, 20], // Pendatang
+            15 => [1, 2, 18, 19], // Luar negeri
+            16 => [1, 2, 17, 20] // Tidak bekerja
         ];
 
         foreach ($formats as $formatId => $syaratIds) {

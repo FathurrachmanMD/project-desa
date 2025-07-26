@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Head, Link } from '@inertiajs/react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,75 +7,47 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { FileText, Home, Plane, User, FileCheck, ArrowRight } from 'lucide-react';
 
-const permitTypes = [
-    {
-        id: 'skck',
-        title: 'Surat Pengantar SKCK',
-        description: 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-blue-500 to-purple-500',
-        requirements: [
-            'Fotokopi KTP',
-            'Fotokopi KK',
-            'Pas foto 3x4',
-            'Surat pengantar RT/RW'
-        ]
-    },
-    {
-        id: 'domisili',
-        title: 'Surat Keterangan Domisili',
-        description: 'Surat keterangan tempat tinggal resmi',
-        icon: Home,
-        color: 'bg-gradient-to-br from-green-500 to-teal-500',
-        requirements: [
-            'Fotokopi KTP',
-            'Fotokopi KK',
-            'Surat pengantar RT/RW',
-            'Bukti kepemilikan/sewa tempat tinggal'
-        ]
-    },
-    {
-        id: 'izin-tinggal',
-        title: 'Surat Izin Tinggal Pendatang',
-        description: 'Surat izin tinggal untuk pendatang',
-        icon: User,
-        color: 'bg-gradient-to-br from-orange-500 to-amber-500',
-        requirements: [
-            'Fotokopi KTP',
-            'Fotokopi KK',
-            'Surat pengantar RT/RW',
-            'Surat keterangan dari kelurahan asal'
-        ]
-    },
-    {
-        id: 'izin-keluar-negeri',
-        title: 'Surat Izin Keluar Negeri',
-        description: 'Surat izin untuk keperluan ke luar negeri',
-        icon: Plane,
-        color: 'bg-gradient-to-br from-red-500 to-pink-500',
-        requirements: [
-            'Fotokopi KTP',
-            'Fotokopi KK',
-            'Fotokopi paspor',
-            'Surat keterangan kerja/sekolah'
-        ]
-    },
-    {
-        id: 'keterangan-tidak-kerja',
-        title: 'Surat Keterangan Tidak Bekerja',
-        description: 'Surat keterangan status tidak bekerja',
-        icon: FileCheck,
-        color: 'bg-gradient-to-br from-purple-500 to-indigo-500',
-        requirements: [
-            'Fotokopi KTP',
-            'Fotokopi KK',
-            'Surat pengantar RT/RW',
-            'Surat keterangan dari kelurahan'
-        ]
-    }
+const icons = [FileText, Home, User, Plane, FileCheck];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    
+  'bg-gradient-to-br from-orange-500 to-red-500',     
+  'bg-gradient-to-br from-pink-500 to-rose-500',      
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      
 ];
 
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number | string;
+  nama: string;
+  url_surat: string;
+  deskripsi: string;
+  form: string[];
+  syarat: Syarat[];
+}
+
 export default function FormPribadi() {
+    const API_URL = import.meta.env.VITE_API_URL;
+    
+    const [data, setData] = useState([]);
+    
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/format-surat/4`);
+            setData(response.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     return (
         <>
             <Head title="Form Perizinan Pribadi - Desa Drawati" />
@@ -114,46 +88,48 @@ export default function FormPribadi() {
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
                             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-
-                            {permitTypes.map((permit) => (
-                                <motion.div
-                                    key={permit.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <Link href={`/form-pribadi/form/${permit.id}`}>
-                                        <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                                            <CardHeader className="space-y-4">
-                                                <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                                    <permit.icon className="w-8 h-8 text-white" />
-                                                </div>
-                                                <div>
-                                                    <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
-                                                    <p className="text-gray-600 text-sm">{permit.description}</p>
-                                                </div>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="space-y-3">
-                                                    <h4 className="text-sm font-semibold">Persyaratan:</h4>
-                                                    <ul className="space-y-2">
-                                                        {permit.requirements.map((req, index) => (
-                                                            <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
-                                                                <span>{req}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                                <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
-                                                    <span>Ajukan Sekarang</span>
-                                                    <ArrowRight className="w-4 h-4" />
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                </motion.div>
-                            ))}
+                                {data.map((row: FormatSurat, index) => {
+                                    const Icon = icons[index % icons.length];
+                                    return (
+                                        <motion.div
+                                            key={row.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <Link href={`/form-pribadi/form/${row.url_surat}`}>
+                                                <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                                    <CardHeader className="space-y-4">
+                                                        <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                            <Icon className="w-8 h-8 text-white" />
+                                                        </div>
+                                                        <div>
+                                                            <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
+                                                            <p className="text-gray-600 text-sm">{row.deskripsi}</p>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <div className="space-y-3">
+                                                            <h4 className="text-sm font-semibold">Persyaratan:</h4>
+                                                            <ul className="space-y-2">
+                                                                {row.syarat.map((req: Syarat, index: any) => (
+                                                                    <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
+                                                                        <span>{req.nama}</span>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
+                                                            <span>Ajukan Sekarang</span>
+                                                            <ArrowRight className="w-4 h-4" />
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        </motion.div>
+                                    )}
+                                )}
                             </div>
                         </div>
                     </div>

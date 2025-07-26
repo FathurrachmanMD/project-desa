@@ -37,7 +37,7 @@ export default function FormUsaha() {
     
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${API_URL}/form-usaha`);
+            const response = await axios.get(`${API_URL}/format-surat/1`);
             setData(response.data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -88,49 +88,48 @@ export default function FormUsaha() {
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
                             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-
-                            {data.map((row: FormatSurat, index) => {
-                                const Icon = icons[index + 1 % icons.length];
-                                return (
-                                    <motion.div
-                                        key={row.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <Link href={`/form-usaha/form/${row.url_surat}`}>
-                                            <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                                                <CardHeader className="space-y-4">
-                                                    <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                                        <Icon className="w-8 h-8 text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
-                                                        <p className="text-gray-600 text-sm">{row.deskripsi}</p>
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <div className="space-y-3">
-                                                        <h4 className="text-sm font-semibold">Persyaratan:</h4>
-                                                        <ul className="space-y-2">
-                                                            {row.syarat.map((req: Syarat, index: any) => (
-                                                                <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
-                                                                    <span>{req.nama}</span>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                    <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
-                                                        <span>Ajukan Sekarang</span>
-                                                        <ArrowRight className="w-4 h-4" />
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </Link>
-                                    </motion.div>
+                                {data.map((row: FormatSurat, index) => {
+                                    const Icon = icons[index % icons.length];
+                                    return (
+                                        <motion.div
+                                            key={row.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <Link href={`/form-usaha/form/${row.url_surat}`}>
+                                                <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                                    <CardHeader className="space-y-4">
+                                                        <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                            <Icon className="w-8 h-8 text-white" />
+                                                        </div>
+                                                        <div>
+                                                            <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
+                                                            <p className="text-gray-600 text-sm">{row.deskripsi}</p>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <div className="space-y-3">
+                                                            <h4 className="text-sm font-semibold">Persyaratan:</h4>
+                                                            <ul className="space-y-2">
+                                                                {row.syarat.map((req: Syarat, index: any) => (
+                                                                    <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
+                                                                        <span>{req.nama}</span>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
+                                                            <span>Ajukan Sekarang</span>
+                                                            <ArrowRight className="w-4 h-4" />
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        </motion.div>
+                                    )}
                                 )}
-                            )}
                             </div>
                         </div>
                     </div>

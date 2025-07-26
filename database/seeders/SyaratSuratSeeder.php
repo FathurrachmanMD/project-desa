@@ -30,7 +30,12 @@ class SyaratSuratSeeder extends Seeder
             'Dokumen Kepemilikan Tempat Usaha',
             'Izin Lingkungan',
             'Foto Lokasi Usaha',
-            'Surat Pengantar RT/RW'
+            'Surat Pengantar RT/RW',
+            'Fotokopi Paspor',
+            'Surat keterangan kerja/sekolah',
+            'Surat keterangan dari kelurahan asal', 
+            'Bukti kepemilikan/sewa tempat tinggal',
+            'Pas foto 3x4'
         ];
 
         foreach ($syarat as $item) {

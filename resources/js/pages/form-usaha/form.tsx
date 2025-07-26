@@ -62,89 +62,22 @@ interface BusinessPermitFormProps {
 }
 
 export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
+  const API_URL = import.meta.env.VITE_API_URL;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const { showToast } = useToast();
+  const { showToast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData();
-      const token = localStorage.getItem("token"); // or wherever you store it
-
-      // Add form fields
-      Object.entries(data.form).forEach(([key, value]) => {
-        formData.append(`form[${key}]`, value as string);
-      });
-
-      // Add files
-      Object.entries(data.file).forEach(([key, file]) => {
-        if (file) {
-          formData.append(`syarat[${key}]`, file as Blob);
-        }
-      });
-
-      const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      // Success handling here
-      console.log("Submitted:", response.data);
-    } catch (error) {
-      // Error handling here
-      console.error("Submission failed:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-    //   try {
-      //     await post(route('form-usaha.submit'), {
-        //       onSuccess: () => {
-          //         showToast.success(
-            //           'Pengajuan Berhasil',
-            //           'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
-            //           { duration: 3000 }
-            //         );
-            //         setTimeout(() => {
-              //           window.location.href = '/form-usaha';
-              //         }, 3000);
-              //       },
-              //       onError: (errors) => {
-                //         showToast.error(
-                  //           'Kesalahan Validasi',
-                  //           'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
-                  //         );
-                  //       },
-                  //       onFinish: () => {
-                    //         setIsSubmitting(false);
-                    //       }
-                    //     });
-                    //   } catch (error) {
-                      //     showToast.error(
-                        //       'Kesalahan Sistem',
-                        //       'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
-                        //     );
-                        //     setIsSubmitting(false);
-                        //   }
-                      
-    const API_URL = import.meta.env.VITE_API_URL;
-    
-    const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
-    const [Icon, setIcon] = useState<ElementType>(icons[0]);
-    
-    const fetchFormatSurat = async () => {
+  const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
+  const [Icon, setIcon] = useState<ElementType>(icons[0]);
+  
+  const fetchFormatSurat = async () => {
       try {
-        const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
+        const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
         setFormatSurat(response.data);
-        setIcon(icons[response.data.id % icons.length]);
+        setIcon(icons[(response.data.id - 1) % icons.length]);
       } catch (error) {
         console.error('Error fetching data:', error);
+        showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
       }
     }
     
@@ -156,7 +89,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
-
+      
       setData(prev => ({
         ...prev,
         form: {
@@ -175,10 +108,10 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
         }
       }));
     };
-
+    
     const handleFileChange = (id: number | string, e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
-
+      
       setData((prev) => ({
         ...prev,
         file: {
@@ -188,6 +121,44 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
       }));
     };
     
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+  
+      try {
+        const formData = new FormData();
+        const token = localStorage.getItem("token"); // or wherever you store it
+  
+        // Add form fields
+        Object.entries(data.form).forEach(([key, value]) => {
+          formData.append(`form[${key}]`, value as string);
+        });
+  
+        // Add files
+        Object.entries(data.file).forEach(([key, file]) => {
+          if (file) {
+            formData.append(`syarat[${key}]`, file as Blob);
+          }
+        });
+  
+        const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+  
+        // Success handling here
+        console.log("Submitted:", response.data);
+      } catch (error) {
+        // Error handling here
+        console.error("Submission failed:", error);
+        showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
     return (
       <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -198,7 +169,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
             variant="ghost" 
             className="px-0 py-2 -ml-2 hover:bg-transparent hover:underline"
             onClick={() => window.history.back()}
-          >
+            >
             <ArrowLeft className="w-5 h-5 mr-2" /> Kembali
           </Button>
         </div>
@@ -210,11 +181,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
               "w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center text-white shadow-md",
               colors[(formatSurat?.id || 0) % colors.length - 1] || 'bg-gradient-to-br from-gray-500 to-gray-700'
             )}>
-              {icons[(formatSurat?.id || 0) % icons.length - 1] ? (
-                <Icon className="w-9 h-9" />
-              ) : (
-                <FileText className="w-9 h-9" />
-              )}
+              <Icon className="w-9 h-9" />
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">
@@ -259,6 +226,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             value={data.form?.[field.name] || ''}
                             onValueChange={(value) => handleSelectChange(field.name, value)}
                             disabled={isSubmitting}
+                            required={field.required}
                           >
                             <SelectTrigger 
                               className={cn(
@@ -288,6 +256,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
+                            required={field.required}
                             className={cn(
                               'min-h-[120px] text-sm',
                               // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
@@ -302,6 +271,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
+                            required={field.required}
                             className={cn(
                               'h-11',
                               // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
@@ -338,6 +308,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                                 onChange={e => handleFileChange(row.id, e)}
                                 disabled={isSubmitting}
                                 accept=".pdf,.doc,.docx,image/*"
+                                required
                                 className={cn(
                                   'border-dashed border-2',
                                   // errors.file ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
@@ -417,4 +388,3 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
     </div>
   );
 }
-

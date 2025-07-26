@@ -52,9 +52,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('form-pribadi/index');
     })->name('form-pribadi.index');
     
-    Route::get('form-pribadi/form/{type}', function (string $type) {
+    Route::get('form-pribadi/form/{slug}', function (string $slug) {
         return Inertia::render('form-pribadi/form', [
-            'type' => $type
+            'slug' => $slug
         ]);
     })->name('form-pribadi.form');
     

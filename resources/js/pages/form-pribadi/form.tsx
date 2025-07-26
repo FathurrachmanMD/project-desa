@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import axios from 'axios';
+import { useState, useEffect, ElementType } from 'react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,624 +9,158 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from '@/components/ui/file-upload';
-import { FileText, Home, Plane, User, FileCheck, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
+import { FileText, Home, Plane, User, FileCheck, ArrowLeft } from 'lucide-react';
 
-type PermitType = 'skck' | 'domisili' | 'izin-tinggal' | 'izin-keluar-negeri' | 'keterangan-tidak-kerja';
+const icons = [FileText, Home, User, Plane, FileCheck];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    
+  'bg-gradient-to-br from-orange-500 to-red-500',     
+  'bg-gradient-to-br from-pink-500 to-rose-500',      
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      
+];
 
-interface FormProps {
-    type: PermitType;
+interface InputField {
+  name: string;
+  value: string;
+  required: boolean;
+  label?: string;
+  placeholder?: string;
+  type?: string;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  options?: string[];
+  disabled?: boolean;
+  readOnly?: boolean;
+  inputMode?: string;
 }
 
-const permitTypes = {
-    skck: {
-        title: 'Surat Pengantar SKCK',
-        description: 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-blue-500 to-purple-500',
-    },
-    domisili: {
-        title: 'Surat Keterangan Domisili',
-        description: 'Surat keterangan tempat tinggal resmi',
-        icon: Home,
-        color: 'bg-gradient-to-br from-green-500 to-teal-500',
-    },
-    'izin-tinggal': {
-        title: 'Surat Izin Tinggal Pendatang',
-        description: 'Surat izin tinggal untuk pendatang',
-        icon: User,
-        color: 'bg-gradient-to-br from-orange-500 to-amber-500',
-    },
-    'izin-keluar-negeri': {
-        title: 'Surat Izin Keluar Negeri',
-        description: 'Surat izin untuk keperluan ke luar negeri',
-        icon: Plane,
-        color: 'bg-gradient-to-br from-red-500 to-pink-500',
-    },
-    'keterangan-tidak-kerja': {
-        title: 'Surat Keterangan Tidak Bekerja',
-        description: 'Surat keterangan status tidak bekerja',
-        icon: FileCheck,
-        color: 'bg-gradient-to-br from-purple-500 to-indigo-500',
-    }
-};
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number;
+  nama: string;
+  url_surat: string;
+  deskripsi: string;
+  form: InputField[];
+  syarat: Syarat[];
+}
 
 const getCurrentDate = () => {
   const now = new Date();
   return now.toISOString().slice(0, 10);
 };
 
-const dropdownOptions = {
-  tujuan_skck: [
-    { value: 'melamar_kerja', label: 'Melamar Kerja' },
-    { value: 'perpanjangan_sim', label: 'Perpanjangan SIM' },
-    { value: 'keperluan_pendidikan', label: 'Keperluan Pendidikan' },
-    { value: 'keperluan_imigrasi', label: 'Keperluan Imigrasi' },
-    { value: 'keperluan_lainnya', label: 'Keperluan Lainnya' },
-  ],
-  status_kepemilikan_rumah: [
-    { value: 'milik_sendiri', label: 'Milik Sendiri' },
-    { value: 'sewa', label: 'Sewa' },
-    { value: 'numpang_keluarga', label: 'Numpang Keluarga' },
-    { value: 'lainnya', label: 'Lainnya' },
-  ],
-  jenis_kelamin: [
-    { value: 'laki_laki', label: 'Laki-laki' },
-    { value: 'perempuan', label: 'Perempuan' },
-  ],
-  agama: [
-    { value: 'islam', label: 'Islam' },
-    { value: 'kristen', label: 'Kristen' },
-    { value: 'katolik', label: 'Katolik' },
-    { value: 'hindu', label: 'Hindu' },
-    { value: 'buddha', label: 'Buddha' },
-    { value: 'konghucu', label: 'Konghucu' },
-  ],
-  status_perkawinan: [
-    { value: 'belum_kawin', label: 'Belum Kawin' },
-    { value: 'kawin', label: 'Kawin' },
-    { value: 'cerai_hidup', label: 'Cerai Hidup' },
-    { value: 'cerai_mati', label: 'Cerai Mati' },
-  ],
-  pendidikan_terakhir: [
-    { value: 'tidak_sekolah', label: 'Tidak Sekolah' },
-    { value: 'sd', label: 'SD/Sederajat' },
-    { value: 'smp', label: 'SMP/Sederajat' },
-    { value: 'sma', label: 'SMA/Sederajat' },
-    { value: 'd1', label: 'D1' },
-    { value: 'd2', label: 'D2' },
-    { value: 'd3', label: 'D3' },
-    { value: 's1', label: 'S1' },
-    { value: 's2', label: 'S2' },
-    { value: 's3', label: 'S3' },
-  ],
-  status_pekerjaan: [
-    { value: 'pns', label: 'PNS' },
-    { value: 'karyawan_swasta', label: 'Karyawan Swasta' },
-    { value: 'wiraswasta', label: 'Wiraswasta' },
-    { value: 'pelajar', label: 'Pelajar' },
-    { value: 'mahasiswa', label: 'Mahasiswa' },
-    { value: 'tidak_bekerja', label: 'Tidak Bekerja' },
-    { value: 'pensiunan', label: 'Pensiunan' },
-    { value: 'lainnya', label: 'Lainnya' },
-  ],
-  tujuan_keluar_negeri: [
-    { value: 'tki', label: 'Tenaga Kerja Indonesia (TKI)' },
-    { value: 'wisata', label: 'Wisata' },
-    { value: 'studi', label: 'Studi' },
-    { value: 'umrah', label: 'Umrah' },
-    { value: 'haji', label: 'Haji' },
-    { value: 'bisnis', label: 'Bisnis' },
-    { value: 'lainnya', label: 'Lainnya' },
-  ],
-  status_kewarganegaraan: [
-    { value: 'wni', label: 'WNI' },
-    { value: 'wna', label: 'WNA' },
-  ],
-};
-
-const permitFieldMap: Record<string, { 
-  label: string; 
-  name: string; 
-  type: string; 
-  required?: boolean;
-  inputType?: 'select';
-  options?: { value: string; label: string }[];
-  placeholder?: string;
-  pattern?: string;
-  title?: string;
-}> = {
-  // SKCK Fields
-  nama_pemohon: { 
-    label: 'Nama Pemohon', 
-    name: 'nama_pemohon', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Nama lengkap sesuai KTP'
-  },
-  nik: { 
-    label: 'NIK', 
-    name: 'nik', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Nomor KTP',
-    pattern: '^[0-9]{16}$',
-    title: 'NIK harus terdiri dari 16 digit angka'
-  },
-  tujuan_skck: {
-    label: 'Tujuan SKCK',
-    name: 'tujuan_skck',
-    type: 'select',
-    required: true,
-    options: dropdownOptions.tujuan_skck,
-    placeholder: 'Pilih tujuan pembuatan SKCK'
-  },
-  tempat_tujuan_skck: {
-    label: 'Tempat Tujuan SKCK',
-    name: 'tempat_tujuan_skck',
-    type: 'text',
-    required: true,
-    placeholder: 'Nama Polsek tujuan'
-  },
-  
-  // Domisili Fields
-  alamat_domisili: {
-    label: 'Alamat Domisili',
-    name: 'alamat_domisili',
-    type: 'textarea',
-    required: true,
-    placeholder: 'Alamat tinggal saat ini'
-  },
-  lama_tinggal: {
-    label: 'Lama Tinggal',
-    name: 'lama_tinggal',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: sejak tahun 2020'
-  },
-  rt_rw: {
-    label: 'RT/RW',
-    name: 'rt_rw',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: 001/002'
-  },
-  
-  // Izin Tinggal Pendatang Fields
-  alamat_asal: {
-    label: 'Alamat Asal',
-    name: 'alamat_asal',
-    type: 'text',
-    required: true,
-    placeholder: 'Alamat asal daerah/kota'
-  },
-  tujuan_pindah: {
-    label: 'Tujuan Pindah',
-    name: 'tujuan_pindah',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: Bekerja, sekolah, dll'
-  },
-  rt_rw_tujuan: {
-    label: 'RT/RW Tujuan',
-    name: 'rt_rw_tujuan',
-    type: 'text',
-    required: true,
-    placeholder: 'RT/RW lokasi tujuan tinggal'
-  },
-  
-  // Izin Keluar Negeri Fields
-  tujuan_keberangkatan: {
-    label: 'Tujuan Keberangkatan',
-    name: 'tujuan_keberangkatan',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: TKI, Umrah, Studi, dll'
-  },
-  negara_tujuan: {
-    label: 'Negara Tujuan',
-    name: 'negara_tujuan',
-    type: 'text',
-    required: true,
-    placeholder: 'Negara yang dituju'
-  },
-  periode_waktu: {
-    label: 'Periode / Waktu',
-    name: 'periode_waktu',
-    type: 'text',
-    required: true,
-    placeholder: 'Estimasi waktu berangkat dan durasi'
-  },
-  
-  // Keterangan Tidak Bekerja Fields
-  alasan_tidak_bekerja: {
-    label: 'Alasan Tidak Bekerja',
-    name: 'alasan_tidak_bekerja',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: Sakit, pengangguran, dll'
-  },
-  tujuan_surat: {
-    label: 'Tujuan Surat',
-    name: 'tujuan_surat',
-    type: 'text',
-    required: true,
-    placeholder: 'Contoh: Bantuan sosial, KIS, dll'
-  },
-  jenis_kelamin: { 
-    label: 'Jenis Kelamin', 
-    name: 'jenis_kelamin', 
-    type: 'select',
-    options: dropdownOptions.jenis_kelamin,
-    required: true
-  },
-  tempat_lahir: { 
-    label: 'Tempat Lahir', 
-    name: 'tempat_lahir', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan tempat lahir'
-  },
-  tanggal_lahir: { 
-    label: 'Tanggal Lahir', 
-    name: 'tanggal_lahir', 
-    type: 'date', 
-    required: true,
-    placeholder: 'Masukkan tanggal lahir'
-  },
-  agama: { 
-    label: 'Agama', 
-    name: 'agama', 
-    type: 'select',
-    options: dropdownOptions.agama,
-    required: true
-  },
-  status_perkawinan: { 
-    label: 'Status Perkawinan', 
-    name: 'status_perkawinan', 
-    type: 'select',
-    options: dropdownOptions.status_perkawinan,
-    required: true
-  },
-  pendidikan_terakhir: { 
-    label: 'Pendidikan Terakhir', 
-    name: 'pendidikan_terakhir', 
-    type: 'select',
-    options: dropdownOptions.pendidikan_terakhir,
-    required: true
-  },
-  status_pekerjaan: { 
-    label: 'Status Pekerjaan', 
-    name: 'status_pekerjaan', 
-    type: 'select',
-    options: dropdownOptions.status_pekerjaan,
-    required: true
-  },
-  alamat: { 
-    label: 'Alamat', 
-    name: 'alamat', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alamat lengkap'
-  },
-  tujuan_skck: { 
-    label: 'Tujuan SKCK', 
-    name: 'tujuan_skck', 
-    type: 'select',
-    options: dropdownOptions.tujuan_skck,
-    required: true
-  },
-  status_kepemilikan_rumah: { 
-    label: 'Status Kepemilikan Rumah', 
-    name: 'status_kepemilikan_rumah', 
-    type: 'select',
-    options: dropdownOptions.status_kepemilikan_rumah,
-    required: true
-  },
-  tujuan_keluar_negeri: { 
-    label: 'Tujuan Keluar Negeri', 
-    name: 'tujuan_keluar_negeri', 
-    type: 'select',
-    options: dropdownOptions.tujuan_keluar_negeri,
-    required: true
-  },
-  status_kewarganegaraan: { 
-    label: 'Status Kewarganegaraan', 
-    name: 'status_kewarganegaraan', 
-    type: 'select',
-    options: dropdownOptions.status_kewarganegaraan,
-    required: true
-  },
-  lama_tinggal: { 
-    label: 'Lama Tinggal', 
-    name: 'lama_tinggal', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan lama tinggal'
-  },
-  alamat_asal: { 
-    label: 'Alamat Asal', 
-    name: 'alamat_asal', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alamat asal'
-  },
-  alamat_domisili: { 
-    label: 'Alamat Domisili', 
-    name: 'alamat_domisili', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alamat domisili'
-  },
-  tujuan_pindah: { 
-    label: 'Tujuan Pindah', 
-    name: 'tujuan_pindah', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan tujuan pindah'
-  },
-  negara_tujuan: { 
-    label: 'Negara Tujuan', 
-    name: 'negara_tujuan', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan negara tujuan'
-  },
-  tgl_berangkat: { 
-    label: 'Tanggal Berangkat', 
-    name: 'tgl_berangkat', 
-    type: 'date', 
-    required: true,
-    placeholder: 'Masukkan tanggal berangkat'
-  },
-  tgl_kembali: { 
-    label: 'Tanggal Kembali', 
-    name: 'tgl_kembali', 
-    type: 'date', 
-    required: true,
-    placeholder: 'Masukkan tanggal kembali'
-  },
-  tujuan_keberangkatan: { 
-    label: 'Tujuan Keberangkatan', 
-    name: 'tujuan_keberangkatan', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan tujuan keberangkatan'
-  },
-  nama_kontak_darurat: { 
-    label: 'Nama Kontak Darurat', 
-    name: 'nama_kontak_darurat', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan nama kontak darurat'
-  },
-  telp_kontak_darurat: { 
-    label: 'Telepon Kontak Darurat', 
-    name: 'telp_kontak_darurat', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan telepon kontak darurat'
-  },
-  hubungan_kontak_darurat: { 
-    label: 'Hubungan Kontak Darurat', 
-    name: 'hubungan_kontak_darurat', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan hubungan kontak darurat'
-  },
-  alasan_tidak_bekerja: { 
-    label: 'Alasan Tidak Bekerja', 
-    name: 'alasan_tidak_bekerja', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alasan tidak bekerja'
-  },
-  tujuan_pembuatan_surat: { 
-    label: 'Tujuan Pembuatan Surat', 
-    name: 'tujuan_pembuatan_surat', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan tujuan pembuatan surat'
-  },
-  terakhir_bekerja: { 
-    label: 'Terakhir Bekerja', 
-    name: 'terakhir_bekerja', 
-    type: 'date', 
-    required: true,
-    placeholder: 'Masukkan terakhir bekerja'
-  },
-  nama_perusahaan_terakhir: { 
-    label: 'Nama Perusahaan Terakhir', 
-    name: 'nama_perusahaan_terakhir', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan nama perusahaan terakhir'
-  },
-  jabatan_terakhir: { 
-    label: 'Jabatan Terakhir', 
-    name: 'jabatan_terakhir', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan jabatan terakhir'
-  },
-  lama_bekerja: { 
-    label: 'Lama Bekerja', 
-    name: 'lama_bekerja', 
-    type: 'text', 
-    required: true,
-    placeholder: 'Masukkan lama bekerja'
-  },
-  alasan_berhenti: { 
-    label: 'Alasan Berhenti', 
-    name: 'alasan_berhenti', 
-    type: 'textarea', 
-    required: true,
-    placeholder: 'Masukkan alasan berhenti'
-  }
-};
-
-const permitFields: Record<string, string[]> = {
-  // Surat Pengantar SKCK
-  skck: [
-    'nama_pemohon',
-    'nik',
-    'tujuan_skck',
-    'tempat_tujuan_skck'
-  ],
-  
-  // Surat Keterangan Domisili
-  domisili: [
-    'nama_pemohon',
-    'alamat_domisili',
-    'lama_tinggal',
-    'rt_rw'
-  ],
-  
-  // Surat Izin Tinggal Pendatang
-  'izin-tinggal': [
-    'nama_pemohon',
-    'alamat_asal',
-    'tujuan_pindah',
-    'rt_rw_tujuan'
-  ],
-  
-  // Surat Izin Keluar Negeri
-  'izin-keluar-negeri': [
-    'nama_pemohon',
-    'tujuan_keberangkatan',
-    'negara_tujuan',
-    'periode_waktu'
-  ],
-  
-  // Surat Keterangan Tidak Bekerja
-  'keterangan-tidak-kerja': [
-    'nama_pemohon',
-    'alasan_tidak_bekerja',
-    'tujuan_surat'
-  ]
-};
-
-interface PersonalPermitFormProps {
-  type: string;
+interface BusinessPermitFormProps {
+  slug: string;
 }
 
-export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
-  // Get the permit type details
-  const permitType = permitTypes[type as keyof typeof permitTypes];
+export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
+  const API_URL = import.meta.env.VITE_API_URL;
   
-  // Initialize form data with all possible fields
-  const initialFormData: FormData = {
-    type,
-    file: null as File | null,
-    nama: '',
-    nik: '',
-    jenis_kelamin: '',
-    tempat_lahir: '',
-    tanggal_lahir: '',
-    agama: '',
-    status_perkawinan: '',
-    pendidikan_terakhir: '',
-    alamat: '',
-    // Add other fields with empty values
-    tujuan_skck: '',
-    status_kepemilikan_rumah: '',
-    lama_tinggal: '',
-    alamat_asal: '',
-    alamat_domisili: '',
-    tujuan_pindah: '',
-    tujuan_keluar_negeri: '',
-    negara_tujuan: '',
-    tgl_berangkat: '',
-    tgl_kembali: '',
-    tujuan_keberangkatan: '',
-    nama_kontak_darurat: '',
-    telp_kontak_darurat: '',
-    hubungan_kontak_darurat: '',
-    alasan_tidak_bekerja: '',
-    tujuan_pembuatan_surat: '',
-    terakhir_bekerja: '',
-    nama_perusahaan_terakhir: '',
-    jabatan_terakhir: '',
-    lama_bekerja: '',
-    alasan_berhenti: '',
-    ...Object.fromEntries(
-      Object.values(permitFieldMap).map(field => [field.name, ''])
-    )
-  };
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
-  const { data, setData, post, processing, errors, reset } = useForm(initialFormData);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setData({
-      ...data,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const formData = new FormData();
-    
-    // Add all form data to FormData
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        formData.append(key, value);
-      }
-    });
-
-    // Append files if any
-    files.forEach((file) => {
-      formData.append('dokumen_pendukung[]', file);
-    });
-
+  
+  const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
+  const [Icon, setIcon] = useState<ElementType>(icons[0]);
+  
+  const fetchFormatSurat = async () => {
     try {
-      const response = await post(route('pengajuan-pribadi.store', { type }), {
-        onSuccess: () => {
-          toast({
-            title: 'Berhasil',
-            description: `Pengajuan ${permitTypes[type].title} berhasil dikirim`,
-            variant: 'default',
-          });
-          // Reset form
-          setData(initialFormData);
-          setFiles([]);
-        },
-        onError: (errors) => {
-          console.error('Error submitting form:', errors);
-          toast({
-            title: 'Gagal',
-            description: 'Terjadi kesalahan saat mengajukan permohonan',
-            variant: 'destructive',
-          });
-        },
-        forceFormData: true,
-      });
+      const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
+      setFormatSurat(response.data);
+      setIcon(icons[(response.data.id - 2) % icons.length]);
     } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Terjadi kesalahan teknis',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+      console.error('Error fetching data:', error);
+      showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
     }
-  };
+  }
+  
+  useEffect(() => {
+    fetchFormatSurat();
+  }, []);
+  
+  const [data, setData] = useState<{ [key: string]: any }>({});
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    setData(prev => ({
+      ...prev,
+      form: {
+          ...prev.form,
+          [name]: value,
+        }
+      }));
+    };
+    
+    const handleSelectChange = (name: string, value: string) => {
+      setData(prev => ({
+        ...prev,
+        form: {
+          ...prev.form,
+          [name]: value,
+        }
+      }));
+    };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
-    }
-  };
+    const handleFileChange = (id: number | string, e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0] ?? null;
+      
+      setData((prev) => ({
+        ...prev,
+        file: {
+          ...prev.file,
+          [id]: file,
+        },
+      }));
+    };
+    
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+  
+      try {
+        const formData = new FormData();
+        const token = localStorage.getItem("token"); // or wherever you store it
+  
+        // Add form fields
+        Object.entries(data.form).forEach(([key, value]) => {
+          formData.append(`form[${key}]`, value as string);
+        });
+  
+        // Add files
+        Object.entries(data.file).forEach(([key, file]) => {
+          if (file) {
+            formData.append(`syarat[${key}]`, file as Blob);
+          }
+        });
+  
+        const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+  
+        // Success handling here
+        console.log("Submitted:", response.data);
+      } catch (error) {
+        // Error handling here
+        console.error("Submission failed:", error);
+        showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
+    return (
+      <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Back Button */}
@@ -644,20 +179,16 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className={cn(
               "w-20 h-20 rounded-2xl flex-shrink-0 flex items-center justify-center text-white shadow-md",
-              permitType?.color || 'bg-gradient-to-br from-gray-500 to-gray-700'
+              colors[(formatSurat?.id || 0) % colors.length - 1] || 'bg-gradient-to-br from-gray-500 to-gray-700'
             )}>
-              {permitType?.icon ? (
-                <permitType.icon className="w-9 h-9" />
-              ) : (
-                <FileText className="w-9 h-9" />
-              )}
+              <Icon className="w-9 h-9" />
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-gray-900 leading-tight">
-                Ajukan {permitType?.title || 'Perizinan Pribadi'}
+                Ajukan {formatSurat?.nama || 'Perizinan Usaha'}
               </h1>
               <p className="text-gray-600 max-w-2xl">
-                {permitType?.description || 'Silakan lengkapi formulir di bawah ini dengan data yang valid dan lengkap untuk proses pengajuan perizinan.'}
+                {formatSurat?.deskripsi || 'Silakan lengkapi formulir di bawah ini dengan data yang valid dan lengkap untuk proses pengajuan perizinan.'}
               </p>
             </div>
           </div>
@@ -679,15 +210,9 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
               <div className="space-y-8">
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {permitFields[type]?.map((key: string) => {
-                    const field = permitFieldMap[key as keyof typeof permitFieldMap];
-                    if (!field) return null;
-                    
-                    const permitType = permitTypes[type as keyof typeof permitTypes];
-                    const error = errors[field.name as keyof typeof errors];
-                    
+                  {formatSurat?.form?.map((field, index) => {
                     return (
-                      <div key={key} className="space-y-2">
+                      <div key={field.name} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
                             {field.label}
@@ -696,29 +221,29 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                             <span className="text-xs text-red-500">Wajib diisi</span>
                           )}
                         </div>
-                        
                         {field.type === 'select' && field.options ? (
                           <Select
-                            value={data[field.name] as string || ''}
+                            value={data.form?.[field.name] || ''}
                             onValueChange={(value) => handleSelectChange(field.name, value)}
                             disabled={isSubmitting}
+                            required={field.required}
                           >
                             <SelectTrigger 
                               className={cn(
                                 'w-full h-11',
-                                error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                                // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                               )}
                             >
-                              <SelectValue placeholder={`Pilih ${field.label.toLowerCase()}`} />
+                              <SelectValue placeholder={`Pilih ${field?.label || ''}`} />
                             </SelectTrigger>
                             <SelectContent>
                               {field.options.map((option) => (
                                 <SelectItem 
-                                  key={option.value} 
-                                  value={option.value}
+                                  key={option} 
+                                  value={option}
                                   className="text-gray-700"
                                 >
-                                  {option.label}
+                                  {option}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -727,13 +252,14 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                           <Textarea
                             id={field.name}
                             name={field.name}
-                            value={data[field.name] as string || ''}
+                            value={data.form?.[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
+                            required={field.required}
                             className={cn(
                               'min-h-[120px] text-sm',
-                              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                              // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                             )}
                           />
                         ) : (
@@ -741,20 +267,21 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                             id={field.name}
                             name={field.name}
                             type={field.type}
-                            value={data[field.name] as string || ''}
+                            value={data.form?.[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
+                            required={field.required}
                             className={cn(
                               'h-11',
-                              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                              // error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
                             )}
                           />
                         )}
                         
-                        {error && (
+                        {/* {error && (
                           <p className="text-sm text-red-600 mt-1">{error}</p>
-                        )}
+                        )} */}
                       </div>
                     );
                   })}
@@ -764,33 +291,39 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                 <div className="border-t border-gray-200 pt-6 md:col-span-2">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Berkas Pendukung</h3>
                   <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="file" className="text-sm font-medium text-gray-700">
-                          Unggah Dokumen
-                        </Label>
-                        <span className="text-xs text-red-500">Wajib diisi</span>
-                      </div>
-                      <Input
-                        id="file"
-                        name="file"
-                        type="file"
-                        onChange={handleFileChange}
-                        disabled={isSubmitting}
-                        accept=".pdf,.doc,.docx,image/*"
-                        className={cn(
-                          'border-dashed border-2',
-                          errors.file ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-                        )}
-                      />
-                      {errors.file && (
-                        <p className="text-sm text-red-600 mt-1">{errors.file}</p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
-                      </p>
-                    </div>
-                    
+                      {
+                        formatSurat?.syarat?.map((row, index) => {
+                          return (
+                            <div className="space-y-2">
+                              <div key={index} className='flex items-center justify-between'>
+                                <Label htmlFor="file" className="text-sm font-medium text-gray-700">
+                                  {row.nama}
+                                </Label>
+                                <span className="text-xs text-red-500">Wajib diisi</span>
+                              </div>
+                              <Input
+                                id="file"
+                                name="file"
+                                type="file"
+                                onChange={e => handleFileChange(row.id, e)}
+                                disabled={isSubmitting}
+                                accept=".pdf,.doc,.docx,image/*"
+                                required
+                                className={cn(
+                                  'border-dashed border-2',
+                                  // errors.file ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                                )}
+                              />
+                              {/* {errors.file && (
+                                <p className="text-sm text-red-600 mt-1">{errors.file}</p>
+                              )} */}
+                              <p className="text-xs text-gray-500 mt-1">
+                                Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
+                              </p>
+                            </div>
+                          );
+                        })
+                      }
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-gray-700">
                         Tanggal Pengajuan
@@ -834,9 +367,9 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
                   <Button 
                     type="submit" 
                     className="w-full sm:w-auto px-8 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    disabled={isSubmitting || processing}
+                    disabled={isSubmitting}
                   >
-                    {isSubmitting || processing ? (
+                    {isSubmitting ? (
                       <div className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -855,4 +388,3 @@ export default function PersonalPermitForm({ type }: PersonalPermitFormProps) {
     </div>
   );
 }
-

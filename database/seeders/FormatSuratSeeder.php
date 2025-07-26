@@ -74,11 +74,26 @@ class FormatSuratSeeder extends Seeder
             ['kategori_id' => 3, 'nama' => 'tidak sengketa'],
             ['kategori_id' => 3, 'nama' => 'renovasi'],
 
-            ['kategori_id' => 4, 'nama' => 'SKCK'],
-            ['kategori_id' => 4, 'nama' => 'domisili'],
-            ['kategori_id' => 4, 'nama' => 'pendatang'],
-            ['kategori_id' => 4, 'nama' => 'luar negeri'],
-            ['kategori_id' => 4, 'nama' => 'tidak bekerja'],
+            ['kategori_id' => 4, 'nama' => 'Surat Pengantar SKCK', 'slug' => 'skck', 'deskripsi' => 'Surat pengantar untuk membuat Surat Keterangan Catatan Kepolisian', 
+            'form_isian' => [
+                
+            ]],
+            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Domisili', 'slug' => 'domisili', 'deskripsi' => 'Surat keterangan tempat tinggal resmi', 
+            'form_isian' => [
+                
+            ]],
+            ['kategori_id' => 4, 'nama' => 'Surat Izin Tinggal Pendatang', 'slug' => 'pendatang', 'deskripsi' => 'Surat izin tinggal untuk pendatang', 
+            'form_isian' => [
+                
+            ]],
+            ['kategori_id' => 4, 'nama' => 'Surat Izin Keluar Negeri', 'slug' => 'luar-negeri', 'deskripsi' => 'Surat izin untuk keperluan keluar negeri', 
+            'form_isian' => [
+                
+            ]],
+            ['kategori_id' => 4, 'nama' => 'Surat Keterangan Tidak Bekerja', 'slug' => 'tidak-bekerja', 'deskripsi' => 'Surat keterangan status tidak bekerja', 
+            'form_isian' => [
+                
+            ]],
 
             ['kategori_id' => 5, 'nama' => 'lahan'],
             ['kategori_id' => 5, 'nama' => 'bantuan'],

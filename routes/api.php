@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendudukController;
-use App\Http\Controllers\FormUsahaController;
+use App\Http\Controllers\FormatSuratController;
 
 Route::get('/surat/{slug}', [SuratController::class, 'index']);
 Route::post('/surat/{slug}', [SuratController::class, 'store']);
@@ -16,5 +16,5 @@ Route::post('/penduduk', [PendudukController::class, 'store']);
 Route::put('/penduduk/{id}', [PendudukController::class, 'update']);
 Route::delete('/penduduk/{id}', [PendudukController::class, 'destroy']);
 
-Route::get('/form-usaha', [FormUsahaController::class, 'index']);
-Route::get('/form-usaha/form/{slug}', [FormUsahaController::class, 'show']);
+Route::get('/format-surat/{kategori}', [FormatSuratController::class, 'index']);
+Route::get('/format-surat/form/{slug}', [FormatSuratController::class, 'show']);
