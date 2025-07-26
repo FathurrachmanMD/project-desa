@@ -355,7 +355,7 @@ export default function PerizinanUsaha() {
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
-              <NewButton href=''/>
+              <NewButton href={`form/create/${activeTab}`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">

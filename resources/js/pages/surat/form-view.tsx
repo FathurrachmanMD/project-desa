@@ -90,7 +90,7 @@ export default function PermitForm({ id }: PermitFormProps) {
   ];
 
   const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
-  const [status, setStatus] = useState<String>("")
+  const [status, setStatus] = useState<string>("")
   // const [Icon, setIcon] = useState<ElementType>(icons[0]);
   
   const fetchFormatSurat = async () => {
