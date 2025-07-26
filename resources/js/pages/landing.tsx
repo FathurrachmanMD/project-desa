@@ -227,7 +227,7 @@ export default function Landing() {
                         }} />
                     </div>
 
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <div className="mt-7 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                         <div className="max-w-4xl mx-auto">
                             <FadeInView direction="up" delay={0.2}>
                                 <motion.div
@@ -235,9 +235,6 @@ export default function Landing() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.8, delay: 0.2 }}
                                 >
-                                    <Badge className="mb-6 bg-[#1E4359]/10 text-[#1E4359] border-[#1E4359]/20 hover:bg-[#1E4359]/15">
-                                        🚀 Pelayanan Digital Terdepan
-                                    </Badge>
                                 </motion.div>
                             </FadeInView>
 
@@ -417,9 +414,9 @@ export default function Landing() {
                                         Keunggulan Kami
                                     </Badge>
                                     <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                                        Mengapa Memilih 
+                                         Kemudahan Layanan untuk Semua Warga 
                                         <span className="block bg-gradient-to-r from-[#1E4359] to-[#2A5B73] bg-clip-text text-transparent">
-                                            Desa Drawati?
+                                        Semua Warga 
                                         </span>
                                     </h2>
                                     <p className="text-xl text-gray-600 mb-8 leading-relaxed">
@@ -552,9 +549,7 @@ export default function Landing() {
                                                         </span>
                                                     </h3>
                                                     <p className="text-gray-600 text-lg leading-relaxed">
-                                                        Menjadi desa digital yang mandiri, maju, dan sejahtera dengan 
-                                                        pelayanan prima berbasis teknologi modern yang dapat diakses 
-                                                        oleh seluruh masyarakat.
+                                                    Mewujudkan masyarakat yang adil dan makmur, sehat dan sejahtera serta bertaqwa kepada Tuhan Yang Maha Esa, berahlak mulia yang berwawasan ilmu pengetahuan dan tekhnologi tinggi dan cinta terhadap lingkungan sekitarnya
                                                     </p>
                                                 </div>
                                             </div>
@@ -578,11 +573,15 @@ export default function Landing() {
                                                             Misi Kami
                                                         </span>
                                                     </h3>
-                                                    <p className="text-gray-600 text-lg leading-relaxed">
-                                                        Memberikan pelayanan administrasi yang cepat, transparan, dan mudah diakses 
-                                                        oleh seluruh masyarakat melalui platform digital yang terintegrasi dengan 
-                                                        teknologi terdepan.
-                                                    </p>
+                                                    <ol className="text-gray-600 text-lg leading-relaxed list-decimal pl-6">
+  <li>Meningkatkan Bidang Pembangunan Infrastruktur.</li>
+  <li>Meningkatkan Bidang Kesejahteraan Masyarakat.</li>
+  <li>Meningkatkan Bidang Religi atau Keagamaan.</li>
+  <li>Meningkatkan Bidang Pemerintahan.</li>
+  <li>Meningkatkan Bidang Pendidikan.</li>
+  <li>Meningkatkan Bidang Kesehatan.</li>
+  <li>Meningkatkan Bidang Ekonomi.</li>
+</ol>   
                                                 </div>
                                             </div>
                                         </Card>
