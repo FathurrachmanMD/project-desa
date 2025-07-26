@@ -57,11 +57,11 @@ const getCurrentDate = () => {
   return now.toISOString().slice(0, 10);
 };
 
-interface BusinessPermitFormProps {
+interface PersonalPermitFormProps {
   slug: string;
 }
 
-export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
+export default function PersonalPermitForm({ slug }: PersonalPermitFormProps) {
   const API_URL = import.meta.env.VITE_API_URL;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -150,6 +150,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
   
         // Success handling here
         console.log("Submitted:", response.data);
+        showToast.sucess("Data Berhasil Disimpan");
       } catch (error) {
         // Error handling here
         console.error("Submission failed:", error);
