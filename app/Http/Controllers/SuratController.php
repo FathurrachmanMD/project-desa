@@ -6,6 +6,7 @@ use App\Models\Surat;
 use App\Models\FormatSurat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -46,25 +47,54 @@ class SuratController extends Controller
     public function store(Request $request, $slug)
     {
         try {
-            // Cari format_surat berdasarkan slug
+            // Find the format_surat based on the slug
             $format = FormatSurat::where('url_surat', $slug)->firstOrFail();
 
-            // Validasi data permintaan
+            // Validate the request data
+            // Added validation rules for 'syarat.*' to ensure each item is a file
             $validated = $request->validate([
-                'penduduk_id'   => 'exists:penduduk,id',
+                'penduduk_id'   => 'nullable|exists:penduduk,id',
                 'nomor_surat'   => 'nullable|string|max:255',
                 'kode_surat'    => 'nullable|string|max:255',
                 'form'          => 'nullable|array',
                 'syarat'        => 'nullable|array',
+                'syarat.*'      => 'file|mimes:jpeg,png,jpg,gif,svg,pdf|max:5120', // Validate each uploaded file
                 'status'        => 'nullable|in:diproses,disetujui,ditolak,dicetak',
             ]);
 
-            // Tambahkan format_id dari hasil query slug
+            // Add format_id from the query result
             $validated['format_id'] = $format->id;
             $validated['created_by'] = Auth::id();
             $validated['updated_by'] = Auth::id();
 
-            // Simpan surat baru
+            $storedSyarat = [];
+
+            // Handle file uploads for 'syarat'
+            if ($request->hasFile('syarat')) {
+                foreach ($request->file('syarat') as $key => $file) {
+                    // Check if the file is valid and exists
+                    if ($file && $file->isValid()) {
+                        // Store the file in the 'public' disk under a 'syarat' directory
+                        // The path will be 'syarat/{filename.extension}'
+                        $path = $file->store('syarat', 'public');
+
+                        // Get the public URL of the stored file
+                        // This assumes your public disk is configured to serve files via URL
+                        $url = Storage::disk('public')->url($path);
+
+                        // Store the URL with the original key
+                        $storedSyarat[$key] = $url;
+                    }
+                }
+            }
+
+            // Assign the processed 'syarat' array to the validated data
+            // If the 'syarat' column in your Surat model is cast to 'array' or 'json',
+            // Laravel will automatically handle the JSON encoding for storage.
+            // If not, you would need to json_encode($storedSyarat) here.
+            $validated['syarat'] = $storedSyarat;
+
+            // Create a new letter (surat)
             $surat = Surat::create($validated);
 
             return response()->json([

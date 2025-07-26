@@ -52,111 +52,10 @@ interface FormatSurat {
   syarat: Syarat[];
 }
 
-interface FormData {
-  slug: string;
-  fields: InputField[];
-  // [key: string]: string | File | null; // Add index signature
-}
-
 const getCurrentDate = () => {
   const now = new Date();
   return now.toISOString().slice(0, 10);
 };
-
-// const permitFieldMap: Record<string, { 
-//   label: string; 
-//   name: string; 
-//   type: string; 
-//   required?: boolean;
-//   inputType?: 'select';
-//   options?: { value: string; label: string }[];
-//   placeholder?: string;
-// }> = {
-//   nama_pemohon: { 
-//     label: 'Nama Pemohon', 
-//     name: 'nama_pemohon', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Masukkan nama lengkap pemohon'
-//   },
-//   nik: { 
-//     label: 'NIK', 
-//     name: 'nik', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Masukkan NIK sesuai KTP'
-//   },
-//   nama_usaha: { 
-//     label: 'Nama Usaha', 
-//     name: 'nama_usaha', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Masukkan nama usaha'
-//   },
-//   alamat_usaha: { 
-//     label: 'Alamat Usaha', 
-//     name: 'alamat_usaha', 
-//     type: 'textarea', 
-//     required: true,
-//     placeholder: 'Masukkan alamat lengkap usaha'
-//   },
-//   lama_usaha: { 
-//     label: 'Lama Usaha', 
-//     name: 'lama_usaha', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Contoh: 2 tahun'
-//   },
-//   jenis_usaha: { 
-//     label: 'Jenis Usaha', 
-//     name: 'jenis_usaha', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Contoh: Makanan, Jasa, dll.'
-//   },
-//   modal_usaha: { 
-//     label: 'Modal Usaha', 
-//     name: 'modal_usaha', 
-//     type: 'text', 
-//     required: true,
-//     placeholder: 'Contoh: Rp 50.000.000'
-//   },
-//   status_tempat_usaha: { 
-//     label: 'Status Tempat Usaha', 
-//     name: 'status_tempat_usaha', 
-//     type: 'select',
-//     options: dropdownOptions.status_kepemilikan,
-//     required: true
-//   },
-//   status_lahan: { 
-//     label: 'Status Tanah', 
-//     name: 'status_lahan', 
-//     type: 'select',
-//     options: dropdownOptions.status_tanah,
-//     required: true
-//   },
-//   rekomendasi_rtrw: { 
-//     label: 'Rekomendasi RT/RW', 
-//     name: 'rekomendasi_rtrw', 
-//     type: 'select',
-//     options: dropdownOptions.rekomendasi_rtrw,
-//     required: true
-//   },
-//   tujuan: { 
-//     label: 'Tujuan', 
-//     name: 'tujuan', 
-//     type: 'textarea', 
-//     required: true,
-//     placeholder: 'Jelaskan tujuan pengajuan izin usaha'
-//   },
-//   jenis_renovasi: {
-//     label: 'Jenis Renovasi',
-//     name: 'jenis_renovasi',
-//     type: 'select',
-//     options: dropdownOptions.jenis_renovasi,
-//     required: true
-//   }
-// };
 
 interface BusinessPermitFormProps {
   slug: string;
@@ -166,21 +65,44 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const { showToast } = useToast();
-  
-  // Get fields based on the slug
-  // const fields = slug && permitFields[slug as keyof typeof permitFields] 
-  //   ? permitFields[slug as keyof typeof permitFields] 
-  //   : [];
-  
-  // const permitType = slug && permitTypes[slug as keyof typeof permitTypes];
-  
-  
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
 
-      console.log(data);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      const token = localStorage.getItem("token"); // or wherever you store it
+
+      // Add form fields
+      Object.entries(data.form).forEach(([key, value]) => {
+        formData.append(`form[${key}]`, value as string);
+      });
+
+      // Add files
+      Object.entries(data.file).forEach(([key, file]) => {
+        if (file) {
+          formData.append(`syarat[${key}]`, file as Blob);
+        }
+      });
+
+      const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Success handling here
+      console.log("Submitted:", response.data);
+    } catch (error) {
+      // Error handling here
+      console.error("Submission failed:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
     //   try {
       //     await post(route('form-usaha.submit'), {
         //       onSuccess: () => {
@@ -210,7 +132,6 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                         //     );
                         //     setIsSubmitting(false);
                         //   }
-    };
                       
     const API_URL = import.meta.env.VITE_API_URL;
     
@@ -220,7 +141,6 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
     const fetchFormatSurat = async () => {
       try {
         const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
-        console.log(response);
         setFormatSurat(response.data);
         setIcon(icons[response.data.id % icons.length]);
       } catch (error) {
@@ -236,16 +156,23 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
+
       setData(prev => ({
         ...prev,
-        [name]: value,
+        form: {
+          ...prev.form,
+          [name]: value,
+        }
       }));
     };
     
     const handleSelectChange = (name: string, value: string) => {
       setData(prev => ({
         ...prev,
-        [name]: value,
+        form: {
+          ...prev.form,
+          [name]: value,
+        }
       }));
     };
 
@@ -329,8 +256,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                         </div>
                         {field.type === 'select' && field.options ? (
                           <Select
-                          // dont forget to change
-                            value={data[field.name] || ''}
+                            value={data.form?.[field.name] || ''}
                             onValueChange={(value) => handleSelectChange(field.name, value)}
                             disabled={isSubmitting}
                           >
@@ -358,8 +284,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                           <Textarea
                             id={field.name}
                             name={field.name}
-                            // this too
-                            value={data[field.name] || ''}
+                            value={data.form?.[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
@@ -373,7 +298,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             id={field.name}
                             name={field.name}
                             type={field.type}
-                            value={data[field.name] || ''}
+                            value={data.form?.[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
