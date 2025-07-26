@@ -54,7 +54,8 @@ interface FormatSurat {
 
 interface FormData {
   slug: string;
-  form: InputField[];
+  fields: InputField[];
+  // [key: string]: string | File | null; // Add index signature
 }
 
 const getCurrentDate = () => {
@@ -162,111 +163,99 @@ interface BusinessPermitFormProps {
 }
 
 export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
-  // const {data, setData} = useForm<FormData>()
-  // const { data, setData, post, processing, errors, reset } = useForm({
-  //   slug,
-  //   file: null as File | null,
-  //   ...Object.fromEntries(
-  //     Object.values(permitFieldMap).map(field => [field.name, ''])
-  //   )
-  // });
-
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const { showToast } = useToast();
-
+  
   // Get fields based on the slug
   // const fields = slug && permitFields[slug as keyof typeof permitFields] 
   //   ? permitFields[slug as keyof typeof permitFields] 
   //   : [];
-    
+  
   // const permitType = slug && permitTypes[slug as keyof typeof permitTypes];
   
-  const handleSelectChange = (name: string, value: string) => {
-  //   setData(name as keyof typeof data, value);
-  };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files && e.target.files[0]) {
-  //     setData('file', e.target.files[0]);
-  //   }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  //   const { name, value } = e.target;
-  //   setData(name as keyof typeof data, value);
-  };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
+    //   e.preventDefault();
+    //   setIsSubmitting(true);
     
-  //   try {
-  //     await post(route('form-usaha.submit'), {
-  //       onSuccess: () => {
-  //         showToast.success(
-  //           'Pengajuan Berhasil',
-  //           'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
-  //           { duration: 3000 }
-  //         );
-  //         setTimeout(() => {
-  //           window.location.href = '/form-usaha';
-  //         }, 3000);
-  //       },
-  //       onError: (errors) => {
-  //         showToast.error(
-  //           'Kesalahan Validasi',
-  //           'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
-  //         );
-  //       },
-  //       onFinish: () => {
-  //         setIsSubmitting(false);
-  //       }
-  //     });
-  //   } catch (error) {
-  //     showToast.error(
-  //       'Kesalahan Sistem',
-  //       'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
-  //     );
-  //     setIsSubmitting(false);
-  //   }
-  };
-
-  const API_URL = import.meta.env.VITE_API_URL;
-      
-  const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
-  const [Icon, setIcon] = useState<ElementType>(icons[0]);
-  
-  const fetchFormatSurat = async () => {
-      try {
-          const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
-          console.log(response);
-          setFormatSurat(response.data);
-          // setFormatSurat({
-          //   id: response.data.id,
-          //   nama: response.data.nama,
-          //   url_surat: response.data.url_surat,
-          //   deskripsi: response.data.deskripsi,
-          //   // form: response.data.form,
-          //   form: () => {
-          //     {
-          //       name: response.data.nama,
-          //       type: string
-          //     }
-          //   }
-          //   syarat: response.data.syarat,
-          // });
-          setIcon(icons[response.data.id % icons.length]);
-      } catch (error) {
-          console.error('Error fetching data:', error);
+    //   try {
+      //     await post(route('form-usaha.submit'), {
+        //       onSuccess: () => {
+          //         showToast.success(
+            //           'Pengajuan Berhasil',
+            //           'Pengajuan berhasil dikirim! Anda akan diarahkan ke halaman utama.',
+            //           { duration: 3000 }
+            //         );
+            //         setTimeout(() => {
+              //           window.location.href = '/form-usaha';
+              //         }, 3000);
+              //       },
+              //       onError: (errors) => {
+                //         showToast.error(
+                  //           'Kesalahan Validasi',
+                  //           'Mohon periksa kembali data yang dimasukkan dan pastikan semua field yang wajib diisi sudah terisi dengan benar.'
+                  //         );
+                  //       },
+                  //       onFinish: () => {
+                    //         setIsSubmitting(false);
+                    //       }
+                    //     });
+                    //   } catch (error) {
+                      //     showToast.error(
+                        //       'Kesalahan Sistem',
+                        //       'Terjadi kesalahan teknis. Silakan coba lagi nanti.'
+                        //     );
+                        //     setIsSubmitting(false);
+                        //   }
+                      };
+                      
+                      const API_URL = import.meta.env.VITE_API_URL;
+                      
+                      const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
+                      const [Icon, setIcon] = useState<ElementType>(icons[0]);
+                      
+                      const fetchFormatSurat = async () => {
+                        try {
+                          const response = await axios.get(`${API_URL}/form-usaha/form/${slug}`);
+                          console.log(response);
+                          setFormatSurat(response.data);
+                          setIcon(icons[response.data.id % icons.length]);
+                        } catch (error) {
+                          console.error('Error fetching data:', error);
       }
-  }
-  
-  useEffect(() => {
+    }
+    
+    useEffect(() => {
       fetchFormatSurat();
-  }, []);
+    }, []);
+    
+    const [data, setData] = useState<{ [key: string]: any }>({});
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+    
+    const handleSelectChange = (name: string, value: string) => {
+      setData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      //   if (e.target.files && e.target.files[0]) {
+      //     setData('file', e.target.files[0]);
+      //   }
+    };
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Back Button */}
@@ -334,7 +323,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                         {field.type === 'select' && field.options ? (
                           <Select
                           // dont forget to change
-                            value={''}
+                            value={data[field.name] || ''}
                             onValueChange={(value) => handleSelectChange(field.name, value)}
                             disabled={isSubmitting}
                           >
@@ -363,7 +352,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             id={field.name}
                             name={field.name}
                             // this too
-                            value={''}
+                            value={data[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
@@ -377,7 +366,7 @@ export default function BusinessPermitForm({ slug }: BusinessPermitFormProps) {
                             id={field.name}
                             name={field.name}
                             type={field.type}
-                            value={''}
+                            value={data[field.name] || ''}
                             onChange={handleChange}
                             disabled={isSubmitting}
                             placeholder={field.placeholder}
