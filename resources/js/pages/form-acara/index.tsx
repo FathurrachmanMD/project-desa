@@ -3,118 +3,51 @@ import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Home, FileText, User, MapPin, Globe, Briefcase, ArrowRight } from 'lucide-react';
+import axios from 'axios';
+import { Calendar, Users, Home, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const permitTypes = [
-    {
-        id: 'izin-hajatan',
-        title: 'Surat Izin Hajatan',
-        description: 'Izin penyelenggaraan hajatan atau acara keluarga',
-        icon: Calendar,
-        color: 'bg-gradient-to-br from-blue-500 to-indigo-600',
-        fields: [
-            'Nama Pemohon',
-            'Jenis Acara',
-            'Tanggal Acara',
-            'Waktu Kegiatan',
-            'Lokasi Acara',
-            'Dampak Keramaian (Ya/Tidak)'
-        ]
-    },
-    {
-        id: 'acara-publik',
-        title: 'Surat Izin Acara Publik',
-        description: 'Izin penyelenggaraan acara untuk umum',
-        icon: Users,
-        color: 'bg-gradient-to-br from-green-500 to-teal-600',
-        fields: [
-            'Nama Penyelenggara',
-            'Nama Acara',
-            'Tanggal & Waktu Acara',
-            'Lokasi Acara',
-            'Rekomendasi Keamanan (Sudah/Belum)'
-        ]
-    },
-    {
-        id: 'sarana-umum',
-        title: 'Izin Penggunaan Sarana Umum Desa',
-        description: 'Izin penggunaan fasilitas umum milik desa',
-        icon: Home,
-        color: 'bg-gradient-to-br from-amber-500 to-orange-500',
-        fields: [
-            'Nama Pemohon',
-            'Jenis Fasilitas',
-            'Tanggal Penggunaan',
-            'Keperluan'
-        ]
-    },
-    {
-        id: 'skck',
-        title: 'Surat Pengantar SKCK',
-        description: 'Surat pengantar untuk keperluan administrasi kepolisian',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-purple-500 to-pink-500',
-        fields: [
-            'Nama Pemohon',
-            'NIK',
-            'Tujuan SKCK',
-            'Tempat Tujuan SKCK'
-        ]
-    },
-    {
-        id: 'domisili',
-        title: 'Surat Keterangan Domisili',
-        description: 'Surat keterangan tempat tinggal resmi',
-        icon: MapPin,
-        color: 'bg-gradient-to-br from-red-500 to-rose-500',
-        fields: [
-            'Nama Pemohon',
-            'Alamat Domisili',
-            'Lama Tinggal',
-            'RT/RW'
-        ]
-    },
-    {
-        id: 'izin-tinggal',
-        title: 'Surat Izin Tinggal Pendatang',
-        description: 'Surat izin tinggal untuk pendatang baru',
-        icon: User,
-        color: 'bg-gradient-to-br from-emerald-500 to-cyan-500',
-        fields: [
-            'Nama Pendatang',
-            'Alamat Asal',
-            'Tujuan Pindah',
-            'RT/RW Tujuan'
-        ]
-    },
-    {
-        id: 'izin-keluar-negeri',
-        title: 'Surat Izin Keluar Negeri',
-        description: 'Surat izin untuk keperluan ke luar negeri',
-        icon: Globe,
-        color: 'bg-gradient-to-br from-violet-500 to-purple-600',
-        fields: [
-            'Nama Pemohon',
-            'Tujuan Keberangkatan',
-            'Negara Tujuan',
-            'Periode / Waktu'
-        ]
-    },
-    {
-        id: 'keterangan-tidak-kerja',
-        title: 'Surat Keterangan Tidak Bekerja',
-        description: 'Surat keterangan status tidak bekerja',
-        icon: Briefcase,
-        color: 'bg-gradient-to-br from-slate-600 to-gray-600',
-        fields: [
-            'Nama Pemohon',
-            'Alasan Tidak Bekerja',
-            'Tujuan Surat'
-        ]
-    }
+const icons = [Calendar, Users, Home];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    
+  'bg-gradient-to-br from-orange-500 to-red-500',     
+  'bg-gradient-to-br from-pink-500 to-rose-500',      
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      
 ];
 
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number | string;
+  nama: string;
+  url_surat: string;
+  deskripsi: string;
+  form: string[];
+  syarat: Syarat[];
+}
+
 export default function FormAcara() {
+    const API_URL = import.meta.env.VITE_API_URL;
+        
+    const [data, setData] = useState([]);
+    
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/format-surat/3`);
+            setData(response.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
+    
     return (
         <>
             <Head title="Form Perizinan Acara - Desa Drawati" />
@@ -154,45 +87,48 @@ export default function FormAcara() {
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
                             <div className="grid gap-8 sm:grid-cols-2">
-                                {permitTypes.map((permit) => (
-                                    <motion.div
-                                        key={permit.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <Link href={`/form-acara/form/${permit.id}`}>
-                                            <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                                                <CardHeader className="space-y-4">
-                                                    <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                                        <permit.icon className="w-8 h-8 text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
-                                                        <p className="text-gray-600 text-sm">{permit.description}</p>
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <div className="space-y-3">
-                                                        <h4 className="text-sm font-semibold">Data yang Dibutuhkan:</h4>
-                                                        <ul className="space-y-2">
-                                                            {permit.fields.map((field, index) => (
-                                                                <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
-                                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
-                                                                    <span>{field}</span>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-                                                    <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
-                                                        <span>Ajukan Sekarang</span>
-                                                        <ArrowRight className="w-4 h-4" />
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </Link>
-                                    </motion.div>
-                                ))}
+                                {data.map((row: FormatSurat, index) => {
+                                    const Icon = icons[index % icons.length];
+                                    return (
+                                        <motion.div
+                                            key={row.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <Link href={`/form-usaha/form/${row.url_surat}`}>
+                                                <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                                                    <CardHeader className="space-y-4">
+                                                        <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                            <Icon className="w-8 h-8 text-white" />
+                                                        </div>
+                                                        <div>
+                                                            <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
+                                                            <p className="text-gray-600 text-sm">{row.deskripsi}</p>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <div className="space-y-3">
+                                                            <h4 className="text-sm font-semibold">Persyaratan:</h4>
+                                                            <ul className="space-y-2">
+                                                                {row.syarat.map((req: Syarat, index: any) => (
+                                                                    <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
+                                                                        <span>{req.nama}</span>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                        <div className="mt-6 flex items-center text-[#1E4359] font-medium text-sm group-hover:gap-2 transition-all">
+                                                            <span>Ajukan Sekarang</span>
+                                                            <ArrowRight className="w-4 h-4" />
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        </motion.div>
+                                    )}
+                                )}
                             </div>
                         </div>
                     </div>

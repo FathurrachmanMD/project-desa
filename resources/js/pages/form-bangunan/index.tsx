@@ -3,64 +3,51 @@ import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { Home, FileCheck, FileSignature, FileText, ArrowRight } from 'lucide-react';
+import axios from 'axios';
+import { Building2, Home, FileText, FileCheck, FileSignature, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const permitTypes = [
-    {
-        id: 'imb-pbg',
-        title: 'Izin Mendirikan Bangunan (IMB / PBG)',
-        description: 'Perizinan untuk mendirikan bangunan baru',
-        icon: Home,
-        color: 'bg-gradient-to-br from-blue-500 to-indigo-600',
-        fields: [
-            'Nama Pemohon',
-            'Alamat Bangunan',
-            'Jenis Bangunan',
-            'Status Tanah'
-        ]
-    },
-    {
-        id: 'izin-bangun-lahan-desa',
-        title: 'Izin Bangun di Lahan Milik Desa',
-        description: 'Perizinan untuk membangun di lahan milik desa',
-        icon: FileCheck,
-        color: 'bg-gradient-to-br from-green-500 to-teal-600',
-        fields: [
-            'Nama Pemohon',
-            'Nama Lahan / Titik Lokasi',
-            'Tujuan Pembangunan',
-            'Rekomendasi Kepala Desa'
-        ]
-    },
-    {
-        id: 'surat-tidak-sengketa',
-        title: 'Surat Tidak Sengketa Tanah',
-        description: 'Surat pernyataan tidak adanya sengketa tanah',
-        icon: FileSignature,
-        color: 'bg-gradient-to-br from-amber-500 to-orange-500',
-        fields: [
-            'Nama Pemilik Tanah',
-            'Lokasi Tanah',
-            'Status Sengketa',
-            'Tujuan Penggunaan'
-        ]
-    },
-    {
-        id: 'renovasi-bangunan',
-        title: 'Izin Renovasi atau Perluasan Bangunan',
-        description: 'Perizinan untuk merenovasi atau memperluas bangunan',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-purple-500 to-pink-500',
-        fields: [
-            'Nama Pemilik',
-            'Lokasi Bangunan',
-            'Jenis Renovasi',
-            'Status Tanah'
-        ]
-    }
+const icons = [Home, FileCheck, FileSignature, FileText];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    
+  'bg-gradient-to-br from-orange-500 to-red-500',     
+  'bg-gradient-to-br from-pink-500 to-rose-500',      
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      
 ];
 
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number | string;
+  nama: string;
+  url_surat: string;
+  deskripsi: string;
+  form: string[];
+  syarat: Syarat[];
+}
+
 export default function FormBangunan() {
+    const API_URL = import.meta.env.VITE_API_URL;
+        
+        const [data, setData] = useState([]);
+        
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/format-surat/2`);
+                setData(response.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        
+        useEffect(() => {
+            fetchData();
+        }, []);
+    
     return (
         <>
             <Head title="Form Perizinan Bangunan - Desa Drawati" />
@@ -101,32 +88,34 @@ export default function FormBangunan() {
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
                             <div className="grid gap-8 sm:grid-cols-2">
-                                {permitTypes.map((permit) => (
+                                {data.map((row: FormatSurat, index) => {
+                                const Icon = icons[index % icons.length];
+                                return (
                                     <motion.div
-                                        key={permit.id}
+                                        key={row.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <Link href={`/form-bangunan/form/${permit.id}`}>
+                                        <Link href={`/form-usaha/form/${row.url_surat}`}>
                                             <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
                                                 <CardHeader className="space-y-4">
-                                                    <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                                        <permit.icon className="w-8 h-8 text-white" />
+                                                    <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                        <Icon className="w-8 h-8 text-white" />
                                                     </div>
                                                     <div>
-                                                        <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
-                                                        <p className="text-gray-600 text-sm">{permit.description}</p>
+                                                        <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
+                                                        <p className="text-gray-600 text-sm">{row.deskripsi}</p>
                                                     </div>
                                                 </CardHeader>
                                                 <CardContent>
                                                     <div className="space-y-3">
-                                                        <h4 className="text-sm font-semibold">Data yang Dibutuhkan:</h4>
+                                                        <h4 className="text-sm font-semibold">Persyaratan:</h4>
                                                         <ul className="space-y-2">
-                                                            {permit.fields.map((field, index) => (
+                                                            {row.syarat.map((req: Syarat, index: any) => (
                                                                 <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
-                                                                    <span>{field}</span>
+                                                                    <span>{req.nama}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
@@ -139,7 +128,8 @@ export default function FormBangunan() {
                                             </Card>
                                         </Link>
                                     </motion.div>
-                                ))}
+                                )}
+                            )}
                             </div>
                         </div>
                     </div>
