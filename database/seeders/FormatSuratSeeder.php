@@ -9,25 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class FormatSuratSeeder extends Seeder
 {
-    function buildInput(string $name, string $type = 'text', string $placeholder = ''): array {
-        return [
-            'name' => $name,
-            'value' => '',             // default empty string
-            'required' => true,        // default to true, adjust as needed
-            'label' => ucfirst($name), // capitalize first letter for label
-            'placeholder' => $placeholder ?: 'Masukkan ' . $name,
-            'type' => $type,
-            'minLength' => null,       // set if needed, otherwise null
-            'maxLength' => null,
-            'pattern' => null,         // regex pattern, null if none
-            'options' => null,         // array for select options, null if none
-            'disabled' => false,
-            'readOnly' => false,
-            'inputMode' => null,       // e.g. 'numeric', 'email', null if none
-        ];
-    }
-
-
     public function run()
     {
         $formats = [
