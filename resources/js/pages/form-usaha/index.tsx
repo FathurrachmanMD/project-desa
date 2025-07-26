@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Head, Link } from '@inertiajs/react';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,75 +7,46 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { Building2, FileText, ShoppingBag, Store, Briefcase, ArrowRight } from 'lucide-react';
 
-const permitTypes = [
-    {
-        id: 'siup',
-        title: 'Surat Izin Usaha Perdagangan (SIUP)',
-        description: 'Izin untuk menjalankan kegiatan usaha perdagangan',
-        icon: Store,
-        color: 'bg-gradient-to-br from-blue-500 to-purple-500',
-        requirements: [
-            'KTP Pemilik Usaha',
-            'NPWP Perusahaan',
-            'Akta Pendirian Usaha',
-            'Surat Keterangan Domisili'
-        ]
-    },
-    {
-        id: 'nib',
-        title: 'Nomor Induk Berusaha (NIB)',
-        description: 'Identitas pelaku usaha untuk memulai dan menjalankan usaha',
-        icon: FileText,
-        color: 'bg-gradient-to-br from-orange-500 to-red-500',
-        requirements: [
-            'KTP Pemilik Usaha',
-            'NPWP Pribadi/Perusahaan',
-            'Akta Pendirian (jika ada)',
-            'Dokumen Kepemilikan Tempat Usaha'
-        ]
-    },
-    {
-        id: 'situ',
-        title: 'Surat Izin Tempat Usaha (SITU)',
-        description: 'Izin yang menyatakan keabsahan lokasi tempat usaha',
-        icon: Building2,
-        color: 'bg-gradient-to-br from-pink-500 to-rose-500',
-        requirements: [
-            'KTP Pemilik Usaha',
-            'Surat Kepemilikan/Sewa Tempat',
-            'Izin Lingkungan',
-            'Foto Lokasi Usaha'
-        ]
-    },
-    {
-        id: 'sku',
-        title: 'Surat Keterangan Usaha (SKU)',
-        description: 'Surat keterangan yang menyatakan keberadaan usaha',
-        icon: ShoppingBag,
-        color: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-        requirements: [
-            'KTP Pemilik Usaha',
-            'Kartu Keluarga',
-            'Surat Pengantar RT/RW',
-            'Foto Tempat Usaha'
-        ]
-    },
-    {
-        id: 'iumk',
-        title: 'Izin Usaha Mikro Kecil (IUMK)',
-        description: 'Izin untuk usaha mikro dan kecil',
-        icon: Briefcase,
-        color: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-        requirements: [
-            'KTP Pemilik Usaha',
-            'Kartu Keluarga',
-            'Foto Usaha',
-            'Surat Pengantar RT/RW'
-        ]
-    }
+const icons = [Store, FileText, Building2, ShoppingBag, Briefcase];
+const colors = [
+  'bg-gradient-to-br from-blue-500 to-purple-500',    // SIUP
+  'bg-gradient-to-br from-orange-500 to-red-500',     // NIB
+  'bg-gradient-to-br from-pink-500 to-rose-500',      // SITU
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   // SKU
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      // IUMK
 ];
 
+interface Syarat {
+  id: number | string;
+  nama: string;
+}
+
+interface FormatSurat {
+  id: number | string;
+  nama: string;
+  deskripsi: string;
+  syarat: Syarat[];
+}
+
 export default function FormUsaha() {
+    const API_URL = import.meta.env.VITE_API_URL;
+    
+    const [data, setData] = useState([]);
+    
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/form-usaha`);
+            console.log(response);
+            setData(response.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+    
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     return (
         <>
             <Head title="Form Perizinan Usaha - Desa Drawati" />
@@ -115,32 +88,34 @@ export default function FormUsaha() {
                         <div className="mx-auto max-w-4xl">
                             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 
-                            {permitTypes.map((permit) => (
+                            {data.map((row: FormatSurat, index) => {
+                                const Icon = icons[index];
+                                return (
                                 <motion.div
-                                    key={permit.id}
+                                    key={row.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    <Link href={`/form-usaha/form/${permit.id}`}>
+                                    <Link href={`/form-usaha/form/${row.id}`}>
                                         <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
                                             <CardHeader className="space-y-4">
-                                                <div className={`${permit.color} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                                    <permit.icon className="w-8 h-8 text-white" />
+                                                <div className={`${colors[index]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                                    <Icon className="w-8 h-8 text-white" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-xl mb-2">{permit.title}</CardTitle>
-                                                    <p className="text-gray-600 text-sm">{permit.description}</p>
+                                                    <CardTitle className="text-xl mb-2">{row.nama}</CardTitle>
+                                                    <p className="text-gray-600 text-sm">{row.deskripsi}</p>
                                                 </div>
                                             </CardHeader>
                                             <CardContent>
                                                 <div className="space-y-3">
                                                     <h4 className="text-sm font-semibold">Persyaratan:</h4>
                                                     <ul className="space-y-2">
-                                                        {permit.requirements.map((req, index) => (
+                                                        {row.syarat.map((req: Syarat, index: any) => (
                                                             <li key={index} className="flex items-start gap-2 text-sm text-gray-600">
                                                                 <div className="w-1.5 h-1.5 rounded-full bg-[#1E4359] mt-1.5 flex-shrink-0" />
-                                                                <span>{req}</span>
+                                                                <span>{req.nama}</span>
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -153,7 +128,8 @@ export default function FormUsaha() {
                                         </Card>
                                     </Link>
                                 </motion.div>
-                            ))}
+                            )}
+                            )}
                             </div>
                         </div>
                     </div>

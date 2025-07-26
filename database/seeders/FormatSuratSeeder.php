@@ -12,10 +12,10 @@ class FormatSuratSeeder extends Seeder
     public function run()
     {
         $formats = [
-            ['kategori_id' => 1, 'nama' => 'SKU', 'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>', 'form_isian' => ['nama', 'jk']],
-            ['kategori_id' => 1, 'nama' => 'IUMK'],
-            ['kategori_id' => 1, 'nama' => 'SITU'],
-            ['kategori_id' => 1, 'nama' => 'NIB'],
+            ['kategori_id' => 1, 'nama' => 'Surat Keterangan Usaha (SKU)', 'slug' => 'sku', 'deskripsi' => 'Surat keterangan yang menyatakan keberadaan usaha', 'template' => '<p>Nama: {nama}</p><p>Jenis Kelamin: {jk}</p>', 'form_isian' => ['nama', 'jk']],
+            ['kategori_id' => 1, 'nama' => 'Izin Usaha Mikro Kecil (IUMK)', 'slug' => 'iumk', 'deskripsi' => 'Izin untuk usaha mikro dan kecil'],
+            ['kategori_id' => 1, 'nama' => 'Surat Izin Tempat Usaha (SITU)', 'slug' => 'situ', 'deskripsi' => 'Izin yang menyatakan keabsahan lokasi tempat usaha'],
+            ['kategori_id' => 1, 'nama' => 'Nomor Induk Berusaha (NIB)', 'slug' => 'nib', 'deskripsi' => 'Identitas pelaku usaha untuk memulai dan menjalankan usaha'],
 
             ['kategori_id' => 2, 'nama' => 'hajatan'],
             ['kategori_id' => 2, 'nama' => 'acara publik'],
@@ -41,8 +41,9 @@ class FormatSuratSeeder extends Seeder
         foreach ($formats as $format) {
             DB::table('format_surat')->insert([
                 'nama' => $format['nama'],
+                'deskripsi' => isset($format['deskripsi']) ? $format['deskripsi'] : null,
                 'kategori_id' => $format['kategori_id'],
-                'url_surat' => Str::slug($format['nama']),
+                'url_surat' => isset($format['slug']) ? $format['slug'] : Str::slug($format['nama']),
                 'template' => isset($format['template']) ? $format['template'] : null,
                 'form_isian' => isset($format['form_isian']) ? json_encode($format['form_isian']) : null,
                 'created_by' => 1,
