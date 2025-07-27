@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/lapak-usaha', function () {
     return Inertia::render('lapak-usaha/index');
-});
+})->name('lapak-usaha');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

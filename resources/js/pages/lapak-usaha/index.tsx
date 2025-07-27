@@ -150,11 +150,13 @@ const LapakUsaha: React.FC = () => {
 
                             {/* Navigation Links */}
                             <div className="hidden md:flex items-center space-x-8">
-                                <button 
-                                    onClick={() => scrollToSection('home')}
-                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                >
-                                    Beranda
+                                <button>
+                                    <Link
+                                        href={'/'} // Gunakan Link dan href yang valid
+                                        className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                    >
+                                        Beranda
+                                    </Link>
                                 </button>
                                 
                                 {/* Perizinan Dropdown */}
@@ -179,11 +181,13 @@ const LapakUsaha: React.FC = () => {
                                         ))}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-                                <button 
-                                    onClick={() => scrollToSection('store')}
-                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                >
-                                    Lapak
+                                <button>
+                                    <Link
+                                        href={'/lapak-usaha'} // Gunakan Link dan href yang valid
+                                        className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                                    >
+                                        Lapak
+                                    </Link>
                                 </button>
                                 <button 
                                     onClick={() => scrollToSection('services')}
