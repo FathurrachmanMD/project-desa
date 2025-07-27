@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penduduk;
+use App\Models\Surat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +24,18 @@ class PendudukController extends Controller
             'suspended' => $data->where('status', 'suspended')->count(),
             'data' => $data
         ]);
+    }
+
+    public function createFromSurat(Surat $surat) {
+        // create or find penduduk by where surat.form.nik match
+        $penduduk = Penduduk::create([
+            'nama' => $surat->form->nama,
+            'nik' => $surat->form->nik,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id()
+        ]);
+
+        $surat->penduduk_id = $penduduk->id;
     }
 
     /**
@@ -78,10 +91,21 @@ class PendudukController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Penduduk $penduduk)
+    public function show($id = null)
     {
-        //
+        if (!$id) {
+            return response()->json([]);
+        }
+
+        $penduduk = Penduduk::find($id);
+
+        if (!$penduduk) {
+            return response()->json([]);
+        }
+
+        return response()->json($penduduk);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -94,14 +118,13 @@ class PendudukController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id = null)
     {
         try {
-            $penduduk = Penduduk::findOrFail($id);
-
+            // Validate input
             $validated = $request->validate([
                 'nama'             => 'sometimes|required|string|max:255',
-                'nik'              => 'sometimes|required|string|max:255|unique:penduduk,nik,' . $penduduk->id,
+                'nik'              => 'sometimes|required|string|max:255|unique:penduduk,nik,' . ($id ?? 'NULL'),
                 'sex'              => 'nullable|in:L,P',
                 'pekerjaan'        => 'nullable|string|max:255',
                 'tempatlahir'      => 'nullable|string|max:255',
@@ -114,10 +137,20 @@ class PendudukController extends Controller
 
             $validated['updated_by'] = Auth::id();
 
-            $penduduk->update($validated);
+            // If ID exists, try to find. If not found or null, create new.
+            $penduduk = $id ? Penduduk::find($id) : null;
+
+            if (!$penduduk) {
+                $validated['created_by'] = Auth::id();
+                $penduduk = Penduduk::create($validated);
+                $message = 'Penduduk berhasil dibuat';
+            } else {
+                $penduduk->update($validated);
+                $message = 'Penduduk berhasil diperbarui';
+            }
 
             return response()->json([
-                'message' => 'Penduduk berhasil diperbarui',
+                'message' => $message,
                 'data' => $penduduk
             ]);
 
@@ -133,6 +166,7 @@ class PendudukController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

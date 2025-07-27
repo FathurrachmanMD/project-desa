@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lapak', function (Blueprint $table) {
             $table->id();
             // $table->unsignedBigInteger('config_id')->nullable()->index();
+            $table->string('nama');
             $table->unsignedBigInteger('penduduk_id')->nullable()->index(); // relasi ke penduduk
 
             $table->string('telepon', 20)->nullable();

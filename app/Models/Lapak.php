@@ -13,6 +13,7 @@ class Lapak extends Model
 
     protected $fillable = [
         'penduduk_id',
+        'nama',
         'telepon',
         'lat',
         'lng',

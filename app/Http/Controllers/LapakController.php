@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lapak;
+use App\Models\Penduduk;
+use App\Models\Surat;
 use Illuminate\Http\Request;
 
 class LapakController extends Controller
@@ -21,6 +23,14 @@ class LapakController extends Controller
     public function create()
     {
         //
+    }
+
+    public function createFromSurat (Surat $surat) {
+        // create or find penduduk by where surat.form.nik match
+        Lapak::create([
+            'nama' => $surat->nama_usaha,
+            'penduduk_id' => $penduduk->id,
+        ]);
     }
 
     /**

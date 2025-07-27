@@ -7,6 +7,8 @@ use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\FormatSuratController;
 
+// todo: put a middleware here
+
 Route::get('dashboard', [DashboardController::class, 'index']);
 
 Route::get('/surat/form/{id}', [SuratController::class, 'show']); // get specific surat
@@ -19,9 +21,12 @@ Route::post('/surat/{slug}', [SuratController::class, 'store']);
 // Route::delete('/surat/{id}', [SuratController::class, 'destroy']);
 
 Route::get('/penduduk', [PendudukController::class, 'index']);
+Route::get('/penduduk/{id}', [PendudukController::class, 'show']);
 Route::post('/penduduk', [PendudukController::class, 'store']);
-Route::put('/penduduk/{id}', [PendudukController::class, 'update']);
+Route::put('/penduduk/form/{id?}', [PendudukController::class, 'update']);
 Route::delete('/penduduk/{id}', [PendudukController::class, 'destroy']);
+
+// not here
 
 Route::get('/format-surat/{kategori}', [FormatSuratController::class, 'index']);
 Route::get('/format-surat/form/{slug}', [FormatSuratController::class, 'show']);

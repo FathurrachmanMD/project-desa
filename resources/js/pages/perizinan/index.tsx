@@ -39,21 +39,21 @@ const permitIcons = {
 };
 
 type SuratItem = {
-    status: string;
-    [key: string]: any;
-  };
+  status: string;
+  [key: string]: any;
+};
 
-  type StatusCounts = {
-    total: number;
-    diproses: number;
-    disetujui: number;
-    ditolak: number;
-  };
+type StatusCounts = {
+  total: number;
+  diproses: number;
+  disetujui: number;
+  ditolak: number;
+};
 
-  type SuratResponse = {
-    list: SuratItem[];
-    statusCounts: StatusCounts | null;
-  };
+type SuratResponse = {
+  list: SuratItem[];
+  statusCounts: StatusCounts | null;
+};
 
 export default function PerizinanUsaha() {
   const API_URL = import.meta.env.VITE_API_URL;

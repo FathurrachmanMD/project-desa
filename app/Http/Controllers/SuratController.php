@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Services\PendudukService;
+use App\Services\LapakService;
+
 class SuratController extends Controller
 {
     public function index($slug)
@@ -148,6 +151,15 @@ class SuratController extends Controller
             $updateData['updated_by'] = Auth::id();
             $surat->status = $request->status;
             $surat->save();
+
+            if ($request->status == 'disetujui') {
+                $pendudukService = new PendudukService();
+                $pendudukService->createFromSurat($surat);
+            }
+            if ($surat->format->kategori_id == 1 && $request->status == 'disetujui') { // if is usaha
+                $lapakService = new LapakService();
+                $lapakService->createFromSurat($surat);
+            }
 
             return response()->json([
                 'message' => 'Surat berhasil diperbarui',

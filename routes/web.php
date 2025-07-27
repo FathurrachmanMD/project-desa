@@ -103,6 +103,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customers', function () {
         return Inertia::render('customers/index');
     })->name('customers.index');
+    Route::get('customers/form/{id?}', function ($id = null) {
+        return Inertia::render('customers/form', [
+            'id' => $id
+        ]);
+    });
     
     // Demo route for toast notifications
     Route::get('demo/toast', function () {

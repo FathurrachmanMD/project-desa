@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect, act } from 'react';
+import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { CustomerTable } from '@/components/customer-table';
-import { CustomerDetailModal } from '@/components/customer-detail-modal';
-import { CustomerEditModal } from '@/components/customer-edit-modal';
+import { useToast } from '@/contexts/ToastContext';
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal';
-import { createCustomerColumns } from '@/components/columns/customer-columns';
-import { customersData as originalCustomersData, Customer } from '@/data/customers';
-import { useCrudToast } from '@/hooks/useToast';
+import NewButton from '@/components/new-button';
 import { type BreadcrumbItem } from '@/types';
 import { 
   Users, 
   UserPlus,
   UserCheck,
   UserX,
-  Shield
+  Shield,
+  User
 } from 'lucide-react';
+
+import DataTable from 'react-data-table-component';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,193 +32,256 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function Customers() {
-  const [customersData, setCustomersData] = useState<Customer[]>(originalCustomersData);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+type PendudukItem = {
+  status: string;
+  [key: string]: any;
+};
+
+type StatusCounts = {
+  total: number;
+  aktif: number;
+  nonaktif: number;
+  suspended: number;
+};
+
+type PendudukResponse = {
+    list: PendudukItem[];
+    statusCounts: StatusCounts | null;
+  };
+
+export default function Penduduk() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const [data, setData] = useState<PendudukItem[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [idDelete, setIdDelete] = useState(0);
   
-  // Toast hooks
-  const { updateSuccess, deleteSuccess, deleteError } = useCrudToast();
+  const { showToast } = useToast();
 
-  const handleView = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setIsDetailModalOpen(true);
-  };
+  const [statusCounts, setStatusCounts] = useState<StatusCounts>({
+    total: 0,
+    aktif: 0,
+    nonaktif: 0,
+    suspended: 0,
+  });
 
-  const handleEdit = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (customer: Customer) => {
-    setCustomerToDelete(customer);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleSaveEdit = (updatedCustomer: Customer) => {
-    const newData = customersData.map(item => 
-      item.id === updatedCustomer.id ? updatedCustomer : item
-    );
-    setCustomersData(newData);
-    setIsEditModalOpen(false);
-    updateSuccess('Data customer');
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!customerToDelete) return;
-    
-    setIsDeleting(true);
+  const getData = async (): Promise<PendudukResponse> => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newData = customersData.filter(item => item.id !== customerToDelete.id);
-      setCustomersData(newData);
-      
-      setIsDeleteModalOpen(false);
-      setCustomerToDelete(null);
-      deleteSuccess('Data customer');
-    } catch {
-      deleteError('Data customer');
+      const response = await axios.get(`${API_URL}/penduduk`);
+      const list = response.data.data || [];
+      showToast.success(response.data.message);
+      return {
+        list,
+        statusCounts: {
+          total: list.length,
+          aktif: response.data.aktif,
+          nonaktif: response.data.nonaktif,
+          suspended: response.data.suspended,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
     } finally {
-      setIsDeleting(false);
+      setIsLoading(false);
     }
   };
 
-  // Statistics
-  const totalCustomers = customersData.length;
-  const activeCustomers = customersData.filter(c => c.status_akun === 'Aktif').length;
-  const inactiveCustomers = customersData.filter(c => c.status_akun === 'Nonaktif').length;
-  const suspendedCustomers = customersData.filter(c => c.status_akun === 'Suspended').length;
+  const handleDeleteModal = (id: number) => {
+    setIdDelete(id);
+    setIsDeleteModalOpen(true);
+  }
 
-  const columns = createCustomerColumns({
-    onView: handleView,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
-  });
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${API_URL}/penduduk/${idDelete}`);
+      showToast.success(response.data.message);
+    } catch (error) {
+      console.error(error);
+      showToast.error("Terjadi kesalahan");
+      return { list: [], statusCounts: null };
+    } finally {
+      fetchData();
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
+    }
+  }
+
+  const fetchData = async () => {
+    const result = await getData();
+    setData(result.list);
+    if (result.statusCounts) setStatusCounts(result.statusCounts);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  console.log(data)
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Manajemen Customer" />
+      <Head title="Manajemen Penduduk" />
       
       <div className="container mx-auto py-8 px-6">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Manajemen Customer
+              Manajemen Penduduk
             </h1>
             <p className="text-muted-foreground mt-1">
-              Kelola data customer yang telah terdaftar dalam sistem
+              Kelola semua penduduk dalam satu dashboard
             </p>
           </div>
-          <Button>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Tambah Customer
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1 px-3 py-1">
+              <User className="h-3.5 w-3.5" />
+              <span>Total Penduduk</span>
+            </Badge>
+          </div>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Total Customer</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total Penduduk</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalCustomers}</div>
+              <div className="text-2xl font-bold">{statusCounts.total}</div>
               <p className="text-xs text-muted-foreground">
-                Customer terdaftar
+                Semua penduduk
               </p>
             </CardContent>
           </Card>
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Customer Aktif</CardTitle>
-              <UserCheck className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium">Penduduk Aktif</CardTitle>
+              <div className="h-2 w-2 rounded-full bg-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{activeCustomers}</div>
+              <div className="text-2xl font-bold">{statusCounts.aktif}</div>
               <p className="text-xs text-muted-foreground">
-                {((activeCustomers / totalCustomers) * 100).toFixed(1)}% dari total
+                Aktif
               </p>
             </CardContent>
           </Card>
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Customer Nonaktif</CardTitle>
-              <UserX className="h-4 w-4 text-gray-600" />
+              <CardTitle className="text-sm font-medium">Penduduk Nonaktif</CardTitle>
+              <div className="h-2 w-2 rounded-full bg-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-600">{inactiveCustomers}</div>
+              <div className="text-2xl font-bold">{statusCounts.nonaktif}</div>
               <p className="text-xs text-muted-foreground">
-                {((inactiveCustomers / totalCustomers) * 100).toFixed(1)}% dari total
+                Nonaktif
               </p>
             </CardContent>
           </Card>
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Customer Suspended</CardTitle>
-              <Shield className="h-4 w-4 text-red-600" />
+              <CardTitle className="text-sm font-medium">Penduduk Suspended</CardTitle>
+              <div className="h-2 w-2 rounded-full bg-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{suspendedCustomers}</div>
+              <div className="text-2xl font-bold">{statusCounts.suspended}</div>
               <p className="text-xs text-muted-foreground">
-                {((suspendedCustomers / totalCustomers) * 100).toFixed(1)}% dari total
+                Suspended
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Customer Table */}
+        {/* Main Content */}
         <Card className="shadow-sm">
-          <CardHeader>
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <CardTitle className="text-lg font-semibold">Daftar Customer</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Total {totalCustomers} customer terdaftar
-                </CardDescription>
-              </div>
-            </div>
+          <CardHeader className="pb-4">
+            <CardTitle>Data Perizinan</CardTitle>
+            <CardDescription className='flex items-center align-middle'>
+              <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
+              {/* <NewButton href={`form/create/${activeTab}`}/> */}
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <CustomerTable data={customersData} columns={columns} />
+          <CardContent className="px-5">
+            <Tabs value={"penduduk"} className="w-full">
+              <TabsContent key={"penduduk"} value={"penduduk"} className='mt-2'>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      {/* should be "penduduk" label name */}
+                      <h3 className="text-lg font-semibold">Penduduk</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Total {statusCounts.total} pengajuan
+                      </p>
+                    </div>
+                  </div>
+                  {
+                    isLoading ? (
+                      <div className="p-4 text-center text-muted-foreground">Loading data...</div>
+                    )
+                    : (
+                      <DataTable
+                        data={data}
+                        columns={[
+                          {
+                            name: "ID",
+                            selector: row => row.id,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Penduduk",
+                            selector: row => row.nama,
+                            sortable: true
+                          },
+                          {
+                            name: "NIK",
+                            selector: row => row.nik,
+                            sortable: true
+                          },
+                          {
+                            name: "Status",
+                            selector: row => row.status,
+                            sortable: true,
+                            cell: row => {
+                              const variant = row.status == 'nonaktif' ? 'warning' : (row.status == 'aktif' ? 'success' : (row.status == 'suspended' ? 'destructive' : 'secondary'));
+                              return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
+                            }
+                          },
+                          {
+                            name: "Aksi",
+                            cell: row => (
+                              <div className="flex items-center gap-2">
+                                <Link href={`customers/form/${row.id}`}>
+                                  <Button className='bg-yellow-500' type='button'>Edit</Button>
+                                </Link>
+                                <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>
+                              </div>
+                            )
+                          }
+                        ]}
+                        pagination
+                        highlightOnHover
+                      />
+                    )
+                  }
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
-
-      {/* Modals */}
-      <CustomerDetailModal
-        customer={selectedCustomer}
-        open={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-      />
-
-      <CustomerEditModal
-        customer={selectedCustomer}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onSave={handleSaveEdit}
-      />
-
       <DeleteConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        title="Hapus Customer"
-        description={
-          customerToDelete
-            ? `Apakah Anda yakin ingin menghapus customer "${customerToDelete.nama}"? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait customer.`
-            : ''
-        }
-        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        title={"Hapus Surat"}
+        description={`Apakah anda yakin akan menghapus data id:${idDelete}`}
+        isLoading={isLoading}
       />
     </AppLayout>
   );
