@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\FormatSuratController;
+use App\Http\Controllers\LapakController;
+use App\Http\Controllers\ProdukController;
 
 // todo: put a middleware here
 
@@ -25,6 +27,18 @@ Route::get('/penduduk/{id}', [PendudukController::class, 'show']);
 Route::post('/penduduk', [PendudukController::class, 'store']);
 Route::put('/penduduk/form/{id?}', [PendudukController::class, 'update']);
 Route::delete('/penduduk/{id}', [PendudukController::class, 'destroy']);
+
+Route::get('/lapak', [LapakController::class, 'index']);
+Route::get('/lapak/{id}', [LapakController::class, 'show']);
+Route::post('/lapak', [LapakController::class, 'store']);
+Route::put('/lapak/{id?}', [LapakController::class, 'update']);
+Route::delete('/lapak/{id}', [LapakController::class, 'destroy']);
+
+Route::get('/produk', [ProdukController::class, 'index']);
+Route::get('/produk/{id}', [ProdukController::class, 'show']);
+Route::post('/produk', [ProdukController::class, 'store']);
+Route::put('/produk/{id?}', [ProdukController::class, 'update']);
+Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
 
 // not here
 
