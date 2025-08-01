@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 
 // Import komponen UI yang diperlukan
@@ -18,9 +18,59 @@ import { MessageCircle, ChevronDown,
     Package
 } from 'lucide-react';
 
-// Kosong untuk sementara, interface dan data akan ditambahkan di masa depan
+// Interface untuk produk
+interface Product {
+    id: number;
+    title: string;
+    price: string;
+    category: string;
+    sellerName: string;
+    sellerPhone: string;
+    description: string;
+    imgSrc: string;
+    lapakName: string;
+    satuan: string;
+    status: string;
+}
 
 const LapakUser: React.FC = () => {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch products ketika component mount
+    useEffect(() => {
+        fetchUserProducts();
+    }, []);
+
+    const fetchUserProducts = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('/api/lapak-user/products', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    // Tambahkan auth header jika diperlukan
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch products');
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                setProducts(data.data);
+            } else {
+                setError(data.message || 'Failed to load products');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const scrollToSection = (sectionId: string) => {
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -182,27 +232,134 @@ const LapakUser: React.FC = () => {
                             </Link>
                         </div>
 
-                        {/* Empty State */}
-                        <motion.div 
-                            className="text-center py-20"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <Store className="w-24 h-24 mx-auto text-gray-300 mb-6" />
-                            <h3 className="text-2xl font-semibold text-gray-600 mb-4">
-                                Belum Ada Lapak
-                            </h3>
-                            <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                Anda belum memiliki produk yang terdaftar. Mulai dengan mengajukan lapak terlebih dahulu untuk mendapatkan izin usaha.
-                            </p>
-                            <Link href="/surat/form/create/sku">
-                                <Button className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Ajukan Lapak Sekarang
+                        {/* Loading State */}
+                        {loading && (
+                            <motion.div 
+                                className="text-center py-20"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <Package className="w-24 h-24 mx-auto text-gray-300 mb-6 animate-pulse" />
+                                <h3 className="text-2xl font-semibold text-gray-600 mb-4">
+                                    Memuat Lapak...
+                                </h3>
+                                <p className="text-gray-500">
+                                    Sedang mengambil data lapak Anda
+                                </p>
+                            </motion.div>
+                        )}
+
+                        {/* Error State */}
+                        {error && !loading && (
+                            <motion.div 
+                                className="text-center py-20"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <Store className="w-24 h-24 mx-auto text-red-300 mb-6" />
+                                <h3 className="text-2xl font-semibold text-red-600 mb-4">
+                                    Gagal Memuat Data
+                                </h3>
+                                <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                    {error}
+                                </p>
+                                <Button 
+                                    onClick={fetchUserProducts}
+                                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                                >
+                                    Coba Lagi
                                 </Button>
-                            </Link>
-                        </motion.div>
+                            </motion.div>
+                        )}
+
+                        {/* Products Grid */}
+                        {!loading && !error && products.length > 0 && (
+                            <motion.div 
+                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                {products.map((product) => (
+                                    <motion.div
+                                        key={product.id}
+                                        className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
+                                        whileHover={{ y: -4 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <div className="aspect-square overflow-hidden">
+                                            <img
+                                                src={product.imgSrc}
+                                                alt={product.title}
+                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                            />
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-1">
+                                                {product.title}
+                                            </h3>
+                                            <p className="text-2xl font-bold text-[#1E4359] mb-2">
+                                                {product.price}
+                                                {product.satuan && <span className="text-sm font-normal text-gray-500"> / {product.satuan}</span>}
+                                            </p>
+                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                                {product.description}
+                                            </p>
+                                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                                <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                    {product.category}
+                                                </span>
+                                                <span className="font-medium">{product.lapakName}</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="flex-1 bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white"
+                                                >
+                                                    Detail
+                                                </Button>
+                                                {product.sellerPhone && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="px-3"
+                                                        onClick={() => window.open(`https://wa.me/${product.sellerPhone.replace(/\D/g, '')}`, '_blank')}
+                                                    >
+                                                        <MessageCircle className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        )}
+
+                        {/* Empty State */}
+                        {!loading && !error && products.length === 0 && (
+                            <motion.div 
+                                className="text-center py-20"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <Store className="w-24 h-24 mx-auto text-gray-300 mb-6" />
+                                <h3 className="text-2xl font-semibold text-gray-600 mb-4">
+                                    Belum Ada Lapak
+                                </h3>
+                                <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                    Anda belum memiliki produk yang terdaftar. Mulai dengan mengajukan lapak terlebih dahulu untuk mendapatkan izin usaha.
+                                </p>
+                                <Link href="/surat/form/create/sku">
+                                    <Button className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Ajukan Lapak Sekarang
+                                    </Button>
+                                </Link>
+                            </motion.div>
+                        )}
                         
                     </div>
                 </section>

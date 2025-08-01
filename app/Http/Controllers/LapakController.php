@@ -124,6 +124,85 @@ class LapakController extends Controller
     }
 
     /**
+     * Get lapak milik user yang sedang login
+     */
+    public function getUserLapak()
+    {
+        try {
+            $user = auth()->user();
+            
+            // Fallback untuk testing - gunakan user ID 1 jika tidak ada auth
+            $userId = $user ? $user->id : 1;
+
+            // Ambil semua lapak yang dibuat oleh user yang sedang login
+            $lapaks = Lapak::where('created_by', $userId)
+                ->with(['penduduk'])
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $lapaks
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch lapak data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get semua produk dari lapak milik user
+     */
+    public function getUserProducts()
+    {
+        try {
+            $user = auth()->user();
+            
+            // Fallback untuk testing - gunakan user ID 1 jika tidak ada auth
+            $userId = $user ? $user->id : 1;
+
+            // Ambil semua lapak milik user
+            $lapakIds = Lapak::where('created_by', $userId)->pluck('id');
+
+            // Ambil semua produk dari lapak-lapak tersebut
+            $products = \App\Models\Produk::whereIn('lapak_id', $lapakIds)
+                ->with(['lapak', 'kategori'])
+                ->where('status', true)
+                ->get();
+
+            // Format data untuk frontend
+            $formattedProducts = $products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'title' => $product->nama,
+                    'price' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
+                    'category' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
+                    'sellerName' => $product->lapak ? $product->lapak->nama : 'Tidak Diketahui',
+                    'sellerPhone' => $product->lapak ? $product->lapak->telepon : '',
+                    'description' => $product->deskripsi,
+                    'imgSrc' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
+                    'lapakName' => $product->lapak ? $product->lapak->nama : 'Tidak Diketahui',
+                    'satuan' => $product->satuan,
+                    'status' => $product->status
+                ];
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $formattedProducts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch products data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)

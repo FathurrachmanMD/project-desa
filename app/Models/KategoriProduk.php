@@ -13,13 +13,17 @@ class KategoriProduk extends Model
     // Tentukan nama tabel jika tidak mengikuti konvensi jamak
     protected $table = 'kategori_produk';
 
-    public $timestamps = false; // Diasumsikan tabel kategori tidak punya timestamps
+    protected $fillable = [
+        'kategori',
+        'slug',
+        'status'
+    ];
 
     /**
      * Get the products for the category.
      */
     public function produks(): HasMany
     {
-        return $this->hasMany(LapakUsaha::class);
+        return $this->hasMany(Produk::class, 'kategori_id');
     }
 }

@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { useState, useEffect, ElementType } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -90,24 +90,27 @@ export default function PermitForm({ slug }: PermitFormProps) {
   ];
 
   const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
-  const [status, setStatus] = useState<String>("")
+  const [status, setStatus] = useState<string>("")
   // const [Icon, setIcon] = useState<ElementType>(icons[0]);
   
-    const fetchFormatSurat = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
-        setFormatSurat(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
-      }
-    }
-  
     useEffect(() => {
+      const fetchFormatSurat = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
+          setFormatSurat(response.data);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
+        }
+      };
+      
       fetchFormatSurat();
-    }, []);
+    }, [API_URL, slug, showToast]);
     
-    const [data, setData] = useState<{ [key: string]: any }>({});
+    const [data, setData] = useState<{ form: { [key: string]: string }, file: { [key: string]: File | null } }>({
+      form: {},
+      file: {}
+    });
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
@@ -146,37 +149,54 @@ export default function PermitForm({ slug }: PermitFormProps) {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSubmitting(true);
-  
+
       try {
         const formData = new FormData();
         const token = localStorage.getItem("token"); // or wherever you store it
-  
-        // Add form fields
+
+        // Validate data exists
+        if (!data.form || !data.file) {
+          throw new Error('Form data is not properly initialized');
+        }
+
+        // Add form fields - only add non-empty values
         Object.entries(data.form).forEach(([key, value]) => {
-          formData.append(`form[${key}]`, value as string);
+          if (value && value.trim() !== '') {
+            formData.append(`form[${key}]`, value);
+          }
         });
-  
-        // Add files
+
+        // Add files - only add actual files
         Object.entries(data.file).forEach(([key, file]) => {
-          if (file) {
+          if (file && file instanceof File) {
             formData.append(`syarat[${key}]`, file as Blob);
           }
         });
-  
+
+        // Validate slug exists
+        if (!slug || typeof slug !== 'string') {
+          throw new Error('Invalid slug parameter');
+        }
+
         const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
         });
-  
+
         // Success handling here
         console.log("Submitted:", response.data);
         showToast.success("Data Berhasil Disimpan");
       } catch (error) {
         // Error handling here
         console.error("Submission failed:", error);
-        showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+        
+        if (error instanceof Error) {
+          showToast.error('Kesalahan Sistem', error.message);
+        } else {
+          showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+        }
       } finally {
         setIsSubmitting(false);
       }

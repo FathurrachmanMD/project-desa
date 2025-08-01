@@ -34,6 +34,10 @@ Route::post('/lapak', [LapakController::class, 'store']);
 Route::put('/lapak/{id?}', [LapakController::class, 'update']);
 Route::delete('/lapak/{id}', [LapakController::class, 'destroy']);
 
+// Routes khusus untuk user lapak (sementara tanpa auth untuk testing)
+Route::get('/lapak-user', [LapakController::class, 'getUserLapak']);
+Route::get('/lapak-user/products', [LapakController::class, 'getUserProducts']);
+
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::post('/produk', [ProdukController::class, 'store']);
