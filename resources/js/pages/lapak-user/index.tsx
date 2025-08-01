@@ -18,7 +18,7 @@ import { MessageCircle, ChevronDown,
     Package
 } from 'lucide-react';
 
-// Interface untuk produk
+// Interface untuk produk yang berasal dari surat yang disetujui
 interface Product {
     id: number;
     title: string;
@@ -31,6 +31,14 @@ interface Product {
     lapakName: string;
     satuan: string;
     status: string;
+    // Data tambahan dari surat pengajuan
+    pengajuan_nama: string;
+    nik: string;
+    nama_usaha: string;
+    jenis_usaha: string;
+    alamat_usaha: string;
+    lama_usaha: string;
+    tanggal_disetujui: string;
 }
 
 const LapakUser: React.FC = () => {
@@ -207,9 +215,9 @@ const LapakUser: React.FC = () => {
                             transition={{ duration: 0.8 }}
                         >
                             <Store className="w-16 h-16 mx-auto mb-4" />
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4">Lapak Saya</h1>
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4">Lapak Usaha Desa</h1>
                             <p className="max-w-2xl mx-auto">
-                                Kelola produk dan usaha Anda di platform digital Desa Drawati. Mulai jualan dan kembangkan bisnis lokal Anda bersama kami.
+                                Daftar usaha yang telah memperoleh Surat Keterangan Usaha (SKU) dan terdaftar resmi di Desa Drawati. Dukung ekonomi lokal dengan berbelanja dari usaha warga setempat.
                             </p>
                         </motion.div>
                     </div>
@@ -219,15 +227,20 @@ const LapakUser: React.FC = () => {
                 <section className="py-16 bg-white">
                     <div className="container mx-auto px-4">
                         <div className="flex justify-between items-center mb-10">
-                            <h2 className="text-3xl font-bold text-gray-800">
-                                Lapak Saya
-                            </h2>
+                            <div>
+                                <h2 className="text-3xl font-bold text-gray-800">
+                                    Usaha Berizin SKU
+                                </h2>
+                                <p className="text-gray-600 mt-1">
+                                    Usaha yang telah memperoleh Surat Keterangan Usaha dari Desa Drawati
+                                </p>
+                            </div>
 
                             {/* Tombol Ajukan Lapak yang mengarah ke form create surat SKU */}
                             <Link href="/surat/form/create/sku">
                                 <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white">
                                     <Plus className="mr-2 h-4 w-4" /> 
-                                    Ajukan Lapak
+                                    Ajukan SKU
                                 </Button>
                             </Link>
                         </div>
@@ -298,27 +311,44 @@ const LapakUser: React.FC = () => {
                                         </div>
                                         <div className="p-4">
                                             <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-1">
-                                                {product.title}
+                                                {product.nama_usaha}
                                             </h3>
-                                            <p className="text-2xl font-bold text-[#1E4359] mb-2">
-                                                {product.price}
-                                                {product.satuan && <span className="text-sm font-normal text-gray-500"> / {product.satuan}</span>}
-                                            </p>
-                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                                {product.description}
-                                            </p>
-                                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                                                <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
-                                                    {product.category}
+                                            <div className="space-y-2 mb-3">
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">Pemilik:</span>
+                                                    <span className="font-medium text-gray-700">{product.pengajuan_nama}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">NIK:</span>
+                                                    <span className="font-medium text-gray-700">{product.nik}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">Jenis Usaha:</span>
+                                                    <span className="font-medium text-gray-700">{product.jenis_usaha}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">Alamat:</span>
+                                                    <span className="font-medium text-gray-700 text-right">{product.alamat_usaha}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-500">Lama Usaha:</span>
+                                                    <span className="font-medium text-gray-700">{product.lama_usaha}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3 pt-2 border-t">
+                                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                    Disetujui
                                                 </span>
-                                                <span className="font-medium">{product.lapakName}</span>
+                                                <span className="text-xs">
+                                                    {new Date(product.tanggal_disetujui).toLocaleDateString('id-ID')}
+                                                </span>
                                             </div>
                                             <div className="flex space-x-2">
                                                 <Button
                                                     size="sm"
                                                     className="flex-1 bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white"
                                                 >
-                                                    Detail
+                                                    Lihat Detail
                                                 </Button>
                                                 {product.sellerPhone && (
                                                     <Button
@@ -347,15 +377,15 @@ const LapakUser: React.FC = () => {
                             >
                                 <Store className="w-24 h-24 mx-auto text-gray-300 mb-6" />
                                 <h3 className="text-2xl font-semibold text-gray-600 mb-4">
-                                    Belum Ada Lapak
+                                    Belum Ada Usaha Berizin
                                 </h3>
                                 <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                    Anda belum memiliki produk yang terdaftar. Mulai dengan mengajukan lapak terlebih dahulu untuk mendapatkan izin usaha.
+                                    Belum ada usaha yang memperoleh Surat Keterangan Usaha (SKU) dari Desa Drawati. Ajukan permohonan SKU untuk mendaftarkan usaha Anda.
                                 </p>
                                 <Link href="/surat/form/create/sku">
                                     <Button className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
                                         <Plus className="mr-2 h-4 w-4" />
-                                        Ajukan Lapak Sekarang
+                                        Ajukan SKU Sekarang
                                     </Button>
                                 </Link>
                             </motion.div>
@@ -369,7 +399,7 @@ const LapakUser: React.FC = () => {
                     <div className="container mx-auto px-4">
                         <div className="max-w-4xl mx-auto text-center">
                             <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                                Cara Memulai Lapak Anda
+                                Cara Mendaftarkan Usaha Anda
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 <motion.div 
@@ -380,9 +410,9 @@ const LapakUser: React.FC = () => {
                                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <FileText className="w-8 h-8 text-blue-600" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-2">1. Ajukan Perizinan</h3>
+                                    <h3 className="text-xl font-semibold mb-2">1. Ajukan SKU</h3>
                                     <p className="text-gray-600">
-                                        Ajukan Surat Keterangan Usaha (SKU) untuk mendapatkan izin resmi berjualan
+                                        Ajukan permohonan Surat Keterangan Usaha (SKU) untuk mendapatkan izin resmi dari desa
                                     </p>
                                 </motion.div>
 
@@ -394,9 +424,9 @@ const LapakUser: React.FC = () => {
                                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Package className="w-8 h-8 text-green-600" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-2">2. Tambah Produk</h3>
+                                    <h3 className="text-xl font-semibold mb-2">2. Menunggu Persetujuan</h3>
                                     <p className="text-gray-600">
-                                        Setelah disetujui, tambahkan produk-produk unggulan Anda ke dalam lapak
+                                        Permohonan SKU akan diproses dan diperiksa oleh perangkat desa untuk persetujuan
                                     </p>
                                 </motion.div>
 
@@ -408,9 +438,9 @@ const LapakUser: React.FC = () => {
                                     <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <MessageCircle className="w-8 h-8 text-orange-600" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-2">3. Terima Pesanan</h3>
+                                    <h3 className="text-xl font-semibold mb-2">3. Usaha Terdaftar</h3>
                                     <p className="text-gray-600">
-                                        Pelanggan dapat menghubungi Anda langsung melalui WhatsApp untuk bertransaksi
+                                        Setelah disetujui, usaha Anda akan terdaftar resmi dan muncul di halaman ini
                                     </p>
                                 </motion.div>
                             </div>

@@ -153,45 +153,61 @@ class LapakController extends Controller
     }
 
     /**
-     * Get semua produk dari lapak milik user
+     * Get semua produk dari lapak yang dibuat berdasarkan surat SKU yang disetujui
      */
     public function getUserProducts()
     {
         try {
-            $user = auth()->user();
-            
-            // Fallback untuk testing - gunakan user ID 1 jika tidak ada auth
-            $userId = $user ? $user->id : 1;
-
-            // Ambil semua lapak milik user
-            $lapakIds = Lapak::where('created_by', $userId)->pluck('id');
-
-            // Ambil semua produk dari lapak-lapak tersebut
-            $products = \App\Models\Produk::whereIn('lapak_id', $lapakIds)
-                ->with(['lapak', 'kategori'])
-                ->where('status', true)
+            // Ambil surat-surat SKU yang sudah disetujui (kategori_id = 1 untuk usaha)
+            $approvedSurats = \App\Models\Surat::with(['format', 'penduduk'])
+                ->whereHas('format', function($query) {
+                    $query->where('kategori_id', 1); // kategori usaha
+                })
+                ->where('status', 'disetujui')
                 ->get();
 
-            // Format data untuk frontend
-            $formattedProducts = $products->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'title' => $product->nama,
-                    'price' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
-                    'category' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
-                    'sellerName' => $product->lapak ? $product->lapak->nama : 'Tidak Diketahui',
-                    'sellerPhone' => $product->lapak ? $product->lapak->telepon : '',
-                    'description' => $product->deskripsi,
-                    'imgSrc' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
-                    'lapakName' => $product->lapak ? $product->lapak->nama : 'Tidak Diketahui',
-                    'satuan' => $product->satuan,
-                    'status' => $product->status
-                ];
-            });
+            $allProducts = [];
+            
+            foreach ($approvedSurats as $surat) {
+                // Cari lapak yang dibuat dari surat ini
+                $lapaks = Lapak::where('penduduk_id', $surat->penduduk_id)
+                    ->with(['products.kategori'])
+                    ->get();
+                
+                foreach ($lapaks as $lapak) {
+                    foreach ($lapak->products as $product) {
+                        if ($product->status) { // hanya produk yang aktif
+                            $allProducts[] = [
+                                'id' => $product->id,
+                                'title' => $product->nama,
+                                'price' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
+                                'category' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
+                                'sellerName' => $lapak->nama,
+                                'sellerPhone' => $lapak->telepon,
+                                'description' => $product->deskripsi,
+                                'imgSrc' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
+                                'lapakName' => $lapak->nama,
+                                'satuan' => $product->satuan,
+                                'status' => $product->status ? 'aktif' : 'nonaktif',
+                                // Tambahan info dari surat
+                                'pengajuan_nama' => $surat->penduduk->nama ?? $surat->form['nama_pemohon'] ?? 'Tidak diketahui',
+                                'nik' => $surat->form['nik'] ?? 'Tidak diketahui',
+                                'nama_usaha' => $surat->form['nama_usaha'] ?? $lapak->nama,
+                                'jenis_usaha' => $surat->form['jenis_usaha'] ?? 'Tidak diketahui',
+                                'alamat_usaha' => $surat->form['alamat_usaha'] ?? 'Tidak diketahui',
+                                'lama_usaha' => $surat->form['lama_usaha'] ?? 'Tidak diketahui',
+                                'tanggal_disetujui' => $surat->updated_at->format('Y-m-d H:i:s')
+                            ];
+                        }
+                    }
+                }
+            }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $formattedProducts
+                'data' => $allProducts,
+                'total' => count($allProducts),
+                'message' => 'Data produk dari surat SKU yang disetujui berhasil diambil'
             ]);
         } catch (\Exception $e) {
             return response()->json([
