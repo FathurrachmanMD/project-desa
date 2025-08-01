@@ -96,6 +96,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'slug' => $slug
         ]);
     });
+    Route::get('surat/form/create/{slug}', function ($slug) {
+        return Inertia::render('surat/form-create', [
+            'slug' => $slug
+        ]);
+    })->name('surat.form.create');
     Route::get('form/view/{id}', function ($id) {
         return Inertia::render('surat/form-view', [
             'id' => $id
@@ -125,6 +130,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/lapak-usaha', function () {
     return Inertia::render('lapak-usaha/index');
 })->name('lapak-usaha');
+
+Route::get('/lapak-user', function () {
+    return Inertia::render('lapak-user/index');
+})->name('lapak-user');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
