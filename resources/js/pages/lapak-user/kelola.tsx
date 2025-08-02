@@ -238,7 +238,7 @@ const LapakUserKelola: React.FC<KelolaProps> = ({ slug }) => {
             } else {
                 toast.error(data.message || 'Failed to delete product');
             }
-        } catch (err) {
+        } catch {
             toast.error('An error occurred while deleting product');
         }
     };

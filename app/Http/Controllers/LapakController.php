@@ -154,50 +154,60 @@ class LapakController extends Controller
 
     /**
      * Get semua produk dari lapak yang dibuat berdasarkan surat SKU yang disetujui
+     * Hanya menampilkan produk default/placeholder untuk setiap lapak yang disetujui
      */
     public function getUserProducts()
     {
         try {
-                        // Ambil surat-surat SKU yang sudah disetujui (format_id = 2 untuk SKU)
-            $approvedSurats = Surat::where('status', 'disetujui')
-                ->where('format_id', 2) // format_id untuk SKU
-                ->with(['penduduk'])
-                ->get();
+            // Ambil daftar nama usaha unik dari surat SKU yang disetujui  
+            $approvedUsahaNames = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->pluck('form')
+                ->map(function($form) {
+                    return $form['nama_usaha'] ?? null;
+                })
+                ->filter()
+                ->unique()
+                ->values();
 
             $allProducts = [];
             
-            foreach ($approvedSurats as $surat) {
-                // Cari lapak yang dibuat dari surat ini
-                $lapaks = Lapak::where('penduduk_id', $surat->penduduk_id)
-                    ->with(['products.kategori'])
-                    ->get();
+            // Untuk setiap nama usaha unique, buat entry placeholder
+            foreach ($approvedUsahaNames as $namaUsaha) {
+                // Cari lapak berdasarkan nama usaha
+                $lapak = Lapak::where('nama', $namaUsaha)->first();
                 
-                foreach ($lapaks as $lapak) {
-                    foreach ($lapak->products as $product) {
-                        if ($product->status) { // hanya produk yang aktif
-                            $allProducts[] = [
-                                'id' => $product->id,
-                                'title' => $product->nama,
-                                'price' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
-                                'category' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
-                                'sellerName' => $lapak->nama,
-                                'sellerPhone' => $lapak->telepon,
-                                'description' => $product->deskripsi,
-                                'imgSrc' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
-                                'lapakName' => $lapak->nama,
-                                'satuan' => $product->satuan,
-                                'status' => $product->status ? 'aktif' : 'nonaktif',
-                                // Tambahan info dari surat
-                                'pengajuan_nama' => $surat->penduduk->nama ?? $surat->form['nama_pemohon'] ?? 'Tidak diketahui',
-                                'nik' => $surat->form['nik'] ?? 'Tidak diketahui',
-                                'nama_usaha' => $surat->form['nama_usaha'] ?? $lapak->nama,
-                                'jenis_usaha' => $surat->form['jenis_usaha'] ?? 'Tidak diketahui',
-                                'alamat_usaha' => $surat->form['alamat_usaha'] ?? 'Tidak diketahui',
-                                'lama_usaha' => $surat->form['lama_usaha'] ?? 'Tidak diketahui',
-                                'tanggal_disetujui' => $surat->updated_at->format('Y-m-d H:i:s')
-                            ];
-                        }
-                    }
+                if ($lapak) {
+                    // Ambil surat yang paling baru untuk info tambahan
+                    $surat = Surat::where('status', 'disetujui')
+                        ->where('format_id', 2)
+                        ->where('form->nama_usaha', $namaUsaha)
+                        ->with(['penduduk'])
+                        ->orderBy('updated_at', 'desc')
+                        ->first();
+                    
+                    // Buat entry placeholder untuk lapak ini (bukan produk user)
+                    $allProducts[] = [
+                        'id' => $lapak->id,
+                        'title' => $namaUsaha,
+                        'price' => 'Rp 0', // Placeholder price
+                        'category' => 'Umum',
+                        'sellerName' => $namaUsaha,
+                        'sellerPhone' => $lapak->telepon,
+                        'description' => "Produk dari {$namaUsaha}",
+                        'imgSrc' => '/placeholder-product.jpg',
+                        'lapakName' => $namaUsaha,
+                        'satuan' => 'pcs',
+                        'status' => 'aktif',
+                        // Info dari surat terbaru
+                        'pengajuan_nama' => $surat ? ($surat->penduduk->nama ?? $surat->form['nama_pemohon'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'nik' => $surat ? ($surat->form['nik'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'nama_usaha' => $namaUsaha,
+                        'jenis_usaha' => $surat ? ($surat->form['jenis_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'alamat_usaha' => $surat ? ($surat->form['alamat_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'lama_usaha' => $surat ? ($surat->form['lama_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'tanggal_disetujui' => $surat ? $surat->updated_at->format('Y-m-d H:i:s') : 'Tidak diketahui'
+                    ];
                 }
             }
 
@@ -205,12 +215,12 @@ class LapakController extends Controller
                 'status' => 'success',
                 'data' => $allProducts,
                 'total' => count($allProducts),
-                'message' => 'Data produk dari surat SKU yang disetujui berhasil diambil'
+                'message' => 'Data lapak dari surat SKU yang disetujui berhasil diambil'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to fetch products data',
+                'message' => 'Failed to fetch lapak data',
                 'error' => $e->getMessage()
             ], 500);
         }
