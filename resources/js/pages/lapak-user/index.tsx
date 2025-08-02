@@ -297,6 +297,7 @@ const LapakUser: React.FC = () => {
                             >
                                 {products.map((product) => (
                                     <motion.div
+                                        
                                         key={product.id}
                                         className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
                                         whileHover={{ y: -4 }}
