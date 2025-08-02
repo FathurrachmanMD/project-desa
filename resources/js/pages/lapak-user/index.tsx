@@ -345,12 +345,14 @@ const LapakUser: React.FC = () => {
                                                 </span>
                                             </div>
                                             <div className="flex space-x-2">
-                                                <Button
-                                                    size="sm"
-                                                    className="flex-1 bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white"
-                                                >
-                                                    Lihat Detail
-                                                </Button>
+                                                <Link href={`/lapak-user/${encodeURIComponent(product.nama_usaha)}`}>
+                                                    <Button
+                                                        size="sm"
+                                                        className="flex-1 bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white"
+                                                    >
+                                                        Lihat Detail
+                                                    </Button>
+                                                </Link>
                                                 {product.sellerPhone && (
                                                     <Button
                                                         size="sm"
