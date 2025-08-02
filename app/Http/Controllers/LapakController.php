@@ -439,6 +439,11 @@ class LapakController extends Controller
 
             $validated['lapak_id'] = $lapak->id;
             $validated['status'] = $validated['status'] ?? true;
+            
+            // Pastikan stok ter-set dengan benar
+            if (!isset($validated['stok']) || $validated['stok'] === null || $validated['stok'] === '') {
+                $validated['stok'] = 0;
+            }
 
             $product = \App\Models\Produk::create($validated);
 
@@ -525,6 +530,11 @@ class LapakController extends Controller
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs('products', $filename, 'public');
                 $validated['foto'] = $path;
+            }
+
+            // Pastikan stok ter-set dengan benar saat update
+            if (!isset($validated['stok']) || $validated['stok'] === null || $validated['stok'] === '') {
+                $validated['stok'] = $product->stok ?? 0; // Keep existing stock if not provided
             }
 
             $product->update($validated);

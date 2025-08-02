@@ -43,6 +43,7 @@ Route::get('/lapak-user/{slug}', [LapakController::class, 'getLapakDetail']);
 Route::get('/lapak-user/{slug}/products', [LapakController::class, 'getLapakProducts']);
 Route::post('/lapak-user/{slug}/products', [LapakController::class, 'storeLapakProduct']);
 Route::put('/lapak-user/{slug}/products/{productId}', [LapakController::class, 'updateLapakProduct']);
+Route::post('/lapak-user/{slug}/products/{productId}/update', [LapakController::class, 'updateLapakProduct']); // Alternative POST route for FormData
 Route::delete('/lapak-user/{slug}/products/{productId}', [LapakController::class, 'deleteLapakProduct']);
 
 Route::get('/produk', [ProdukController::class, 'index']);
