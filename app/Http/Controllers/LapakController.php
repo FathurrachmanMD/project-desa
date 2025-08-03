@@ -124,6 +124,494 @@ class LapakController extends Controller
     }
 
     /**
+     * Get lapak milik user yang sedang login
+     */
+    public function getUserLapak()
+    {
+        try {
+            $user = auth()->user();
+            
+            // Fallback untuk testing - gunakan user ID 1 jika tidak ada auth
+            $userId = $user ? $user->id : 1;
+
+            // Ambil semua lapak yang dibuat oleh user yang sedang login
+            $lapaks = Lapak::where('created_by', $userId)
+                ->with(['penduduk'])
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $lapaks
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch lapak data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get semua produk dari lapak yang dibuat berdasarkan surat SKU yang disetujui
+     * Hanya menampilkan produk default/placeholder untuk setiap lapak yang disetujui
+     */
+    public function getUserProducts()
+    {
+        try {
+            // Ambil daftar nama usaha unik dari surat SKU yang disetujui  
+            $approvedUsahaNames = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->pluck('form')
+                ->map(function($form) {
+                    return $form['nama_usaha'] ?? null;
+                })
+                ->filter()
+                ->unique()
+                ->values();
+
+            $allProducts = [];
+            
+            // Untuk setiap nama usaha unique, buat entry placeholder
+            foreach ($approvedUsahaNames as $namaUsaha) {
+                // Cari lapak berdasarkan nama usaha
+                $lapak = Lapak::where('nama', $namaUsaha)->first();
+                
+                if ($lapak) {
+                    // Ambil surat yang paling baru untuk info tambahan
+                    $surat = Surat::where('status', 'disetujui')
+                        ->where('format_id', 2)
+                        ->where('form->nama_usaha', $namaUsaha)
+                        ->with(['penduduk'])
+                        ->orderBy('updated_at', 'desc')
+                        ->first();
+                    
+                    // Buat entry placeholder untuk lapak ini (bukan produk user)
+                    $allProducts[] = [
+                        'id' => $lapak->id,
+                        'title' => $namaUsaha,
+                        'price' => 'Rp 0', // Placeholder price
+                        'category' => 'Umum',
+                        'sellerName' => $namaUsaha,
+                        'sellerPhone' => $lapak->telepon,
+                        'description' => "Produk dari {$namaUsaha}",
+                        'imgSrc' => '/placeholder-product.jpg',
+                        'lapakName' => $namaUsaha,
+                        'satuan' => 'pcs',
+                        'status' => 'aktif',
+                        // Info dari surat terbaru
+                        'pengajuan_nama' => $surat ? ($surat->penduduk->nama ?? $surat->form['nama_pemohon'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'nik' => $surat ? ($surat->form['nik'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'nama_usaha' => $namaUsaha,
+                        'jenis_usaha' => $surat ? ($surat->form['jenis_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'alamat_usaha' => $surat ? ($surat->form['alamat_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'lama_usaha' => $surat ? ($surat->form['lama_usaha'] ?? 'Tidak diketahui') : 'Tidak diketahui',
+                        'tanggal_disetujui' => $surat ? $surat->updated_at->format('Y-m-d H:i:s') : 'Tidak diketahui'
+                    ];
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $allProducts,
+                'total' => count($allProducts),
+                'message' => 'Data lapak dari surat SKU yang disetujui berhasil diambil'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch lapak data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get detail lapak berdasarkan slug/nama usaha untuk halaman detail
+     */
+    public function getLapakDetail($slug)
+    {
+        try {
+            // Decode slug jika menggunakan URL encoding
+            $namaUsaha = urldecode($slug);
+            
+            // Cari surat SKU yang disetujui dengan nama usaha yang sesuai
+            $surat = Surat::where('status', 'disetujui')
+                ->where('format_id', 2) // Format ID untuk SKU
+                ->where('form->nama_usaha', 'LIKE', '%' . $namaUsaha . '%')
+                ->with(['penduduk', 'format'])
+                ->first();
+
+            if (!$surat) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lapak tidak ditemukan atau belum disetujui'
+                ], 404);
+            }
+
+            // Cari lapak yang dibuat dari surat ini
+            $lapak = Lapak::where('nama', $surat->form['nama_usaha'])
+                ->with(['products.kategori'])
+                ->first();
+
+            if (!$lapak) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data lapak tidak ditemukan'
+                ], 404);
+            }
+
+            // Format data lapak detail
+            $lapakDetail = [
+                'id' => $lapak->id,
+                'nama_lapak' => $lapak->nama,
+                'slug' => $slug,
+                'telepon' => $lapak->telepon,
+                'alamat' => $surat->form['alamat_usaha'] ?? 'Tidak diketahui',
+                'koordinat' => [
+                    'lat' => $lapak->lat,
+                    'lng' => $lapak->lng,
+                    'zoom' => $lapak->zoom
+                ],
+                'status' => $lapak->status ? 'Aktif' : 'Nonaktif',
+                
+                // Info dari surat pengajuan
+                'pemilik' => [
+                    'nama' => $surat->penduduk->nama ?? $surat->form['nama_pemohon'] ?? 'Tidak diketahui',
+                    'nik' => $surat->form['nik'] ?? 'Tidak diketahui',
+                    'telepon' => $lapak->telepon
+                ],
+                'usaha' => [
+                    'nama_usaha' => $surat->form['nama_usaha'] ?? $lapak->nama,
+                    'jenis_usaha' => $surat->form['jenis_usaha'] ?? 'Tidak diketahui',
+                    'alamat_usaha' => $surat->form['alamat_usaha'] ?? 'Tidak diketahui',
+                    'lama_usaha' => $surat->form['lama_usaha'] ?? 'Tidak diketahui',
+                    'tanggal_disetujui' => $surat->updated_at->format('d/m/Y H:i')
+                ],
+                
+                // Produk-produk dari lapak ini
+                'produk' => $lapak->products->map(function ($product) use ($lapak) {
+                    return [
+                        'id' => $product->id,
+                        'nama' => $product->nama,
+                        'harga' => $product->harga,
+                        'harga_formatted' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
+                        'kategori' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
+                        'deskripsi' => $product->deskripsi,
+                        'foto' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
+                        'satuan' => $product->satuan,
+                        'status' => $product->status ? 'aktif' : 'nonaktif',
+                        'stok' => $product->stok ?? 0
+                    ];
+                }),
+                
+                'total_produk' => $lapak->products->count(),
+                'produk_aktif' => $lapak->products->where('status', true)->count()
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $lapakDetail,
+                'message' => 'Detail lapak berhasil diambil'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch lapak detail',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get produk dari lapak tertentu
+     */
+    public function getLapakProducts($slug)
+    {
+        try {
+            $namaUsaha = urldecode($slug);
+            
+            $surat = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->where('form->nama_usaha', 'LIKE', '%' . $namaUsaha . '%')
+                ->first();
+
+            if (!$surat) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $lapak = Lapak::where('nama', $surat->form['nama_usaha'])
+                ->with(['products.kategori'])
+                ->first();
+
+            if (!$lapak) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $products = $lapak->products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'nama' => $product->nama,
+                    'harga' => $product->harga,
+                    'harga_formatted' => 'Rp ' . number_format($product->harga, 0, ',', '.'),
+                    'kategori_id' => $product->kategori_id,
+                    'kategori' => $product->kategori ? $product->kategori->kategori : 'Tidak Berkategori',
+                    'deskripsi' => $product->deskripsi,
+                    'foto' => $product->foto ? '/storage/' . $product->foto : '/placeholder-product.jpg',
+                    'satuan' => $product->satuan,
+                    'status' => $product->status,
+                    'stok' => $product->stok ?? 0
+                ];
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $products,
+                'lapak' => [
+                    'id' => $lapak->id,
+                    'nama' => $lapak->nama
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch products',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Tambah produk baru ke lapak
+     */
+    public function storeLapakProduct($slug, Request $request)
+    {
+        try {
+            $namaUsaha = urldecode($slug);
+            
+            $surat = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->where('form->nama_usaha', 'LIKE', '%' . $namaUsaha . '%')
+                ->first();
+
+            if (!$surat) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $lapak = Lapak::where('nama', $surat->form['nama_usaha'])->first();
+
+            if (!$lapak) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'nama' => 'required|string|max:255',
+                'harga' => 'required|numeric|min:0',
+                'kategori_id' => 'required|exists:kategori_produk,id',
+                'deskripsi' => 'nullable|string',
+                'satuan' => 'required|string|max:50',
+                'stok' => 'nullable|integer|min:0',
+                'foto' => 'nullable|image|max:2048',
+                'status' => 'boolean'
+            ]);
+
+            // Handle file upload
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('products', $filename, 'public');
+                $validated['foto'] = $path;
+            }
+
+            $validated['lapak_id'] = $lapak->id;
+            $validated['status'] = $validated['status'] ?? true;
+
+            $product = \App\Models\Produk::create($validated);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $product,
+                'message' => 'Produk berhasil ditambahkan'
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update produk
+     */
+    public function updateLapakProduct($slug, $productId, Request $request)
+    {
+        try {
+            $namaUsaha = urldecode($slug);
+            
+            $surat = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->where('form->nama_usaha', 'LIKE', '%' . $namaUsaha . '%')
+                ->first();
+
+            if (!$surat) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $lapak = Lapak::where('nama', $surat->form['nama_usaha'])->first();
+
+            if (!$lapak) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $product = \App\Models\Produk::where('id', $productId)
+                ->where('lapak_id', $lapak->id)
+                ->first();
+
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Produk tidak ditemukan'
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'nama' => 'required|string|max:255',
+                'harga' => 'required|numeric|min:0',
+                'kategori_id' => 'required|exists:kategori_produk,id',
+                'deskripsi' => 'nullable|string',
+                'satuan' => 'required|string|max:50',
+                'stok' => 'nullable|integer|min:0',
+                'foto' => 'nullable|image|max:2048',
+                'status' => 'boolean'
+            ]);
+
+            // Handle file upload
+            if ($request->hasFile('foto')) {
+                // Delete old file if exists
+                if ($product->foto && \Storage::disk('public')->exists($product->foto)) {
+                    \Storage::disk('public')->delete($product->foto);
+                }
+
+                $file = $request->file('foto');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('products', $filename, 'public');
+                $validated['foto'] = $path;
+            }
+
+            $product->update($validated);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $product,
+                'message' => 'Produk berhasil diupdate'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Hapus produk
+     */
+    public function deleteLapakProduct($slug, $productId)
+    {
+        try {
+            $namaUsaha = urldecode($slug);
+            
+            $surat = Surat::where('status', 'disetujui')
+                ->where('format_id', 2)
+                ->where('form->nama_usaha', 'LIKE', '%' . $namaUsaha . '%')
+                ->first();
+
+            if (!$surat) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $lapak = Lapak::where('nama', $surat->form['nama_usaha'])->first();
+
+            if (!$lapak) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data lapak tidak ditemukan'
+                ], 404);
+            }
+
+            $product = \App\Models\Produk::where('id', $productId)
+                ->where('lapak_id', $lapak->id)
+                ->first();
+
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Produk tidak ditemukan'
+                ], 404);
+            }
+
+            // Delete file if exists
+            if ($product->foto && \Storage::disk('public')->exists($product->foto)) {
+                \Storage::disk('public')->delete($product->foto);
+            }
+
+            $product->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Produk berhasil dihapus'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
