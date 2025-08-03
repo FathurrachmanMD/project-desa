@@ -290,79 +290,87 @@ const LapakUser: React.FC = () => {
                         {/* Products Grid */}
                         {!loading && !error && products.length > 0 && (
                             <motion.div 
-                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
                             >
                                 {products.map((product) => (
                                     <motion.div
-                                        
                                         key={product.id}
-                                        className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300"
-                                        whileHover={{ y: -4 }}
-                                        transition={{ duration: 0.2 }}
+                                        className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+                                        whileHover={{ y: -8, scale: 1.02 }}
+                                        transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
                                     >
-                                        <div className="aspect-square overflow-hidden">
-                                            <img
-                                                src={product.imgSrc}
-                                                alt={product.title}
-                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                            />
+                                        {/* Header dengan gradient */}
+                                        <div className="relative bg-gradient-to-br from-[#1E4359] via-[#2A5B73] to-[#1E4359] p-6 text-white">
+                                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                                            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8"></div>
+                                            
+                                            <div className="relative z-10">
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                                        <Store className="w-6 h-6 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-xl text-white group-hover:text-blue-100 transition-colors">
+                                                            {product.nama_usaha}
+                                                        </h3>
+                                                        <p className="text-blue-100 text-sm font-medium">
+                                                            {product.jenis_usaha}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                    <span className="text-white text-xs font-semibold">Usaha Berizin</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="p-4">
-                                            <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-1">
-                                                {product.nama_usaha}
-                                            </h3>
-                                            <div className="space-y-2 mb-3">
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">Pemilik:</span>
-                                                    <span className="font-medium text-gray-700">{product.pengajuan_nama}</span>
+
+                                        {/* Content */}
+                                        <div className="p-6 space-y-4">
+                                            {/* Pemilik */}
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    <Building className="w-5 h-5 text-blue-600" />
                                                 </div>
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">NIK:</span>
-                                                    <span className="font-medium text-gray-700">{product.nik}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">Jenis Usaha:</span>
-                                                    <span className="font-medium text-gray-700">{product.jenis_usaha}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">Alamat:</span>
-                                                    <span className="font-medium text-gray-700 text-right">{product.alamat_usaha}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <span className="text-gray-500">Lama Usaha:</span>
-                                                    <span className="font-medium text-gray-700">{product.lama_usaha}</span>
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-gray-500 font-medium">Pemilik Usaha</p>
+                                                    <p className="font-semibold text-gray-800">{product.pengajuan_nama}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3 pt-2 border-t">
-                                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                                                    Disetujui
-                                                </span>
-                                                <span className="text-xs">
-                                                    {new Date(product.tanggal_disetujui).toLocaleDateString('id-ID')}
-                                                </span>
+
+                                            {/* Alamat */}
+                                            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mt-1">
+                                                    <TreePine className="w-5 h-5 text-green-600" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-gray-500 font-medium">Alamat Usaha</p>
+                                                    <p className="font-semibold text-gray-800 text-sm leading-relaxed">{product.alamat_usaha}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex space-x-2">
-                                                <Link href={`/lapak-user/${encodeURIComponent(product.nama_usaha)}`}>
+
+                                            {/* Action Button */}
+                                            <div className="pt-2">
+                                                <Link href={`/lapak-user/${encodeURIComponent(product.nama_usaha)}`} className="block">
                                                     <Button
-                                                        size="sm"
-                                                        className="flex-1 bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white"
+                                                        className="w-full bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
                                                     >
-                                                        Lihat Detail
+                                                        <span className="group-hover:scale-105 transition-transform duration-200">
+                                                            Lihat Detail Usaha
+                                                        </span>
+                                                        <motion.div
+                                                            className="ml-2"
+                                                            whileHover={{ x: 4 }}
+                                                            transition={{ duration: 0.2 }}
+                                                        >
+                                                            →
+                                                        </motion.div>
                                                     </Button>
                                                 </Link>
-                                                {product.sellerPhone && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="px-3"
-                                                        onClick={() => window.open(`https://wa.me/${product.sellerPhone.replace(/\D/g, '')}`, '_blank')}
-                                                    >
-                                                        <MessageCircle className="w-4 h-4" />
-                                                    </Button>
-                                                )}
                                             </div>
                                         </div>
                                     </motion.div>
