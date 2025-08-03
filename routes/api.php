@@ -46,6 +46,16 @@ Route::put('/lapak-user/{slug}/products/{productId}', [LapakController::class, '
 Route::post('/lapak-user/{slug}/products/{productId}/update', [LapakController::class, 'updateLapakProduct']); // Alternative POST route for FormData
 Route::delete('/lapak-user/{slug}/products/{productId}', [LapakController::class, 'deleteLapakProduct']);
 
+// New LapakUser dedicated routes
+Route::prefix('lapak-users')->group(function () {
+    Route::get('/', [App\Http\Controllers\LapakUserController::class, 'index']);
+    Route::get('/{slug}', [App\Http\Controllers\LapakUserController::class, 'show']);
+    Route::post('/', [App\Http\Controllers\LapakUserController::class, 'store']);
+    Route::put('/{lapakUser}', [App\Http\Controllers\LapakUserController::class, 'update']);
+    Route::delete('/{lapakUser}', [App\Http\Controllers\LapakUserController::class, 'destroy']);
+    Route::post('/from-surat/{surat}', [App\Http\Controllers\LapakUserController::class, 'createFromSurat']);
+});
+
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::post('/produk', [ProdukController::class, 'store']);
