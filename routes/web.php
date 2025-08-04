@@ -141,11 +141,5 @@ Route::get('/lapak-user/{slug}', function ($slug) {
     ]);
 })->name('lapak-user.detail');
 
-Route::get('/lapak-user/{slug}/kelola', function ($slug) {
-    return Inertia::render('lapak-user/kelola', [
-        'slug' => $slug
-    ]);
-})->name('lapak-user.kelola');
-
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

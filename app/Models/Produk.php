@@ -13,10 +13,12 @@ class Produk extends Model
 
     protected $fillable = [
         'lapak_id',
+        'lapak_user_id',
         'kategori_id',
         'nama',
         'harga',
         'satuan',
+        'stok',
         'tipe_potongan',
         'potongan',
         'deskripsi',
@@ -30,6 +32,11 @@ class Produk extends Model
     public function lapak()
     {
         return $this->belongsTo(Lapak::class, 'lapak_id', 'id');
+    }
+
+    public function lapakUser()
+    {
+        return $this->belongsTo(LapakUser::class, 'lapak_user_id', 'id');
     }
 
     public function kategori()
