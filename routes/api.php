@@ -39,7 +39,7 @@ Route::get('/lapak-user', [LapakController::class, 'getUserLapak']);
 Route::get('/lapak-user/products', [LapakController::class, 'getUserProducts']);
 Route::get('/lapak-user/{slug}', [LapakController::class, 'getLapakDetail']);
 
-// New LapakUser dedicated routes
+// New LapakUser  
 Route::prefix('lapak-users')->group(function () {
     Route::get('/', [App\Http\Controllers\LapakUserController::class, 'index']);
     Route::get('/{slug}', [App\Http\Controllers\LapakUserController::class, 'show']);
