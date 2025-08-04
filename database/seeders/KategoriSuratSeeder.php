@@ -19,6 +19,7 @@ class KategoriSuratSeeder extends Seeder
             'Perizinan Keramaian',
             'Perizinan Pribadi',
             'Perizinan Pertanian',
+            'Pengajuan Produk',
         ];
 
         foreach ($kategori as $item) {
