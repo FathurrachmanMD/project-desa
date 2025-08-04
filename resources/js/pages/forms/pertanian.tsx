@@ -4,40 +4,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { Calendar, Users, Home, ArrowRight } from 'lucide-react';
+import { LandPlot, Sprout, Tractor, Droplets, FileText, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const icons = [Calendar, Users, Home];
+const icons = [LandPlot, Sprout, Tractor, Droplets];
 const colors = [
-  'bg-gradient-to-br from-blue-500 to-purple-500',    
-  'bg-gradient-to-br from-orange-500 to-red-500',     
-  'bg-gradient-to-br from-pink-500 to-rose-500',      
-  'bg-gradient-to-br from-emerald-500 to-teal-500',   
-  'bg-gradient-to-br from-cyan-500 to-blue-500',      
+    'bg-gradient-to-br from-blue-500 to-purple-500',    
+    'bg-gradient-to-br from-orange-500 to-red-500',     
+    'bg-gradient-to-br from-pink-500 to-rose-500',      
+    'bg-gradient-to-br from-emerald-500 to-teal-500',   
+    'bg-gradient-to-br from-cyan-500 to-blue-500',      
 ];
 
 interface Syarat {
-  id: number | string;
-  nama: string;
+    id: number | string;
+    nama: string;
 }
 
 interface FormatSurat {
-  id: number | string;
-  nama: string;
-  url_surat: string;
-  deskripsi: string;
-  form: string[];
-  syarat: Syarat[];
+    id: number | string;
+    nama: string;
+    url_surat: string;
+    deskripsi: string;
+    form: string[];
+    syarat: Syarat[];
 }
 
-export default function FormAcara() {
+export default function FormPertanian() {
     const API_URL = import.meta.env.VITE_API_URL;
         
     const [data, setData] = useState([]);
     
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${API_URL}/format-surat/3`);
+            const response = await axios.get(`${API_URL}/format-surat/5`);
             setData(response.data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -50,14 +50,13 @@ export default function FormAcara() {
     
     return (
         <>
-            <Head title="Form Perizinan Acara - Desa Drawati" />
+            <Head title="Perizinan Pertanian - Desa Drawati" />
 
             <Navbar />
-            {/* Section: Perizinan Acara */}
             <section className="bg-white w-full pt-32 pb-8 md:pt-40 md:pb-12 border-b">
                 <div className="max-w-4xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Acara & Administrasi</h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan acara dan administrasi warga yang mudah, cepat, dan transparan.</p>
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1E4359] mb-2">Perizinan Pertanian</h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">Layanan perizinan pertanian digital untuk mendukung petani dan pelaku usaha pertanian di Desa Drawati.</p>
                 </div>
             </section>
             <div className="min-h-screen">
@@ -68,13 +67,14 @@ export default function FormAcara() {
                         <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                             <div className="text-center">
                                 <Badge className="mb-4 bg-[#1E4359]/10 text-[#1E4359] border-[#1E4359]/20 hover:bg-[#1E4359]/15">
-                                    Pilih Jenis Layanan
+                                    Pilih Jenis Perizinan
                                 </Badge>
-                                <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                                    Form Perizinan Acara & Administrasi
+                                <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                                    Form Perizinan Pertanian
                                 </h1>
                                 <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-                                    Pilih jenis layanan yang Anda butuhkan. Pastikan data yang Anda berikan sesuai dengan dokumen resmi.
+                                    Pilih jenis perizinan pertanian yang sesuai dengan kebutuhan Anda. 
+                                    Setiap jenis perizinan memiliki persyaratan dan ketentuan yang berbeda.
                                 </p>
                             </div>
                         </div>
@@ -86,7 +86,7 @@ export default function FormAcara() {
                     
                     <div className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
                         <div className="mx-auto max-w-4xl">
-                            <div className="grid gap-8 sm:grid-cols-2">
+                            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
                                 {data.map((row: FormatSurat, index) => {
                                     const Icon = icons[index % icons.length];
                                     return (
@@ -96,7 +96,7 @@ export default function FormAcara() {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.3 }}
                                         >
-                                            <Link href={`/form-usaha/form/${row.url_surat}`}>
+                                            <Link href={`/form-pertanian/form/${row.url_surat}`}>
                                                 <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
                                                     <CardHeader className="space-y-4">
                                                         <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
