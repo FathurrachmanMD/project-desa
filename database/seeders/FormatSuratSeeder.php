@@ -238,7 +238,72 @@ class FormatSuratSeeder extends Seeder
                 ['name' => 'tujuan_irigasi', 'label' => 'Tujuan Pengelolaan', 'placeholder' => 'Contoh: Pertanian, Perkebunan', 'type' => 'text', 'required' => true],
                 ['name' => 'durasi_jumlah', 'label' => 'Durasi Pengelolaan', 'placeholder' => 'Contoh: 3', 'type' => 'number', 'required' => true],
                 ['name' => 'durasi_satuan', 'label' => 'Satuan Durasi', 'type' => 'select', 'options' => ['Bulan', 'Tahun'], 'required' => true],
-            ]]
+            ]],
+            [
+                'kategori_id' => 6, // ID untuk kategori "Pengajuan Produk"
+                'nama' => 'Pengajuan Produk Baru',
+                'slug' => 'pengajuan-produk',
+                'deskripsi' => 'Formulir untuk mengajukan produk baru untuk ditampilkan di Lapak Usaha Desa.',
+                'template' => null, // Template bisa di-generate nanti saat disetujui
+                'form_isian' => [
+                    // Field untuk memilih Lapak (warga isi nama lapak)
+                    // Kita definisikan sebagai 'searchable-select' untuk di-handle khusus di frontend
+                    [
+                        'name' => 'lapak_id',
+                        'label' => 'Nama Lapak',
+                        'placeholder' => 'Cari dan pilih lapak Anda...',
+                        'type' => 'searchable-select',
+                        'required' => true,
+                        'options_source' => 'lapak' // hint untuk frontend agar mengambil data dari tabel 'lapak'
+                    ],
+                    // Field untuk mengunggah bukti kepemilikan usaha
+                    [
+                        'name' => 'bukti_usaha',
+                        'label' => 'Bukti Kepemilikan Usaha',
+                        'type' => 'file',
+                        'required' => true,
+                        'accept' => 'image/png, image/jpeg, image/jpg', // Menerima format gambar
+                        'description' => 'Unggah foto SKU atau bukti lain. Mendukung format .png, .jpg, .jpeg.'
+                    ],
+                    // Field untuk detail produk
+                    [
+                        'name' => 'nama_produk',
+                        'label' => 'Nama Produk',
+                        'placeholder' => 'Masukkan nama produk Anda',
+                        'type' => 'text',
+                        'required' => true
+                    ],
+                    [
+                        'name' => 'harga_produk',
+                        'label' => 'Harga',
+                        'placeholder' => 'cth: Rp 15.000 / kg',
+                        'type' => 'text',
+                        'required' => true
+                    ],
+                    [
+                        'name' => 'kategori_produk',
+                        'label' => 'Kategori Produk',
+                        'type' => 'select',
+                        'required' => true,
+                        'options' => ['Pangan', 'Minuman', 'Kerajinan']
+                    ],
+                    [
+                        'name' => 'deskripsi_produk',
+                        'label' => 'Deskripsi Produk',
+                        'placeholder' => 'Jelaskan keunggulan produk Anda',
+                        'type' => 'textarea',
+                        'required' => true
+                    ],
+                    [
+                        'name' => 'gambar_produk',
+                        'label' => 'Foto Produk',
+                        'type' => 'file',
+                        'required' => true,
+                        'accept' => 'image/png, image/jpeg, image/jpg',
+                        'description' => 'Unggah foto produk terbaik Anda. Mendukung format .png, .jpg, .jpeg.'
+                    ]
+                ]
+            ]
         ];
 
         foreach ($formats as $format) {

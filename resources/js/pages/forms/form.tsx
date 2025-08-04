@@ -9,17 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileUpload } from '@/components/ui/file-upload';
+import { Building2, FileText, ShoppingBag, Store, Briefcase, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
-import { FileText, Home, Plane, User, FileCheck, ArrowLeft } from 'lucide-react';
 
-const icons = [FileText, Home, User, Plane, FileCheck];
+const icons = [Store, FileText, Building2, ShoppingBag, Briefcase];
 const colors = [
-  'bg-gradient-to-br from-blue-500 to-purple-500',    
-  'bg-gradient-to-br from-orange-500 to-red-500',     
-  'bg-gradient-to-br from-pink-500 to-rose-500',      
-  'bg-gradient-to-br from-emerald-500 to-teal-500',   
-  'bg-gradient-to-br from-cyan-500 to-blue-500',      
+  'bg-gradient-to-br from-blue-500 to-purple-500',    // SIUP
+  'bg-gradient-to-br from-orange-500 to-red-500',     // NIB
+  'bg-gradient-to-br from-pink-500 to-rose-500',      // SITU
+  'bg-gradient-to-br from-emerald-500 to-teal-500',   // SKU
+  'bg-gradient-to-br from-cyan-500 to-blue-500',      // IUMK
 ];
 
 interface InputField {
@@ -57,42 +57,42 @@ const getCurrentDate = () => {
   return now.toISOString().slice(0, 10);
 };
 
-interface PersonalPermitFormProps {
+interface FormProps {
   slug: string;
 }
 
-export default function PersonalPermitForm({ slug }: PersonalPermitFormProps) {
+export default function PermitForm({ slug }: FormProps) {
   const API_URL = import.meta.env.VITE_API_URL;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
-  
+
   const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
   const [Icon, setIcon] = useState<ElementType>(icons[0]);
   
   const fetchFormatSurat = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
-      setFormatSurat(response.data);
-      setIcon(icons[(response.data.id - 2) % icons.length]);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
+      try {
+        const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
+        setFormatSurat(response.data);
+        setIcon(icons[(response.data.id - 1) % icons.length]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        showToast.error('Kesalahan Sistem', 'Gagal mengambil format surat');
+      }
     }
-  }
-  
-  useEffect(() => {
-    fetchFormatSurat();
-  }, []);
-  
-  const [data, setData] = useState<{ [key: string]: any }>({});
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
     
-    setData(prev => ({
-      ...prev,
-      form: {
+    useEffect(() => {
+      fetchFormatSurat();
+    }, []);
+    
+    const [data, setData] = useState<{ [key: string]: any }>({});
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      
+      setData(prev => ({
+        ...prev,
+        form: {
           ...prev.form,
           [name]: value,
         }
@@ -108,7 +108,7 @@ export default function PersonalPermitForm({ slug }: PersonalPermitFormProps) {
         }
       }));
     };
-
+    
     const handleFileChange = (id: number | string, e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
       
@@ -170,7 +170,7 @@ export default function PersonalPermitForm({ slug }: PersonalPermitFormProps) {
             variant="ghost" 
             className="px-0 py-2 -ml-2 hover:bg-transparent hover:underline"
             onClick={() => window.history.back()}
-          >
+            >
             <ArrowLeft className="w-5 h-5 mr-2" /> Kembali
           </Button>
         </div>

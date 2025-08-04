@@ -1,27 +1,30 @@
-// index.tsx
+// index.tsx - VERSI PALING LENGKAP DAN FINAL
 
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 
-// Import komponen UI yang diperlukan
+// Import komponen UI dari shadcn/ui
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-// Import Ikon
-import { Utensils, Coffee, HandMetal, Package, MessageCircle, PlusCircle, ChevronDown, 
-    Building,
-    FileText,
-    Briefcase,
-    Calendar,
-    TreePine,
+// Import Ikon dari lucide-react
+import { 
+    Utensils, Coffee, HandMetal, Package, MessageCircle, PlusCircle, ChevronDown, 
+    Building, FileText, Briefcase, Calendar, TreePine, Check, ChevronsUpDown 
 } from 'lucide-react';
+
+// Import helper dari utils
+import { cn } from '@/lib/utils';
+
 
 // Interface dan Data Produk (Tidak ada perubahan)
 interface Product {
@@ -68,14 +71,34 @@ const initialProducts: Product[] = [
     },
 ];
 
-type NewProductForm = Partial<Omit<Product, 'id'>>;
+// Tipe data untuk form pengajuan baru
+type NewProductForm = {
+    lapak_id: string;
+    bukti_usaha: File | null;
+    nama_produk: string;
+    harga_produk: string;
+    kategori_produk: 'pangan' | 'minuman' | 'kerajinan' | undefined;
+    deskripsi_produk: string;
+    gambar_produk: File | null;
+};
+
+// Data dummy untuk lapak (nantinya ambil dari backend)
+const lapaks = [
+    { value: "1", label: "Kelompok Tani Makmur" },
+    { value: "2", label: "Ibu Siti Kerajinan" },
+    { value: "3", label: "Kopi Kang Ujang" },
+    { value: "4", label: "Warung Bu Rina" },
+];
 
 const LapakUsaha: React.FC = () => {
     
     const [activeCategory, setActiveCategory] = useState<'semua' | 'pangan' | 'minuman' | 'kerajinan'>('semua');
 
     const scrollToSection = (sectionId: string) => {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     const perizinanServices = [
@@ -87,16 +110,17 @@ const LapakUsaha: React.FC = () => {
     ];
     
     const initialFormState: NewProductForm = {
-        title: '',
-        price: '',
-        category: undefined,
-        sellerName: '',
-        sellerPhone: '',
-        description: '',
-        imgSrc: ''
+        lapak_id: '',
+        bukti_usaha: null,
+        nama_produk: '',
+        harga_produk: '',
+        kategori_produk: undefined,
+        deskripsi_produk: '',
+        gambar_produk: null,
     };
     const [newProduct, setNewProduct] = useState<NewProductForm>(initialFormState);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [openLapakSelect, setOpenLapakSelect] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -104,7 +128,14 @@ const LapakUsaha: React.FC = () => {
     };
 
     const handleCategoryChange = (value: 'pangan' | 'minuman' | 'kerajinan') => {
-        setNewProduct(prev => ({ ...prev, category: value }));
+        setNewProduct(prev => ({ ...prev, kategori_produk: value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, files } = e.target;
+        if (files && files.length > 0) {
+            setNewProduct(prev => ({ ...prev, [name]: files[0] }));
+        }
     };
 
     const filteredProducts = initialProducts.filter(product => {
@@ -121,21 +152,21 @@ const LapakUsaha: React.FC = () => {
 
     return (
         <>
-            {/* Navigation */}
-                <motion.nav 
-                    className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
-                    initial={{ y: -100 }}
-                    animate={{ y: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                >
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16">
-                            {/* Logo */}
-                            <motion.div 
-                                className="flex items-center space-x-3"
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.2 }}
-                            >
+            <motion.nav 
+                className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        {/* Logo */}
+                        <motion.div 
+                            className="flex items-center space-x-3"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Link href="/" className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-gradient-to-br from-[#1E4359] to-[#2A5B73] rounded-xl flex items-center justify-center">
                                     <img 
                                         src="/logo-drawati.png" 
@@ -146,88 +177,71 @@ const LapakUsaha: React.FC = () => {
                                 <div>
                                     <h2 className="text-lg font-bold text-[#1E4359]">Desa Drawati</h2>
                                 </div>
-                            </motion.div>
+                            </Link>
+                        </motion.div>
 
-                            {/* Navigation Links */}
-                            <div className="hidden md:flex items-center space-x-8">
-                                <button>
-                                    <Link
-                                        href={'/'} // Gunakan Link dan href yang valid
-                                        className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                    >
-                                        Beranda
-                                    </Link>
-                                </button>
-                                
-                                {/* Perizinan Dropdown */}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium flex items-center space-x-1">
-                                            <span>Perizinan</span>
-                                            <ChevronDown className="w-4 h-4" />
-                                        </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg rounded-lg p-2">
-                                        {perizinanServices.map((service, index) => (
-                                            <DropdownMenuItem key={index} asChild>
-                                                <Link 
-                                                    href={service.href}
-                                                    className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-[#1E4359]/5 transition-colors cursor-pointer"
-                                                >
-                                                    <service.icon className="w-4 h-4 text-[#1E4359]" />
-                                                    <span className="text-gray-700">{service.name}</span>
-                                                </Link>
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                <button>
-                                    <Link
-                                        href={'/lapak-usaha'} // Gunakan Link dan href yang valid
-                                        className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                    >
-                                        Lapak
-                                    </Link>
-                                </button>
-                                <button 
-                                    onClick={() => scrollToSection('services')}
-                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                >
-                                    Layanan
-                                </button>
-                                <button 
-                                    onClick={() => scrollToSection('about')}
-                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                >
-                                    Tentang
-                                </button>
-                                <button 
-                                    onClick={() => scrollToSection('contact')}
-                                    className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
-                                >
-                                    Kontak
-                                </button>
-                            </div>
+                        {/* Navigation Links */}
+                        <div className="hidden md:flex items-center space-x-8">
+                            <Link href={'/'} className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium">
+                                Beranda
+                            </Link>
+                            
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium flex items-center space-x-1">
+                                        <span>Perizinan</span>
+                                        <ChevronDown className="w-4 h-4" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg rounded-lg p-2">
+                                    {perizinanServices.map((service, index) => (
+                                        <DropdownMenuItem key={index} asChild>
+                                            <Link 
+                                                href={service.href}
+                                                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-[#1E4359]/5 transition-colors cursor-pointer w-full text-left"
+                                            >
+                                                <service.icon className="w-4 h-4 text-[#1E4359]" />
+                                                <span className="text-gray-700">{service.name}</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
 
-                            {/* Auth Buttons */}
-                            <div className="flex items-center space-x-4">
-                                <Link href="/login">
-                                    <Button variant="ghost" size="sm" className="text-[#1E4359] hover:bg-[#1E4359]/5">
-                                        Masuk
-                                    </Button>
-                                </Link>
-                                <Link href="/register">
-                                    <Button size="sm" className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
-                                        Daftar
-                                    </Button>
-                                </Link>
-                            </div>
+                            <Link href={'/lapak-usaha'} className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium">
+                                Lapak
+                            </Link>
+                            {/* Tombol-tombol ini saya biarkan sebagai button, karena fungsinya scroll, bukan navigasi halaman */}
+                            <button onClick={() => scrollToSection('services')} className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium">
+                                Layanan
+                            </button>
+                            <button onClick={() => scrollToSection('about')} className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium">
+                                Tentang
+                            </button>
+                            <button onClick={() => scrollToSection('contact')} className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium">
+                                Kontak
+                            </button>
+                        </div>
+
+                        {/* Auth Buttons */}
+                        <div className="flex items-center space-x-4">
+                            <Link href="/login">
+                                <Button variant="ghost" size="sm" className="text-[#1E4359] hover:bg-[#1E4359]/5">
+                                    Masuk
+                                </Button>
+                            </Link>
+                            <Link href="/register">
+                                <Button size="sm" className="bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white">
+                                    Daftar
+                                </Button>
+                            </Link>
                         </div>
                     </div>
-                </motion.nav>
+                </div>
+            </motion.nav>
             <Head title="Lapak Usaha Desa Drawati" />
             
-            <main className="bg-gray-50">
+            <main className="bg-gray-50 pt-16">
                 <section
                     className="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-center text-white"
                     style={{ backgroundImage: "url('https://asset-2.tstatic.net/wartakota/foto/bank/images/Suasana-persawahan-di-Desa-Drawati-Paseh-Kabupaten-Bandung.jpg')" }}
@@ -262,17 +276,16 @@ const LapakUsaha: React.FC = () => {
                     </div>
                 </section>
                 
-                <section className="py-16 bg-white">
+                <section id="products" className="py-16 bg-white">
                     <div className="container mx-auto px-4">
                         <div className="flex justify-between items-center mb-10">
                             <h2 className="text-3xl font-bold text-gray-800 capitalize">
                                 {activeCategory === 'semua' ? 'Semua Produk' : `Kategori: ${activeCategory}`}
                             </h2>
-
                             <Dialog open={isFormModalOpen} onOpenChange={setIsFormModalOpen}>
                                 <DialogTrigger asChild>
                                     <Button>
-                                        <PlusCircle className="mr-2 h-4 w-4" /> Tambah Produk
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Ajukan Produk
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[600px]">
@@ -283,21 +296,55 @@ const LapakUsaha: React.FC = () => {
                                                 Isi detail produk Anda. Data akan diperiksa oleh admin sebelum ditampilkan.
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
+                                        <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
                                             <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="title" className="text-right">Nama Produk</Label>
-                                                <Input id="title" name="title" value={newProduct.title} onChange={handleInputChange} className="col-span-3" required />
+                                                <Label htmlFor="lapak_id" className="text-right">Nama Lapak</Label>
+                                                <Popover open={openLapakSelect} onOpenChange={setOpenLapakSelect}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button variant="outline" role="combobox" aria-expanded={openLapakSelect} className="col-span-3 justify-between">
+                                                            {newProduct.lapak_id ? lapaks.find((lapak) => lapak.value === newProduct.lapak_id)?.label : "Cari dan pilih lapak..."}
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[400px] p-0">
+                                                        <Command>
+                                                            <CommandInput placeholder="Cari nama lapak..." />
+                                                            <CommandEmpty>Lapak tidak ditemukan.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {lapaks.map((lapak) => (
+                                                                    <CommandItem key={lapak.value} value={lapak.label} onSelect={() => {
+                                                                        setNewProduct(prev => ({...prev, lapak_id: lapak.value}));
+                                                                        setOpenLapakSelect(false);
+                                                                    }}>
+                                                                        <Check className={cn("mr-2 h-4 w-4", newProduct.lapak_id === lapak.value ? "opacity-100" : "opacity-0")} />
+                                                                        {lapak.label}
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                            <div className="grid grid-cols-4 items-start gap-4">
+                                                <Label htmlFor="bukti_usaha" className="text-right pt-2">Bukti Usaha</Label>
+                                                <div className="col-span-3">
+                                                    <Input id="bukti_usaha" name="bukti_usaha" type="file" onChange={handleFileChange} className="col-span-3" accept=".png, .jpg, .jpeg" required />
+                                                    <p className="text-sm text-muted-foreground mt-1">Mendukung format .png, .jpg, .jpeg.</p>
+                                                    {newProduct.bukti_usaha && <p className="text-sm text-green-600 mt-1">File dipilih: {newProduct.bukti_usaha.name}</p>}
+                                                </div>
                                             </div>
                                             <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="price" className="text-right">Harga</Label>
-                                                <Input id="price" name="price" value={newProduct.price} onChange={handleInputChange} placeholder="cth: Rp 25.000 / item" className="col-span-3" required />
+                                                <Label htmlFor="nama_produk" className="text-right">Nama Produk</Label>
+                                                <Input id="nama_produk" name="nama_produk" value={newProduct.nama_produk} onChange={handleInputChange} className="col-span-3" required />
                                             </div>
                                             <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="category" className="text-right">Kategori</Label>
+                                                <Label htmlFor="harga_produk" className="text-right">Harga</Label>
+                                                <Input id="harga_produk" name="harga_produk" value={newProduct.harga_produk} onChange={handleInputChange} placeholder="cth: Rp 25.000 / item" className="col-span-3" required />
+                                            </div>
+                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                <Label htmlFor="kategori_produk" className="text-right">Kategori</Label>
                                                 <Select onValueChange={handleCategoryChange} required>
-                                                    <SelectTrigger className="col-span-3">
-                                                        <SelectValue placeholder="Pilih kategori produk" />
-                                                    </SelectTrigger>
+                                                    <SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih kategori produk" /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="pangan">Pangan</SelectItem>
                                                         <SelectItem value="minuman">Minuman</SelectItem>
@@ -305,34 +352,28 @@ const LapakUsaha: React.FC = () => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="description" className="text-right">Deskripsi</Label>
-                                                <Textarea id="description" name="description" value={newProduct.description} onChange={handleInputChange} className="col-span-3" required />
+                                            <div className="grid grid-cols-4 items-start gap-4">
+                                                <Label htmlFor="deskripsi_produk" className="text-right pt-2">Deskripsi</Label>
+                                                <Textarea id="deskripsi_produk" name="deskripsi_produk" value={newProduct.deskripsi_produk} onChange={handleInputChange} className="col-span-3" required />
                                             </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="sellerName" className="text-right">Nama Penjual</Label>
-                                                <Input id="sellerName" name="sellerName" value={newProduct.sellerName} onChange={handleInputChange} className="col-span-3" required />
-                                            </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="sellerPhone" className="text-right">No. WhatsApp</Label>
-                                                <Input id="sellerPhone" name="sellerPhone" value={newProduct.sellerPhone} onChange={handleInputChange} placeholder="cth: 628123456789" className="col-span-3" required />
-                                            </div>
-                                            <div className="grid grid-cols-4 items-center gap-4">
-                                                <Label htmlFor="imgSrc" className="text-right">Link Gambar</Label>
-                                                <Input id="imgSrc" name="imgSrc" value={newProduct.imgSrc} onChange={handleInputChange} placeholder="https://url-gambar-produk.com/gambar.jpg" className="col-span-3" required />
+                                            <div className="grid grid-cols-4 items-start gap-4">
+                                                <Label htmlFor="gambar_produk" className="text-right pt-2">Foto Produk</Label>
+                                                <div className="col-span-3">
+                                                    <Input id="gambar_produk" name="gambar_produk" type="file" onChange={handleFileChange} className="col-span-3" accept=".png, .jpg, .jpeg" required />
+                                                    <p className="text-sm text-muted-foreground mt-1">Mendukung format .png, .jpg, .jpeg.</p>
+                                                     {newProduct.gambar_produk && <p className="text-sm text-green-600 mt-1">File dipilih: {newProduct.gambar_produk.name}</p>}
+                                                </div>
                                             </div>
                                         </div>
                                         <DialogFooter>
-                                            <Button>
-                                                Kirim untuk Persetujuan
-                                            </Button>
+                                            <Button type="submit">Kirim untuk Persetujuan</Button>
                                         </DialogFooter>
                                     </form>
                                 </DialogContent>
                             </Dialog>
                         </div>
 
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredProducts.map((item) => (
                                 <Dialog key={item.id}>
                                     <DialogTrigger asChild>
@@ -346,7 +387,6 @@ const LapakUsaha: React.FC = () => {
                                             </CardContent>
                                         </Card>
                                     </DialogTrigger>
-
                                     <DialogContent className="sm:max-w-3xl">
                                         <DialogHeader>
                                             <DialogTitle className="text-3xl font-bold">{item.title}</DialogTitle>
@@ -386,6 +426,10 @@ const LapakUsaha: React.FC = () => {
                         </div>
                     </div>
                 </section>
+                {/* Dummy sections for scroll links */}
+                <div id="services" className="h-0"></div>
+                <div id="about" className="h-0"></div>
+                <div id="contact" className="h-0"></div>
             </main>
         </>
     );
