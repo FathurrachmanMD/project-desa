@@ -97,7 +97,7 @@ export default function FormBangunan() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <Link href={`/form-usaha/form/${row.url_surat}`}>
+                                        <Link href={`/form-bangunan/form/${row.url_surat}`}>
                                             <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group">
                                                 <CardHeader className="space-y-4">
                                                     <div className={`${colors[index % colors.length]} w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
