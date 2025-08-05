@@ -12,47 +12,69 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Services\PendudukService;
 use App\Services\LapakService;
+use Inertia\Inertia;
 
 class SuratController extends Controller
 {
     public function index($slug)
     {
-        $surats = Surat::with('format')
-            ->whereHas('format', function ($query) use ($slug) {
-                $query->where('url_surat', $slug);
-            })
-            ->latest()
-            ->get()
-            ->map(function ($surat) {
-                $formIsian = $surat->format->form_isian ?? [];
-                $suratForm = $surat->form ?? [];
+        // slug is now kategori slug
+        // Step 1: Get all formats under the selected kategori
+        $formats = FormatSurat::with([
+            'surat' => function ($query) {
+                $query->select('id', 'format_id', 'form', 'status'); // Ensure format_id is included
+            }
+        ])
+        ->whereHas('kategori', fn($query) => $query->where('slug', $slug))
+        ->get();
 
-                // Extract 'name' values from the form_isian array of objects
-                $formIsianKeys = [];
-                foreach ($formIsian as $item) {
-                    if (isset($item['name'])) {
-                        $formIsianKeys[] = $item['name'];
-                    }
-                }
+        // return response()->json($formats);
 
-                // Create a default form array with all expected keys set to null
-                $defaultForm = array_fill_keys($formIsianKeys, null);
+        // Transform output: group surat by format.slug
+        $data = $formats->mapWithKeys(function ($format) {
+            $formIsian = $format->form_isian ?? [];
 
-                // Merge so missing fields from form_isian are included with null
-                // existing values from suratForm will override nulls from defaultForm
-                $surat->form = array_merge($defaultForm, $suratForm);
+            // Extract keys from form_isian
+            $formKeys = collect($formIsian)->pluck('name')->filter()->all();
 
+            // Map surat with form merging
+            $surats = $format->surat->map(function ($surat) use ($formKeys) {
+                $defaultForm = array_fill_keys($formKeys, null);
+                $surat->form = array_merge($defaultForm, $surat->form ?? []);
                 return $surat;
             });
 
-        return response()->json([
-            'message' => 'Daftar surat berdasarkan format berhasil ditampilkan',
-            'total' => $surats->count(),
-            'diproses' => $surats->where('status', 'diproses')->count(),
-            'disetujui' => $surats->where('status', 'disetujui')->count(),
-            'ditolak' => $surats->where('status', 'ditolak')->count(),
-            'data' => $surats
-        ], 200);
+            return [
+                $format->url_surat => $surats
+            ];
+        });
+
+        // Count
+        $total = $data->mapWithKeys(fn($surats, $formatSlug) => [
+            $formatSlug => $surats->count(),
+        ]);
+        $diproses = $data->mapWithKeys(fn($surats, $formatSlug) => [
+            $formatSlug => $surats->where('status', 'diproses')->count(),
+        ]);
+
+        $disetujui = $data->mapWithKeys(fn($surats, $formatSlug) => [
+            $formatSlug => $surats->where('status', 'disetujui')->count(),
+        ]);
+
+        $ditolak = $data->mapWithKeys(fn($surats, $formatSlug) => [
+            $formatSlug => $surats->where('status', 'ditolak')->count(),
+        ]);
+
+
+        // Return response
+        return Inertia::render('admin/perizinan', [
+            'slug' => $slug,
+            'data' => $data,
+            'total' => $total,
+            'diproses' => $diproses,
+            'disetujui' => $disetujui,
+            'ditolak' => $ditolak,
+        ]);
     }
 
     public function store(Request $request, $slug)

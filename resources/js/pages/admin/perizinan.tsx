@@ -12,11 +12,24 @@ import NewButton from '@/components/new-button';
 import { type BreadcrumbItem } from '@/types';
 import { 
   FileText, 
-  Home, 
-  UserPlus, 
-  Plane, 
-  UserX,
-  ListFilter
+  Building, 
+  MapPin, 
+  Globe,
+  ListFilter,
+  Calendar,
+  Users,
+  Building2,
+  TreePine,
+  FileCheck,
+  Wrench,
+  Sprout,
+  HandHeart,
+  UserCheck,
+  Droplets,
+  Home,
+  UserPlus,
+  Plane,
+  UserX
 } from 'lucide-react';
 
 import DataTable from 'react-data-table-component';
@@ -27,12 +40,27 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: '/dashboard',
   },
   {
-    title: 'Manajemen Perizinan Pribadi',
-    href: '/perizinan-pribadi',
+    title: 'Manajemen Perizinan',
+    href: '/perizinan',
   },
 ];
 
 const permitIcons = {
+  'sku': FileText,
+  'iumk': Building,
+  'situ': MapPin,
+  'nib': Globe,
+  'hajatan': Calendar,
+  'acara-publik': Users,
+  'sarana-umum': Building2,
+  'imb': Building,
+  'lahan-desa': TreePine,
+  'tidak-sengketa': FileCheck,
+  'renovasi': Wrench,
+  'pengelolaan-lahan': Sprout,
+  'permohonan-bantuan': HandHeart,
+  'surat-keterangan-petani': UserCheck,
+  'surat-izin-irigasi': Droplets,
   'pengantar-skck': FileText,
   'keterangan-domisili': Home,
   'izin-tinggal-pendatang': UserPlus,
@@ -40,105 +68,69 @@ const permitIcons = {
   'keterangan-tidak-bekerja': UserX,
 };
 
-type SuratItem = {
-    status: string;
-    [key: string]: any;
-  };
+type Surat = {
+  id: number;
+  form: Record<string, any>;
+  status: string;
+  // add other Surat fields you expect
+};
 
-  type StatusCounts = {
-    total: number;
-    diproses: number;
-    disetujui: number;
-    ditolak: number;
-  };
+type Props = {
+    slug: String,
+    data: Record<string, Surat[]>;       // e.g. { format_slug1: [surat1, surat2], ... }
+    total: Record<string, number>;       // e.g. { format_slug1: 10, ... }
+    diproses: Record<string, number>;
+    disetujui: Record<string, number>;
+    ditolak: Record<string, number>;
+};
 
-  type SuratResponse = {
-    list: SuratItem[];
-    statusCounts: StatusCounts | null;
-  };
+export default function Perizinan({ slug, data, total, diproses, disetujui, ditolak }: Props) {
+    const [activeTab, setActiveTab] = useState(() => {
+        // Get all keys from data object
+        const keys = Object.keys(data);
+        // Return the first key, or fallback to empty string if none
+        return keys.length > 0 ? keys[0] : '';
+    });
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [idDelete, setIdDelete] = useState(0);
 
-export default function PerizinanBangunan() {
-  const API_URL = import.meta.env.VITE_API_URL;
+    const { showToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('pengantar-skck');
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [idDelete, setIdDelete] = useState(0);
-  
-  const { showToast } = useToast();
+    // Create a permits array that always uses the latest state
+    //   const permitTypes = [
+    //     { key: 'sku' },
+    //     { key: 'iumk' },
+    //     { key: 'situ' },
+    //     { key: 'nib' },
+    //   ];
+    const permitTypes = Object.keys(data).map((key) => ({
+        key,
+        data: data[key],  // surat array for this format
+    }));
 
-  // Create a permits array that always uses the latest state
-  const permitTypes = [
-    { key: 'pengantar-skck' },
-    { key: 'keterangan-domisili' },
-    { key: 'izin-tinggal-pendatang' },
-    { key: 'izin-keluar-negeri' },
-    { key: 'keterangan-tidak-bekerja' },
-  ];
 
-  // const [activeTab, setActiveTab] = useState('sku'); // example default tab
-  const [tabData, setTabData] = useState<SuratItem[]>([]);
-  const [statusCounts, setStatusCounts] = useState<StatusCounts>({
-    total: 0,
-    diproses: 0,
-    disetujui: 0,
-    ditolak: 0,
-  });
-
-  const getDataForTab = async (tabKey: string): Promise<SuratResponse> => {
-    try {
-      const response = await axios.get(`${API_URL}/surat/${tabKey}`);
-      const list = response.data.data || [];
-      showToast.success(response.data.message);
-      return {
-        list,
-        statusCounts: {
-          total: list.length,
-          diproses: response.data.diproses,
-          disetujui: response.data.disetujui,
-          ditolak: response.data.ditolak,
-        },
-      };
-    } catch (error) {
-      console.error(`Failed to fetch data for ${tabKey}:`, error);
-      showToast.error("Terjadi kesalahan");
-      return { list: [], statusCounts: null };
-    } finally {
-      setIsLoading(false);
+    const handleDeleteModal = (id: number) => {
+        setIdDelete(id);
+        setIsDeleteModalOpen(true);
     }
-  };
 
-  const handleDeleteModal = (id: number) => {
-    setIdDelete(id);
-    setIsDeleteModalOpen(true);
-  }
-
-  const handleDelete = async () => {
-    try {
-      const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
-      showToast.success(response.data.message);
-    } catch (error) {
-      console.error(error);
-      showToast.error("Terjadi kesalahan");
-      return { list: [], statusCounts: null };
-    } finally {
-      fetchData();
-      setIsLoading(false);
-      setIsDeleteModalOpen(false);
+    const handleDelete = async () => {
+        // try {
+        //   const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
+        //   showToast.success(response.data.message);
+        // } catch (error) {
+        //   console.error(error);
+        //   showToast.error("Terjadi kesalahan");
+        //   return { list: [], counts: null };
+        // } finally {
+        //   fetchData();
+        //   setIsLoading(false);
+        //   setIsDeleteModalOpen(false);
+        // }
     }
-  }
 
-  const fetchData = async () => {
-    const result = await getDataForTab(activeTab);
-    setTabData(result.list);
-    if (result.statusCounts) setStatusCounts(result.statusCounts);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  return (
+    return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Manajemen Perizinan Usaha" />
       
@@ -146,10 +138,10 @@ export default function PerizinanBangunan() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Manajemen Perizinan Pribadi
+              Manajemen Perizinan {slug.charAt(0).toUpperCase() + slug.slice(1)}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Kelola semua jenis perizinan pribadi dalam satu dashboard
+              Kelola semua jenis perizinan {slug} dalam satu dashboard
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -168,7 +160,7 @@ export default function PerizinanBangunan() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statusCounts.total}</div>
+              <div className="text-2xl font-bold">{total[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Semua pengajuan perizinan
               </p>
@@ -181,7 +173,7 @@ export default function PerizinanBangunan() {
               <div className="h-2 w-2 rounded-full bg-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statusCounts.diproses}</div>
+              <div className="text-2xl font-bold">{diproses[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Sedang dalam proses
               </p>
@@ -194,7 +186,7 @@ export default function PerizinanBangunan() {
               <div className="h-2 w-2 rounded-full bg-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statusCounts.disetujui}</div>
+              <div className="text-2xl font-bold">{disetujui[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Telah disetujui
               </p>
@@ -207,7 +199,7 @@ export default function PerizinanBangunan() {
               <div className="h-2 w-2 rounded-full bg-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statusCounts.ditolak}</div>
+              <div className="text-2xl font-bold">{ditolak[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Telah ditolak
               </p>
@@ -221,34 +213,33 @@ export default function PerizinanBangunan() {
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
-              <NewButton href={`form/create/${activeTab}`}/>
+              <NewButton href={`/form/create/${activeTab}`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-5 w-full mb-8">
+              <TabsList className={`grid grid-cols-${permitTypes.length} w-full mb-8`}>
                 {permitTypes.map((permit) => {
-                  const Icon = permitIcons[permit.key as keyof typeof permitIcons];
-                  // permit data is array of all surat in one kategori
-                  // const counts = getStatusCounts(permit.data);
-                  
-                  return (
-                    <TabsTrigger 
-                      key={permit.key} 
-                      value={permit.key}
-                      className="flex flex-col items-center gap-2 p-4 h-auto"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        <span className="text-xs font-medium">
-                          {permit.key.toUpperCase()}
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {/* {counts.total}  */}
-                      </Badge>
-                    </TabsTrigger>
-                  );
+                    const Icon = permitIcons[permit.key as keyof typeof permitIcons]; // if you have icon keyed by format slug
+
+                    // You can calculate counts here or pass counts separately
+                    const countsTotal = total[permit.key] ?? 0;
+
+                    return (
+                        <TabsTrigger
+                        key={permit.key}
+                        value={permit.key}
+                        className="flex flex-col items-center gap-2 p-4 h-auto"
+                        >
+                        <div className="flex items-center gap-2">
+                            {Icon && <Icon className="h-4 w-4" />}
+                            <span className="text-xs font-medium">{permit.key.toUpperCase()}</span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                            {countsTotal}
+                        </Badge>
+                        </TabsTrigger>
+                    );
                 })}
               </TabsList>
               <TabsContent key={activeTab} value={activeTab} className='mt-2'>
@@ -258,7 +249,7 @@ export default function PerizinanBangunan() {
                       {/* should be activetab label name */}
                       <h3 className="text-lg font-semibold">{activeTab.toUpperCase()}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Total {statusCounts.total} pengajuan
+                        Total {total[activeTab]} pengajuan
                       </p>
                     </div>
                   </div>
@@ -268,7 +259,7 @@ export default function PerizinanBangunan() {
                     )
                     : (
                       <DataTable
-                        data={tabData}
+                        data={data[activeTab]}
                         columns={[
                           {
                             name: "ID",
@@ -283,6 +274,11 @@ export default function PerizinanBangunan() {
                           {
                             name: "NIK",
                             selector: row => row.form.nik,
+                            sortable: true
+                          },
+                          {
+                            name: "Nama Usaha",
+                            selector: row => row.form.nama_usaha,
                             sortable: true
                           },
                           {

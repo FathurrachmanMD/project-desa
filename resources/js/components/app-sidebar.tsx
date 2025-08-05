@@ -15,27 +15,27 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Perizinan Usaha',
-        href: '/perizinan',
+        href: '/perizinan/usaha',
         icon: FileText,
     },
     {
         title: 'Perizinan Acara',
-        href: '/perizinan-acara',
+        href: '/perizinan/acara',
         icon: Calendar,
     },
     {
         title: 'Perizinan Bangunan',
-        href: '/perizinan-bangunan',
+        href: '/perizinan/bangunan',
         icon: Building2,
     },
     {
         title: 'Perizinan Pribadi',
-        href: '/perizinan-pribadi',
+        href: '/perizinan/pribadi',
         icon: User,
     },
     {
         title: 'Perizinan Pertanian',
-        href: '/perizinan-pertanian',
+        href: '/perizinan/pertanian',
         icon: Sprout,
     },
     {

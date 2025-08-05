@@ -14,17 +14,19 @@ class KategoriSuratSeeder extends Seeder
     public function run(): void
     {
         $kategori = [
-            'Perizinan Usaha',
-            'Perizinan Bangunan',
-            'Perizinan Keramaian',
-            'Perizinan Pribadi',
-            'Perizinan Pertanian',
+            'Perizinan Usaha' => 'usaha',
+            'Perizinan Bangunan' => 'bangunan',
+            'Perizinan Keramaian' => 'acara',
+            'Perizinan Pribadi' => 'pribadi',
+            'Perizinan Pertanian' => 'pertanian',
         ];
 
-        foreach ($kategori as $item) {
+        foreach ($kategori as $nama => $slug) {
             DB::table('kategori_surat')->insert([
-                'nama' => $item,
+                'nama' => $nama,
+                'slug' => $slug,
             ]);
         }
+
     }
 }

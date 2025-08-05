@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SuratController;
 
 Route::get('/', function () {
     return Inertia::render('landing');
@@ -32,6 +33,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     });
 
+    Route::get('perizinan/{slug}', [SuratController::class, 'index']);
+    Route::put('perizinan/{slug}/{id}', [SuratController::class, 'update']);
+    Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy']);
+
     Route::get('customers', function () {
         return Inertia::render('customers/index');
     })->name('customers.index');
@@ -42,21 +47,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-Route::get('perizinan-acara', function () {
-    return Inertia::render('perizinan-acara/index');
-})->name('perizinan-acara.index');
-
-Route::get('perizinan-bangunan', function () {
-    return Inertia::render('perizinan-bangunan/index');
-})->name('perizinan-bangunan.index');
-
-Route::get('perizinan-pertanian', function () {
-    return Inertia::render('perizinan-pertanian/index');
-})->name('perizinan-pertanian.index');
-
-Route::get('perizinan-pribadi', function () {
-    return Inertia::render('perizinan-pribadi/index');
-})->name('perizinan-pribadi.index');
 
 // Form Usaha Routes
 Route::get('form-usaha', function () {

@@ -38,6 +38,11 @@ class FormatSurat extends Model
         return $this->form_isian ?? [];
     }
 
+    public function surat()
+    {
+        return $this->hasMany(Surat::class, 'format_id', 'id');
+    }
+
     public function syarat()
     {
         return $this->belongsToMany(SyaratSurat::class, 'syarat_format_surat', 'format_id', 'syarat_id');
