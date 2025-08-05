@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
+use App\Models\User;
 use App\Models\Surat;
 use App\Models\Penduduk;
 
@@ -32,18 +34,36 @@ class DashboardController extends Controller
         $disetujui = Surat::where('status', 'disetujui')->count();
 
         $percentage = $total_surat > 0 ? round(($disetujui / $total_surat) * 100, 2) : 0;
+        
+        $activities = Surat::with('format', 'format.kategori')->latest()->get();
+        // dont know if this means user or penduduk
+        $users = User::all();
 
-        return response()->json([
-            'total_izin_usaha' => $total_izin_usaha,
-            'total_izin_bangunan' => $total_izin_bangunan,
-            'total_izin_acara' => $total_izin_acara,
-            'total_izin_pribadi' => $total_izin_pribadi,
-            'total_izin_pertanian' => $total_izin_pertanian,
-            'diproses' => $diproses,
-            'disetujui' => $disetujui,
-            'approval_percentage' => $percentage,
-            'total_penduduk' => $total_penduduk,
-            'total_surat' => $total_surat
+        // return response()->json([
+        //     $activities
+        // ], 200, );
+
+        return Inertia::render('dashboard', [
+            'total' => [
+                'izin_usaha' => $total_izin_usaha,
+                'izin_bangunan' => $total_izin_bangunan,
+                'izin_acara' => $total_izin_acara,
+                'izin_pribadi' => $total_izin_pribadi,
+                'izin_pertanian' => $total_izin_pertanian,
+                'diproses' => $diproses,
+                'disetujui' => $disetujui,
+                'approval_percentage' => $percentage,
+                'penduduk' => $total_penduduk,
+                'surat' => $total_surat
+            ],
+            'activities' => [
+                'data' => $activities,
+                'total' => $activities->count()
+            ],
+            'users' => [
+                'data' => $users,
+                'total' => $users->count()
+            ]
         ]);
     }
 }

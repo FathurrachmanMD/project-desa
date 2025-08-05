@@ -31,6 +31,7 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
+import { Surat } from '@/types/surat';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -98,37 +99,26 @@ const calculateStats = () => {
     };
 };
 
-type TotalDashboardData = {
-    total_izin_usaha: number;
-    total_izin_bangunan: number;
-    total_izin_acara: number;
-    total_izin_pribadi: number;
-    total_izin_pertanian: number;
+type Total = {
+    izin_usaha: number;
+    izin_bangunan: number;
+    izin_acara: number;
+    izin_pribadi: number;
+    izin_pertanian: number;
     diproses: number;
     disetujui: number;
     approval_percentage: number;
-    total_penduduk: number;
-    total_surat: number;
+    penduduk: number;
+    surat: number;
 };
 
-export default function Dashboard() {
-    const API_URL = import.meta.env.VITE_API_URL;
+type DashboardData = {
+    total: Total;
+    activities: {data: Surat[]};
+    users: any; // maybe penduduk idk
+}
 
-    const [total, setTotal] = useState<TotalDashboardData | null>(null);
-    
-    const fetchData = async () => {
-        try {
-            const response = await axios.get(`${API_URL}/dashboard`);
-            setTotal(response.data);
-        }
-        catch(error) {
-            console.error(error)
-        }
-    }
-    
-    useEffect(() => {
-        fetchData();
-    }, []);
+export default function Dashboard(data: DashboardData) {
     const stats = calculateStats();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -163,9 +153,9 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_surat : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.surat : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
-                                            {total ? total.disetujui : 0} disetujui, {total ? total.diproses : 0} diproses
+                                            {data.total ? data.total.disetujui : 0} disetujui, {data.total ? data.total.diproses : 0} diproses
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -183,7 +173,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_acara : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.izin_acara : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             Hajatan, Publik, Sarana
                                         </p>
@@ -203,7 +193,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_bangunan : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.izin_bangunan : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             IMB, Renovasi, Lahan Desa
                                         </p>
@@ -223,7 +213,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_pribadi : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.izin_pribadi : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             SKCK, Domisili, Keluar Negeri
                                         </p>
@@ -243,7 +233,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_usaha : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.izin_usaha : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             SKU, IUMK, SITU, NIB
                                         </p>
@@ -263,7 +253,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_izin_pertanian : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.izin_pertanian : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             Lahan, Pupuk, Keterangan Petani
                                         </p>
@@ -283,7 +273,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-0 px-3 lg:px-4 pb-2 lg:pb-3">
-                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{total ? total.total_penduduk : 0}</div>
+                                        <div className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{data.total ? data.total.penduduk : 0}</div>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight">
                                             {/* {stats.activeCustomers} aktif */}
                                         </p>
@@ -334,7 +324,7 @@ export default function Dashboard() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <RecentActivities />
+                                    <RecentActivities activities={data.activities.data} />
                                 </CardContent>
                             </Card>
                         </FadeInView>
@@ -371,7 +361,7 @@ export default function Dashboard() {
                                         Menunggu Persetujuan
                                     </p>
                                     <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
-                                        {total?.diproses}
+                                        {data.total?.diproses}
                                     </p>
                                 </div>
                             </div>
@@ -387,7 +377,7 @@ export default function Dashboard() {
                                         Disetujui Total
                                     </p>
                                     <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                                        {total?.disetujui}
+                                        {data.total?.disetujui}
                                     </p>
                                 </div>
                             </div>
@@ -403,7 +393,7 @@ export default function Dashboard() {
                                         Tingkat Persetujuan
                                     </p>
                                     <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                                        {total?.approval_percentage}%
+                                        {data.total?.approval_percentage}%
                                     </p>
                                 </div>
                             </div>
