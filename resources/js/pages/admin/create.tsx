@@ -63,21 +63,26 @@ const getCurrentDate = () => {
 
 interface PermitFormProps {
   slug: string;
+  id: string;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Dashboard',
-    href: '/dashboard',
-  },
-  {
-    title: 'Buat Surat',
-    href: '/dashboard',
-  },
-];
-
-export default function PermitForm({ slug }: PermitFormProps) {
+export default function PermitForm({ slug, id }: PermitFormProps) {
   const API_URL = import.meta.env.VITE_API_URL;
+  
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: 'Dashboard',
+      href: '/dashboard',
+    },
+    {
+      title: 'Manajemen Perizinan',
+      href: `/perizinan/${slug}`,
+    },
+    {
+      title: 'Buat Surat',
+      href: '/dashboard',
+    },
+  ];
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
@@ -96,7 +101,7 @@ export default function PermitForm({ slug }: PermitFormProps) {
     useEffect(() => {
       const fetchFormatSurat = async () => {
         try {
-          const response = await axios.get(`${API_URL}/format-surat/form/${slug}`);
+          const response = await axios.get(`${API_URL}/format-surat/form/${id}`);
           setFormatSurat(response.data);
         } catch (error) {
           console.error('Error fetching data:', error);
@@ -105,7 +110,7 @@ export default function PermitForm({ slug }: PermitFormProps) {
       };
       
       fetchFormatSurat();
-    }, [API_URL, slug, showToast]);
+    }, [API_URL, id, showToast]);
     
     const [data, setData] = useState<{ form: { [key: string]: string }, file: { [key: string]: File | null } }>({
       form: {},
@@ -173,12 +178,12 @@ export default function PermitForm({ slug }: PermitFormProps) {
           }
         });
 
-        // Validate slug exists
-        if (!slug || typeof slug !== 'string') {
-          throw new Error('Invalid slug parameter');
+        // Validate id exists
+        if (!id || typeof id !== 'string') {
+          throw new Error('Invalid id parameter');
         }
 
-        const response = await axios.post(`${API_URL}/surat/${slug}`, formData, {
+        const response = await axios.post(`${API_URL}/surat/${id}`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',

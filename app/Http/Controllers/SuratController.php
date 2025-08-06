@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 class SuratController extends Controller
 {
-    public function index($slug)
+    public function index(Request $request, $slug)
     {
         // slug is now kategori slug
         // Step 1: Get all formats under the selected kategori
@@ -64,7 +64,6 @@ class SuratController extends Controller
         $ditolak = $data->mapWithKeys(fn($surats, $formatSlug) => [
             $formatSlug => $surats->where('status', 'ditolak')->count(),
         ]);
-
 
         // Return response
         return Inertia::render('admin/perizinan', [
@@ -302,22 +301,21 @@ class SuratController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($slug, $id)
     {
         try {
             $surat = Surat::findOrFail($id);
             $surat->delete();
 
-            return response()->json([
-                'message' => 'Surat berhasil dihapus'
-            ], 200);
+            return redirect()->route('perizinan.show', $slug)
+                            ->with('success', 'Surat berhasil dihapus');
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Surat tidak ditemukan'], 404);
+            return redirect()->route('perizinan.show', $slug)
+                            ->with('error', 'Surat tidak ditemukan');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal menghapus surat',
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect()->route('perizinan.show', $slug)
+                            ->with('error', 'Gagal menghapus surat: ' . $e->getMessage());
         }
     }
+
 }

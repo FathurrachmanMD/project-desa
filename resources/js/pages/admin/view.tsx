@@ -62,22 +62,27 @@ const getCurrentDate = () => {
 };
 
 interface PermitFormProps {
+  slug: string;
   id: number;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Dashboard',
-    href: '/dashboard',
-  },
-  {
-    title: 'Edit Surat',
-    href: '/dashboard',
-  },
-];
 
-export default function PermitForm({ id }: PermitFormProps) {
+export default function PermitForm({ slug, id }: PermitFormProps) {
   const API_URL = import.meta.env.VITE_API_URL;
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: 'Dashboard',
+      href: '/dashboard',
+    },
+    {
+      title: 'Manajemen Perizinan',
+      href: `/perizinan/${slug}`,
+    },
+    {
+      title: 'Edit Surat',
+      href: '/dashboard',
+    },
+  ];
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
@@ -180,13 +185,12 @@ export default function PermitForm({ id }: PermitFormProps) {
         <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           {/* Back Button */}
           <div className="mb-6">
-            <Button 
-              variant="ghost" 
-              className="px-0 py-2 -ml-2 hover:bg-transparent hover:underline"
-              onClick={() => window.history.back()}
-              >
+            <Link
+              href={`/perizinan/${slug}`}
+              className="inline-flex items-center px-0 py-2 -ml-2 hover:bg-transparent hover:underline"
+            >
               <ArrowLeft className="w-5 h-5 mr-2" /> Kembali
-            </Button>
+            </Link>
           </div>
           
           {/* Header Section */}

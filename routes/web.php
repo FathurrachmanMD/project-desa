@@ -15,27 +15,27 @@ Route::get('/onboarding', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    // Form Surat
-    Route::get('form/create/{id}', function ($slug) {
-        return Inertia::render('surat/form-create', [
-            'slug' => $slug
-        ]);
-    });
     Route::get('surat/form/create/{slug}', function ($slug) {
         return Inertia::render('surat/form-create', [
             'slug' => $slug
         ]);
     })->name('surat.form.create');
-    Route::get('form/view/{id}', function ($id) {
-        return Inertia::render('surat/form-view', [
+
+    Route::get('perizinan/{slug}', [SuratController::class, 'index'])->name('perizinan.show');
+    Route::get('perizinan/{slug}/{id}/create', function ($slug, $id) {
+        return Inertia::render('admin/create', [
+            'slug' => $slug,
             'id' => $id
         ]);
     });
-
-    Route::get('perizinan/{slug}', [SuratController::class, 'index']);
+    Route::get('perizinan/{slug}/{id}', function ($slug, $id) {
+        return Inertia::render('admin/view', [
+            'slug' => $slug,
+            'id' => $id
+        ]);
+    });
     Route::put('perizinan/{slug}/{id}', [SuratController::class, 'update']);
-    Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy']);
+    Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy'])->name('perizinan.destroy');
 
     Route::get('customers', function () {
         return Inertia::render('customers/index');

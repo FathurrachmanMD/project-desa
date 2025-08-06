@@ -1,6 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
-import React, { useState, useEffect, act } from 'react';
-import axios from 'axios';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +32,7 @@ import {
 } from 'lucide-react';
 
 import DataTable from 'react-data-table-component';
+import { Surat } from '@/types/surat';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -68,13 +68,6 @@ const permitIcons = {
   'keterangan-tidak-bekerja': UserX,
 };
 
-type Surat = {
-  id: number;
-  form: Record<string, any>;
-  status: string;
-  // add other Surat fields you expect
-};
-
 type Props = {
     slug: String,
     data: Record<string, Surat[]>;       // e.g. { format_slug1: [surat1, surat2], ... }
@@ -85,52 +78,45 @@ type Props = {
 };
 
 export default function Perizinan({ slug, data, total, diproses, disetujui, ditolak }: Props) {
-    const [activeTab, setActiveTab] = useState(() => {
-        // Get all keys from data object
-        const keys = Object.keys(data);
-        // Return the first key, or fallback to empty string if none
-        return keys.length > 0 ? keys[0] : '';
-    });
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [idDelete, setIdDelete] = useState(0);
+  const [activeTab, setActiveTab] = useState(() => {
+      // Get all keys from data object
+      const keys = Object.keys(data);
+      // Return the first key, or fallback to empty string if none
+      return keys.length > 0 ? keys[0] : '';
+  });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [idDelete, setIdDelete] = useState(0);
 
-    const { showToast } = useToast();
-
-    // Create a permits array that always uses the latest state
-    //   const permitTypes = [
-    //     { key: 'sku' },
-    //     { key: 'iumk' },
-    //     { key: 'situ' },
-    //     { key: 'nib' },
-    //   ];
-    const permitTypes = Object.keys(data).map((key) => ({
-        key,
-        data: data[key],  // surat array for this format
-    }));
+  const { showToast } = useToast();
+  
+  const permitTypes = Object.keys(data).map((key) => ({
+      key,
+      data: data[key],  // surat array for this format
+  }));
 
 
-    const handleDeleteModal = (id: number) => {
-        setIdDelete(id);
-        setIsDeleteModalOpen(true);
-    }
+  const handleDeleteModal = (id: number) => {
+      setIdDelete(id);
+      setIsDeleteModalOpen(true);
+  }
 
-    const handleDelete = async () => {
-        // try {
-        //   const response = await axios.delete(`${API_URL}/surat/form/${idDelete}`);
-        //   showToast.success(response.data.message);
-        // } catch (error) {
-        //   console.error(error);
-        //   showToast.error("Terjadi kesalahan");
-        //   return { list: [], counts: null };
-        // } finally {
-        //   fetchData();
-        //   setIsLoading(false);
-        //   setIsDeleteModalOpen(false);
-        // }
-    }
+  const handleDelete = async () => {
+    router.delete(route('perizinan.destroy', {slug, id: idDelete}), {
+      onSuccess: () => {
+        showToast.success('Berhasil menghapus surat');
+      },
+      onError: () => {
+        showToast.error('Terjadi kesalahan');
+      },
+      onFinish: () => {
+        setIsDeleteModalOpen(false);
+        router.reload();
+      }
+    })
+  }
 
-    return (
+  return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Manajemen Perizinan Usaha" />
       
@@ -212,8 +198,8 @@ export default function Perizinan({ slug, data, total, diproses, disetujui, dito
           <CardHeader className="pb-4">
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
-              <span className='grow'>Kelola semua jenis perizinan usaha yang diajukan warga</span>
-              <NewButton href={`/form/create/${activeTab}`}/>
+              <span className='grow'>Kelola semua jenis perizinan {slug} yang diajukan warga</span>
+              <NewButton href={`/perizinan/usaha/${activeTab}/create`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
@@ -294,7 +280,7 @@ export default function Perizinan({ slug, data, total, diproses, disetujui, dito
                             name: "Aksi",
                             cell: row => (
                               <div className="flex items-center gap-2">
-                                <Link href={`form/view/${row.id}`}>
+                                <Link href={`/perizinan/${slug}/${row.id}`}>
                                   <Button className='bg-gray-500' type='button'>Lihat</Button>
                                 </Link>
                                 <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>

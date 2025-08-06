@@ -1,6 +1,6 @@
 export interface Surat {
-  id: string;
-  form: {nama: string};
+  id: number;
+  form: any;
   // initials: string;
   // activity: string;
   // type: 'event' | 'building' | 'personal' | 'business' | 'agricultural';
