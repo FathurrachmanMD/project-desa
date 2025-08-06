@@ -146,12 +146,18 @@ class SuratController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($slug, $id)
     {
         try {
             $surat = Surat::with('format')->findOrFail($id);
             $surat->syarat = $surat->getSyarat();
-            return response()->json($surat, 200);
+            // change this to inertia
+            return Inertia::render('admin/view', [
+                'slug' => $slug,
+                'id' => $id,
+                'surat' => $surat
+            ]);
+            // return response()->json($surat, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Terjadi kesalahan',
@@ -308,13 +314,13 @@ class SuratController extends Controller
             $surat->delete();
 
             return redirect()->route('perizinan.show', $slug)
-                            ->with('success', 'Surat berhasil dihapus');
+                ->with('success', 'Surat berhasil dihapus');
         } catch (ModelNotFoundException $e) {
             return redirect()->route('perizinan.show', $slug)
-                            ->with('error', 'Surat tidak ditemukan');
+                ->with('error', 'Surat tidak ditemukan');
         } catch (\Exception $e) {
             return redirect()->route('perizinan.show', $slug)
-                            ->with('error', 'Gagal menghapus surat: ' . $e->getMessage());
+                ->with('error', 'Gagal menghapus surat: ' . $e->getMessage());
         }
     }
 

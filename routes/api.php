@@ -13,7 +13,7 @@ use App\Http\Controllers\ProdukController;
 
 Route::get('dashboard', [DashboardController::class, 'index']);
 
-Route::get('/surat/form/{id}', [SuratController::class, 'show']); // get specific surat
+// Route::get('/surat/form/{id}', [SuratController::class, 'show']); // get specific surat
 Route::put('/surat/status/{id}', [SuratController::class, 'updateStatus']);
 // Route::delete('/surat/form/{id}', [SuratController::class, 'destroy']);
 

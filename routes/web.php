@@ -28,12 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'id' => $id
         ]);
     });
-    Route::get('perizinan/{slug}/{id}', function ($slug, $id) {
-        return Inertia::render('admin/view', [
-            'slug' => $slug,
-            'id' => $id
-        ]);
-    });
+    Route::get('perizinan/{slug}/{id}', [SuratController::class, 'show']);
     Route::put('perizinan/{slug}/{id}', [SuratController::class, 'update']);
     Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy'])->name('perizinan.destroy');
 
