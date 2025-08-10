@@ -183,7 +183,7 @@ export default function Landing() {
                                 </DropdownMenu>
                                 <button>
                                     <Link
-                                        href={'/lapak-usaha'} // Gunakan Link dan href yang valid
+                                        href={'/lapak-user'} // Gunakan Link dan href yang valid
                                         className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
                                     >
                                         Lapak

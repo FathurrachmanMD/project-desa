@@ -1,33 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 
 // Import komponen UI yang diperlukan
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-// --- IMPOR BARU DARI DETAIL.TSX ---
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from '@/lib/utils';
-
 
 // Import Ikon
-import { 
-    MessageCircle, ChevronDown, Building, FileText, Briefcase, Calendar, TreePine, 
-    Plus, Store, Package,
-    // --- IMPOR IKON BARU DARI DETAIL.TSX ---
-    PlusCircle, Utensils, Coffee, HandMetal, Check, ChevronsUpDown 
+import { MessageCircle, ChevronDown, 
+    Building,
+    FileText,
+    Briefcase,
+    Calendar,
+    TreePine,
+    Plus,
+    Store,
+    Package
 } from 'lucide-react';
 
-// --- INTERFACE & TIPE DATA ---
-
-// Interface untuk daftar Lapak Usaha
-interface LapakUsaha {
+// Interface untuk produk yang berasal dari surat yang disetujui
+interface Product {
     id: number;
     title: string;
     price: string;
@@ -39,6 +31,7 @@ interface LapakUsaha {
     lapakName: string;
     satuan: string;
     status: string;
+    // Data tambahan dari surat pengajuan
     pengajuan_nama: string;
     nik: string;
     nama_usaha: string;
@@ -48,123 +41,44 @@ interface LapakUsaha {
     tanggal_disetujui: string;
 }
 
-// --- TIPE DATA BARU DARI DETAIL.TSX ---
-// Tipe data untuk form pengajuan produk baru
-type NewProductForm = {
-    lapak_id: string;
-    nama_produk: string;
-    harga_produk: string;
-    kategori_produk: 'pangan' | 'minuman' | 'kerajinan' | undefined;
-    deskripsi_produk: string;
-    bukti_sku: File | null;
-    link_foto: string;
-};
-
-
-// --- DUMMY DATA ---
-
-// Data dummy untuk daftar Lapak Usaha
-const dummyLapakUsaha: LapakUsaha[] = [
-    {
-        id: 1,
-        title: 'Warung Nasi Ibu Siti',
-        price: '15000',
-        category: 'Kuliner',
-        sellerName: 'Ibu Siti',
-        sellerPhone: '081234567890',
-        description: 'Menjual aneka masakan rumahan lezat dan higienis.',
-        imgSrc: '',
-        lapakName: 'Warung Nasi Ibu Siti',
-        satuan: 'Porsi',
-        status: 'approved',
-        pengajuan_nama: 'Siti Rohmah',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Warung Nasi Ibu Siti',
-        jenis_usaha: 'Rumah Makan',
-        alamat_usaha: 'Kp. Drawati RT 01 RW 02, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '5 Tahun',
-        tanggal_disetujui: '2023-10-26',
-    },
-    {
-        id: 2,
-        title: 'Bengkel Motor Kang Ujang',
-        price: '50000',
-        category: 'Jasa',
-        sellerName: 'Kang Ujang',
-        sellerPhone: '089876543210',
-        description: 'Melayani servis motor, ganti oli, dan tambal ban.',
-        imgSrc: '',
-        lapakName: 'Bengkel Motor Kang Ujang',
-        satuan: 'Jasa',
-        status: 'approved',
-        pengajuan_nama: 'Ujang Surujang',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Bengkel Motor Kang Ujang',
-        jenis_usaha: 'Otomotif',
-        alamat_usaha: 'Jl. Raya Paseh No. 12, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '10 Tahun',
-        tanggal_disetujui: '2023-09-15',
-    },
-    {
-        id: 3,
-        title: 'Toko Kelontong Berkah',
-        price: '1000',
-        category: 'Kebutuhan Harian',
-        sellerName: 'Bapak Ahmad',
-        sellerPhone: '085678901234',
-        description: 'Menyediakan kebutuhan pokok dan sehari-hari.',
-        imgSrc: '',
-        lapakName: 'Toko Kelontong Berkah',
-        satuan: 'pcs',
-        status: 'approved',
-        pengajuan_nama: 'Ahmad Subagja',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Toko Kelontong Berkah',
-        jenis_usaha: 'Perdagangan',
-        alamat_usaha: 'Gg. Pahlawan III, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '3 Tahun',
-        tanggal_disetujui: '2024-01-20',
-    },
-];
-
-// --- DATA DUMMY BARU DARI DETAIL.TSX ---
-const allLapaks = [
-    { value: "1", label: "Warung Nasi Ibu Siti" },
-    { value: "2", label: "Bengkel Motor Kang Ujang" },
-    { value: "3", label: "Toko Kelontong Berkah" },
-];
-
 const LapakUser: React.FC = () => {
-    const [products, setProducts] = useState<LapakUsaha[]>(dummyLapakUsaha);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // --- LOGIKA FORM BARU DARI DETAIL.TSX ---
-    const initialFormState: NewProductForm = {
-        lapak_id: '',
-        nama_produk: '',
-        harga_produk: '',
-        kategori_produk: undefined,
-        deskripsi_produk: '',
-        bukti_sku: null,
-        link_foto: '',
-    };
-    const [newProduct, setNewProduct] = useState<NewProductForm>(initialFormState);
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-    const [openLapakSelect, setOpenLapakSelect] = useState(false);
+    // Fetch products ketika component mount
+    useEffect(() => {
+        fetchUserProducts();
+    }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setNewProduct(prev => ({ ...prev, [name]: value }));
-    };
-    const handleCategoryChange = (value: 'pangan' | 'minuman' | 'kerajinan') => {
-        setNewProduct(prev => ({ ...prev, kategori_produk: value }));
-    };
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, files } = e.target;
-        if (files && files.length > 0) {
-            setNewProduct(prev => ({ ...prev, [name]: files[0] }));
+    const fetchUserProducts = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('/api/lapak-user/products', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    // Tambahkan auth header jika diperlukan
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch products');
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                setProducts(data.data);
+            } else {
+                setError(data.message || 'Failed to load products');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setLoading(false);
         }
     };
-    // --- AKHIR LOGIKA FORM BARU ---
 
     const scrollToSection = (sectionId: string) => {
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -187,7 +101,6 @@ const LapakUser: React.FC = () => {
                 animate={{ y: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
             >
-                {/* ... konten navigasi tidak berubah ... */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
@@ -243,7 +156,7 @@ const LapakUser: React.FC = () => {
                             </DropdownMenu>
                             <button>
                                 <Link
-                                    href={'/lapak-user'} 
+                                    href={'/lapak-usaha'} 
                                     className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
                                 >
                                     Lapak
@@ -294,7 +207,6 @@ const LapakUser: React.FC = () => {
                     className="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-center text-white"
                     style={{ backgroundImage: "url('https://asset-2.tstatic.net/wartakota/foto/bank/images/Suasana-persawahan-di-Desa-Drawati-Paseh-Kabupaten-Bandung.jpg')" }}
                 >
-                    {/* ... konten hero section tidak berubah ... */}
                     <div className="absolute inset-0 bg-black/50"></div>
                     <div className="relative z-10 px-4">
                         <motion.div
@@ -324,71 +236,59 @@ const LapakUser: React.FC = () => {
                                 </p>
                             </div>
 
-                            {/* --- PERUBAHAN DI SINI: Tombol diletakkan berdampingan --- */}
-                            <div className="flex items-center gap-4">
-                                {/* Tombol Ajukan Produk Baru (DIPINDAHKAN KE SINI) */}
-                                <Dialog open={isFormModalOpen} onOpenChange={setIsFormModalOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline">
-                                            <PlusCircle className="mr-2 h-4 w-4" /> Ajukan Produk Baru
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[600px]">
-                                        <form onSubmit={(e) => { e.preventDefault(); alert('Pengajuan produk terkirim (simulasi)'); setIsFormModalOpen(false); }}>
-                                            <DialogHeader>
-                                                <DialogTitle className="text-2xl">Form Pengajuan Produk</DialogTitle>
-                                                <DialogDescription>Isi detail produk yang ingin Anda tampilkan di lapak.</DialogDescription>
-                                            </DialogHeader>
-                                            <div className="grid gap-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
-                                                {/* Nama Lapak Dropdown */}
-                                                <div className="grid grid-cols-4 items-center gap-4">
-                                                    <Label className="text-right">Nama Lapak</Label>
-                                                    <Popover open={openLapakSelect} onOpenChange={setOpenLapakSelect}>
-                                                        <PopoverTrigger asChild>
-                                                            <Button variant="outline" role="combobox" aria-expanded={openLapakSelect} className="col-span-3 justify-between">
-                                                                {newProduct.lapak_id ? allLapaks.find((lapak) => lapak.value === newProduct.lapak_id)?.label : "Cari dan pilih lapak..."}
-                                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-[400px] p-0">
-                                                            <Command><CommandInput placeholder="Cari nama lapak..." /><CommandEmpty>Lapak tidak ditemukan.</CommandEmpty>
-                                                                <CommandGroup>
-                                                                    {allLapaks.map((lapak) => (
-                                                                        <CommandItem key={lapak.value} value={lapak.label} onSelect={() => { setNewProduct(prev => ({...prev, lapak_id: lapak.value})); setOpenLapakSelect(false); }}>
-                                                                            <Check className={cn("mr-2 h-4 w-4", newProduct.lapak_id === lapak.value ? "opacity-100" : "opacity-0")} />
-                                                                            {lapak.label}
-                                                                        </CommandItem>
-                                                                    ))}
-                                                                </CommandGroup>
-                                                            </Command>
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </div>
-                                                {/* Form Fields Lainnya */}
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nama_produk" className="text-right">Nama Produk</Label><Input id="nama_produk" name="nama_produk" value={newProduct.nama_produk} onChange={handleInputChange} className="col-span-3" required /></div>
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="harga_produk" className="text-right">Harga</Label><Input id="harga_produk" name="harga_produk" value={newProduct.harga_produk} onChange={handleInputChange} placeholder="cth: Rp 25.000 / item" className="col-span-3" required /></div>
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right">Kategori</Label><Select onValueChange={handleCategoryChange} required><SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih kategori produk" /></SelectTrigger><SelectContent><SelectItem value="pangan"><Utensils className="inline-block mr-2 h-4 w-4" />Pangan</SelectItem><SelectItem value="minuman"><Coffee className="inline-block mr-2 h-4 w-4" />Minuman</SelectItem><SelectItem value="kerajinan"><HandMetal className="inline-block mr-2 h-4 w-4" />Kerajinan</SelectItem></SelectContent></Select></div>
-                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="deskripsi_produk" className="text-right pt-2">Deskripsi</Label><Textarea id="deskripsi_produk" name="deskripsi_produk" value={newProduct.deskripsi_produk} onChange={handleInputChange} className="col-span-3" required /></div>
-                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="bukti_sku" className="text-right pt-2">Bukti SKU</Label><div className="col-span-3"><Input id="bukti_sku" name="bukti_sku" type="file" onChange={handleFileChange} accept=".png, .jpg, .jpeg" required />{newProduct.bukti_sku && <p className="text-sm text-green-600 mt-1">File dipilih: {newProduct.bukti_sku.name}</p>}</div></div>
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="link_foto" className="text-right">Foto Produk</Label><Input id="link_foto" name="link_foto" value={newProduct.link_foto} onChange={handleInputChange} placeholder="Link foto produk" className="col-span-3" required /></div>
-                                            </div>
-                                            <DialogFooter><Button type="submit">Kirim untuk Persetujuan</Button></DialogFooter>
-                                        </form>
-                                    </DialogContent>
-                                </Dialog>
-
-                                {/* Tombol Ajukan SKU (Tombol Asli) */}
-                                <Link href="/surat/form/create/sku">
-                                    <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white">
-                                        <Plus className="mr-2 h-4 w-4" /> 
-                                        Ajukan SKU
-                                    </Button>
-                                </Link>
-                            </div>
+                            {/* Tombol Ajukan Lapak yang mengarah ke form create surat SKU */}
+                            <Link href="/surat/form/create/sku">
+                                <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white">
+                                    <Plus className="mr-2 h-4 w-4" /> 
+                                    Ajukan SKU
+                                </Button>
+                            </Link>
                         </div>
 
+                        {/* Loading State */}
+                        {loading && (
+                            <motion.div 
+                                className="text-center py-20"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <Package className="w-24 h-24 mx-auto text-gray-300 mb-6 animate-pulse" />
+                                <h3 className="text-2xl font-semibold text-gray-600 mb-4">
+                                    Memuat Lapak...
+                                </h3>
+                                <p className="text-gray-500">
+                                    Sedang mengambil data lapak Anda
+                                </p>
+                            </motion.div>
+                        )}
+
+                        {/* Error State */}
+                        {error && !loading && (
+                            <motion.div 
+                                className="text-center py-20"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <Store className="w-24 h-24 mx-auto text-red-300 mb-6" />
+                                <h3 className="text-2xl font-semibold text-red-600 mb-4">
+                                    Gagal Memuat Data
+                                </h3>
+                                <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                    {error}
+                                </p>
+                                <Button 
+                                    onClick={fetchUserProducts}
+                                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                                >
+                                    Coba Lagi
+                                </Button>
+                            </motion.div>
+                        )}
+
                         {/* Products Grid */}
-                        {products.length > 0 ? (
+                        {!loading && !error && products.length > 0 && (
                             <motion.div 
                                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
                                 initial={{ opacity: 0, y: 30 }}
@@ -476,8 +376,10 @@ const LapakUser: React.FC = () => {
                                     </motion.div>
                                 ))}
                             </motion.div>
-                        ) : (
-                        // Empty State
+                        )}
+
+                        {/* Empty State */}
+                        {!loading && !error && products.length === 0 && (
                             <motion.div 
                                 className="text-center py-20"
                                 initial={{ opacity: 0, y: 30 }}
