@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\Lapak;
+use App\Models\KategoriProduk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -49,30 +50,48 @@ class ProdukController extends Controller
             $validated = $request->validate([
                 'lapak_id'      => 'nullable|exists:lapak,id',
                 'kategori_id'   => 'nullable|exists:kategori_produk,id',
-                'nama'          => 'nullable|string',
+                'kategori_produk' => 'nullable|string',
+                'nama'          => 'required|string',
                 'harga'         => 'nullable|integer',
                 'satuan'        => 'nullable|string|max:20',
-                'tipe_potongan' => 'nullable|boolean',
+                'tipe_potongan' => 'boolean',
                 'potongan'      => 'nullable|integer',
                 'deskripsi'     => 'nullable|string',
-                'foto'          => 'nullable|string|max:225',
-                'status'        => 'boolean',
+                'foto'          => 'nullable|file|mimes:jpg,jpeg,png',
+                'surat'          => 'nullable|file|mimes:pdf,jpg,jpeg,png',
             ]);
+
+            if ($request->hasFile('foto')) {
+                $path = $request->file('foto')->store('produk', 'public');
+                $validated['foto'] = $path;
+            }
+            if ($request->hasFile('surat')) {
+                $path = $request->file('surat')->store('produk', 'public');
+                $validated['surat'] = $path;
+            }
+
+            if (!empty($validated['kategori_produk'])) {
+                $kategori = KategoriProduk::where('slug', $validated['kategori_produk'])->first();
+
+                if ($kategori) {
+                    $validated['kategori_id'] = $kategori->id;
+                }
+            }
 
             $validated["created_by"] = auth()->id();
             $validated["updated_by"] = auth()->id();
 
             $item = Produk::create($validated);
+
             return response()->json($item, 201);
 
-        }
-        catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Validation error', 'errors' => $e->errors()], 422);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => 'Error', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     /**
      * Display the specified resource.

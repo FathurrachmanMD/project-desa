@@ -26,10 +26,11 @@ return new class extends Migration
             $table->integer('potongan')->default(0);
 
             $table->text('deskripsi')->nullable();
-            $table->string('foto', 225)->nullable();
+            $table->string('foto')->nullable();
+            $table->string('surat')->nullable();
             $table->integer('stok')->default(0);
 
-            $table->boolean('status')->default(true); // aktif/nonaktif
+            $table->enum('status', ['diproses', 'disetujui', 'ditolak'])->default('diproses');
 
             $table->timestamps();
             $table->unsignedBigInteger('created_by')->nullable();

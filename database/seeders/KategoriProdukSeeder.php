@@ -16,6 +16,7 @@ class KategoriProdukSeeder extends Seeder
         $categories = [
             ['kategori' => 'Umum', 'slug' => 'umum'],
             ['kategori' => 'Pangan', 'slug' => 'pangan'],
+            ['kategori' => 'Minuman', 'slug' => 'minuman'],
             ['kategori' => 'Kerajinan', 'slug' => 'kerajinan'],
             ['kategori' => 'Pertanian', 'slug' => 'pertanian'],
             ['kategori' => 'Jasa', 'slug' => 'jasa'],

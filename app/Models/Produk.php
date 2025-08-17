@@ -13,7 +13,6 @@ class Produk extends Model
 
     protected $fillable = [
         'lapak_id',
-        'lapak_user_id',
         'kategori_id',
         'nama',
         'harga',
@@ -23,6 +22,7 @@ class Produk extends Model
         'potongan',
         'deskripsi',
         'foto',
+        'surat',
         'status',
         'created_by',
         'updated_by',

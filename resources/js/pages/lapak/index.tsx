@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from '@/lib/utils';
-
+import axios from 'axios';
 
 // Import Ikon
 import { 
@@ -58,28 +58,23 @@ interface Lapak {
 }
 
 interface Produk {
-    id: number;
-    lapak_id?: number | null;
+    id?: number | null;
+    lapak_id: number | null;
     kategori_id?: number | null;
 
-    nama?: string | null;
-    harga?: number | null;
+    nama: string;
+    harga: number;
     satuan?: string | null;
 
-    tipe_potongan: boolean; // true = persen, false = nominal (or however you define it)
-    potongan: number;
+    tipe_potongan?: boolean; // true = persen, false = nominal (or however you define it)
+    potongan?: number;
 
-    deskripsi?: string | null;
-    foto?: string | null;
-    stok: number;
+    deskripsi: string;
+    foto?: File | null;
+    surat?: File | null;
+    stok?: number;
 
-    status: boolean; // true = aktif, false = nonaktif
-
-    created_at: string;
-    updated_at: string;
-
-    created_by?: number | null;
-    updated_by?: number | null;
+    status?: boolean; // true = aktif, false = nonaktif
 
     // optional eager-loaded relations
     lapak?: {
@@ -92,30 +87,7 @@ interface Produk {
         nama: string;
         slug: string;
     };
-    created_by_user?: {
-        id: number;
-        name: string;
-    };
 }
-
-// --- TIPE DATA BARU DARI DETAIL.TSX ---
-// Tipe data untuk form pengajuan produk baru
-type NewProductForm = {
-    lapak_id: string;
-    nama_produk: string;
-    harga_produk: string;
-    kategori_produk: 'pangan' | 'minuman' | 'kerajinan' | undefined;
-    deskripsi_produk: string;
-    bukti_sku: File | null;
-    link_foto: string;
-};
-
-// --- DATA DUMMY BARU DARI DETAIL.TSX ---
-const allLapaks = [
-    { value: "1", label: "Warung Nasi Ibu Siti" },
-    { value: "2", label: "Bengkel Motor Kang Ujang" },
-    { value: "3", label: "Toko Kelontong Berkah" },
-];
 
 type Props = {
     data: Lapak[];
@@ -126,19 +98,20 @@ type Props = {
 }
 
 const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [lapaks, setLapaks] = useState<Lapak[]>(data);
 
     // --- LOGIKA FORM BARU DARI DETAIL.TSX ---
-    const initialFormState: NewProductForm = {
-        lapak_id: '',
-        nama_produk: '',
-        harga_produk: '',
-        kategori_produk: undefined,
-        deskripsi_produk: '',
-        bukti_sku: null,
-        link_foto: '',
+    const initialFormState: Produk = {
+        lapak_id: null,
+        nama: '',
+        harga: 0,
+        kategori_id: undefined,
+        deskripsi: '',
+        surat: null,
+        foto: null,
     };
-    const [newProduct, setNewProduct] = useState<NewProductForm>(initialFormState);
+    const [newProduct, setNewProduct] = useState<Produk>(initialFormState);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [openLapakSelect, setOpenLapakSelect] = useState(false);
 
@@ -155,6 +128,68 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
             setNewProduct(prev => ({ ...prev, [name]: files[0] }));
         }
     };
+
+    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            const formData = new FormData();
+            const token = localStorage.getItem("token"); // or wherever you store it
+
+            // Validate data exists
+            if (!newProduct || !newProduct.surat) {
+                throw new Error('Form data is not properly initialized');
+            }
+
+            Object.entries(newProduct).forEach(([key, value]) => {
+                if (typeof value === "string" && value.trim() !== "") {
+                    formData.append(key, value);
+                } else if (typeof value === "number" || typeof value === "boolean") {
+                    formData.append(key, String(value)); // convert safely
+                }
+            });
+
+            // Add files - only add actual File objects
+            if (newProduct.surat && newProduct.surat instanceof File) {
+                formData.append("surat", newProduct.surat as Blob);
+            }
+            if (newProduct.foto && newProduct.foto instanceof File) {
+                formData.append("foto", newProduct.foto as Blob);
+            }
+
+            console.log(newProduct)
+            console.log(formData)
+
+            // Validate id exists
+            // if (!id || typeof id !== 'string') {
+            // throw new Error('Invalid id parameter');
+            // }
+
+            const response = await axios.post(`${API_URL}/produk`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+            });
+
+            // Success handling here
+            console.log("Submitted:", response.data);
+            // showToast.success("Data Berhasil Disimpan");
+        } catch (error) {
+            // Error handling here
+            console.error("Submission failed:", error);
+            
+            if (error instanceof Error) {
+            // showToast.error('Kesalahan Sistem', error.message);
+            } else {
+            // showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+            }
+        } finally {
+            // setIsSubmitting(false);
+        }
+        alert('Pengajuan produk terkirim (simulasi)');
+        setIsFormModalOpen(false);
+    }
+
     // --- AKHIR LOGIKA FORM BARU ---
 
     const scrollToSection = (sectionId: string) => {
@@ -325,7 +360,7 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[600px]">
-                                        <form onSubmit={(e) => { e.preventDefault(); alert('Pengajuan produk terkirim (simulasi)'); setIsFormModalOpen(false); }}>
+                                        <form onSubmit={handleSubmit}>
                                             <DialogHeader>
                                                 <DialogTitle className="text-2xl">Form Pengajuan Produk</DialogTitle>
                                                 <DialogDescription>Isi detail produk yang ingin Anda tampilkan di lapak.</DialogDescription>
@@ -337,17 +372,17 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
                                                     <Popover open={openLapakSelect} onOpenChange={setOpenLapakSelect}>
                                                         <PopoverTrigger asChild>
                                                             <Button variant="outline" role="combobox" aria-expanded={openLapakSelect} className="col-span-3 justify-between">
-                                                                {newProduct.lapak_id ? allLapaks.find((lapak) => lapak.value === newProduct.lapak_id)?.label : "Cari dan pilih lapak..."}
+                                                                {newProduct.lapak_id ? lapaks.find((lapak) => lapak.id === newProduct.lapak_id)?.nama : "Cari dan pilih lapak..."}
                                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="w-[400px] p-0">
                                                             <Command><CommandInput placeholder="Cari nama lapak..." /><CommandEmpty>Lapak tidak ditemukan.</CommandEmpty>
                                                                 <CommandGroup>
-                                                                    {allLapaks.map((lapak) => (
-                                                                        <CommandItem key={lapak.value} value={lapak.label} onSelect={() => { setNewProduct(prev => ({...prev, lapak_id: lapak.value})); setOpenLapakSelect(false); }}>
-                                                                            <Check className={cn("mr-2 h-4 w-4", newProduct.lapak_id === lapak.value ? "opacity-100" : "opacity-0")} />
-                                                                            {lapak.label}
+                                                                    {lapaks.map((lapak) => (
+                                                                        <CommandItem key={lapak.id} value={lapak.nama} onSelect={() => { setNewProduct(prev => ({...prev, lapak_id: lapak.id})); setOpenLapakSelect(false); }}>
+                                                                            <Check className={cn("mr-2 h-4 w-4", newProduct.lapak_id === lapak.id ? "opacity-100" : "opacity-0")} />
+                                                                            {lapak.nama}
                                                                         </CommandItem>
                                                                     ))}
                                                                 </CommandGroup>
@@ -356,12 +391,12 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
                                                     </Popover>
                                                 </div>
                                                 {/* Form Fields Lainnya */}
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nama_produk" className="text-right">Nama Produk</Label><Input id="nama_produk" name="nama_produk" value={newProduct.nama_produk} onChange={handleInputChange} className="col-span-3" required /></div>
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="harga_produk" className="text-right">Harga</Label><Input id="harga_produk" name="harga_produk" value={newProduct.harga_produk} onChange={handleInputChange} placeholder="cth: Rp 25.000 / item" className="col-span-3" required /></div>
+                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="nama_produk" className="text-right">Nama Produk</Label><Input id="nama" name="nama" value={newProduct.nama} onChange={handleInputChange} className="col-span-3" required /></div>
+                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="harga" className="text-right">Harga</Label><Input id="harga" name="harga" value={newProduct.harga} onChange={handleInputChange} placeholder="cth: Rp 25.000 / item" className="col-span-3" required /></div>
                                                 <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right">Kategori</Label><Select onValueChange={handleCategoryChange} required><SelectTrigger className="col-span-3"><SelectValue placeholder="Pilih kategori produk" /></SelectTrigger><SelectContent><SelectItem value="pangan"><Utensils className="inline-block mr-2 h-4 w-4" />Pangan</SelectItem><SelectItem value="minuman"><Coffee className="inline-block mr-2 h-4 w-4" />Minuman</SelectItem><SelectItem value="kerajinan"><HandMetal className="inline-block mr-2 h-4 w-4" />Kerajinan</SelectItem></SelectContent></Select></div>
-                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="deskripsi_produk" className="text-right pt-2">Deskripsi</Label><Textarea id="deskripsi_produk" name="deskripsi_produk" value={newProduct.deskripsi_produk} onChange={handleInputChange} className="col-span-3" required /></div>
-                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="bukti_sku" className="text-right pt-2">Bukti SKU</Label><div className="col-span-3"><Input id="bukti_sku" name="bukti_sku" type="file" onChange={handleFileChange} accept=".png, .jpg, .jpeg" required />{newProduct.bukti_sku && <p className="text-sm text-green-600 mt-1">File dipilih: {newProduct.bukti_sku.name}</p>}</div></div>
-                                                <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="link_foto" className="text-right">Foto Produk</Label><Input id="link_foto" name="link_foto" value={newProduct.link_foto} onChange={handleInputChange} placeholder="Link foto produk" className="col-span-3" required /></div>
+                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="deskripsi" className="text-right pt-2">Deskripsi</Label><Textarea id="deskripsi" name="deskripsi" value={newProduct.deskripsi} onChange={handleInputChange} className="col-span-3" required /></div>
+                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="surat" className="text-right pt-2">Bukti SKU</Label><div className="col-span-3"><Input id="surat" name="surat" type="file" onChange={handleFileChange} accept=".pdf, .png, .jpg, .jpeg" required /></div></div>
+                                                <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="foto" className="text-right pt-2">Foto Produk</Label><div className="col-span-3"><Input id="foto" name="foto" type="file" onChange={handleFileChange} accept=".png, .jpg, .jpeg" required /></div></div>
                                             </div>
                                             <DialogFooter><Button type="submit">Kirim untuk Persetujuan</Button></DialogFooter>
                                         </form>

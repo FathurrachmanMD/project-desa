@@ -121,7 +121,7 @@ const LapakUserDetail = ({data}: Props) => {
                     initial={{ y: -50 }} animate={{ y: 0 }} transition={{ duration: 0.5 }}
                 >
                     <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-                        <Link href="/lapak-user">
+                        <Link href="/lapak">
                             <Button variant="ghost" className="flex items-center space-x-2 text-[#1E4359] hover:text-[#2A5B73] hover:bg-blue-50">
                                 <ArrowLeft className="w-5 h-5" />
                                 <span className="font-medium">Kembali ke Daftar Lapak</span>

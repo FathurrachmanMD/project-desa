@@ -28,7 +28,8 @@ return new class extends Migration
             $table->string('lng', 20)->nullable();
 
             $table->tinyInteger('zoom')->default(10);
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+          
+            $table->enum('status', ['diproses', 'disetujui', 'ditolak'])->default('diproses');
 
             $table->foreignId('surat_id')->nullable()->constrained('surat')->onDelete('set null');
             $table->foreignId('penduduk_id')->nullable()->constrained('penduduk')->onDelete('set null');

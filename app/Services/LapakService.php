@@ -28,7 +28,7 @@ class LapakService
                 [
                     'surat_id' => $surat->id,
                     'telepon' => $formData["nomor_hp"] ?? $surat->penduduk->nomor_hp ?? '',
-                    'status' => 'approved',
+                    'status' => 'disetujui',
                     'alamat' => $formData["alamat_usaha"] ?? $formData["alamat"],
                     'created_by' => $surat->created_by ?? Auth::id(),
                     'updated_by' => $surat->updated_by ?? Auth::id(),
