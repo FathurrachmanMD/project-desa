@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuratController;
+use App\Http\Controllers\LapakController;
+use App\Http\Controllers\ProdukController;
 
 Route::get('/', function () {
     return Inertia::render('landing');
@@ -23,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('perizinan/{slug}', [SuratController::class, 'index'])->name('perizinan.show');
     Route::get('perizinan/{slug}/{id}/create', function ($slug, $id) {
-        return Inertia::render('admin/create', [
+        return Inertia::render('admin/perizinan/create', [
             'slug' => $slug,
             'id' => $id
         ]);
@@ -99,15 +101,8 @@ Route::get('/lapak-usaha', function () {
     return Inertia::render('lapak-usaha/index');
 })->name('lapak-usaha');
 
-Route::get('/lapak-user', function () {
-    return Inertia::render('lapak-user/index');
-})->name('lapak-user');
-
-Route::get('/lapak-user/{slug}', function ($slug) {
-    return Inertia::render('lapak-user/detail', [
-        'slug' => $slug
-    ]);
-})->name('lapak-user.detail');
+Route::get('/lapak', [LapakController::class, 'index'])->name('lapak-user');
+Route::get('/lapak/{id}', [ProdukController::class, 'index'])->name('lapak-detail');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

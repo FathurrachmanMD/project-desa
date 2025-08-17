@@ -92,7 +92,12 @@ export function Navbar() {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        
+                        <Link
+                            href={'/lapak'} 
+                            className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
+                        >
+                            Lapak
+                        </Link>
                         <Link 
                             href="/layanan"
                             className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"

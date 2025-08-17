@@ -38,39 +38,6 @@ interface Product {
     description: string;
 }
 
-const initialProducts: Product[] = [
-    {
-        id: 1,
-        imgSrc: 'https://fahum.umsu.ac.id/blog/wp-content/uploads/2024/08/10-manfaat-beras-untuk-kecantikan-750x375.webp',
-        title: 'Beras Pulen Organik',
-        price: 'Rp 16.000 / L',
-        category: 'pangan',
-        sellerName: 'Kelompok Tani Makmur',
-        sellerPhone: '6281234567890',
-        description: 'Beras pulen hasil panen organik dari sawah Desa Drawati, tanpa pestisida dan pemutih. Sangat cocok untuk konsumsi keluarga sehari-hari.',
-    },
-    {
-        id: 2,
-        imgSrc: 'https://media.dinomarket.com/docs/imgTD/2022-02/_SMine_1645691788366_240222150228_ll.jpg_xl.jpg',
-        title: 'Keranjang Bambu Estetik',
-        price: 'Rp 35.000',
-        category: 'kerajinan',
-        sellerName: 'Ibu Siti Kerajinan',
-        sellerPhone: '6281234567891',
-        description: 'Keranjang serbaguna yang dianyam dengan tangan dari bambu pilihan. Kuat, tahan lama, dan memiliki nilai estetika tinggi untuk dekorasi rumah.',
-    },
-    {
-        id: 3,
-        imgSrc: 'https://dikemas.com/uploads/2020/08/dikemas-ria-dia-3.jpg',
-        title: 'Kopi Luwak Asli Drawati',
-        price: 'Rp 25.000 / 100g',
-        category: 'minuman',
-        sellerName: 'Kopi Kang Ujang',
-        sellerPhone: '6281234567892',
-        description: 'Biji kopi luwak asli yang diproses secara tradisional, menghasilkan aroma yang khas dan cita rasa yang lembut dengan tingkat keasaman rendah.',
-    },
-];
-
 // Tipe data untuk form pengajuan baru
 type NewProductForm = {
     lapak_id: string;

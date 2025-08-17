@@ -16,79 +16,80 @@ import {
 
 // --- INTERFACE & TIPE DATA ---
 
-interface LapakDetail {
+interface Lapak {
     id: number;
-    nama_lapak: string;
-    telepon: string;
-    usaha: {
-        nama_usaha: string;
-        jenis_usaha: string;
-        alamat_usaha: string;
-    };
-    pemilik: {
+    nama: string;
+    deskripsi: string;
+    jenis_usaha: string;
+    pemilik_nama: string;
+    pemilik_nik: string;
+    telepon?: string;
+    email?: string;
+    alamat: string;
+    lat?: string;
+    lng?: string;
+    zoom: number;
+    status: 'pending' | 'approved' | 'rejected';
+    produk: Produk[];
+    penduduk?: {
+        id: number;
         nama: string;
+        nik: string;
+    };
+    surat?: {
+        id: number;
+        nomor_surat: string;
+        status: string;
+    };
+    created_by?: {
+        id: number;
+        name: string;
     };
 }
 
-interface Product {
+interface Produk {
     id: number;
-    imgSrc: string;
-    title: string;
-    price: string;
-    category: 'pangan' | 'minuman' | 'kerajinan';
-    sellerName: string;
-    sellerPhone: string;
-    description: string;
+    lapak_id?: number | null;
+    kategori_id?: number | null;
+
+    nama?: string | null;
+    harga?: number | null;
+    satuan?: string | null;
+
+    tipe_potongan: boolean; // true = persen, false = nominal (or however you define it)
+    potongan: number;
+
+    deskripsi?: string | null;
+    foto?: string | null;
+
+    status: boolean; // true = aktif, false = nonaktif
+
+    created_at: string;
+    updated_at: string;
+
+    created_by?: number | null;
+    updated_by?: number | null;
+
+    kategori?: {
+        id: number;
+        nama: string;
+        slug: string;
+    };
+    created_by_user?: {
+        id: number;
+        name: string;
+    };
 }
 
-// Tipe data untuk form telah dihapus karena tidak digunakan
-
-
-// --- DUMMY DATA ---
-
-// Data 'allLapaks' telah dihapus karena tidak digunakan
-const dummyLapakDetail: LapakDetail = {
-    id: 1,
-    nama_lapak: 'Warung Nasi Ibu Siti',
-    telepon: '081234567890',
-    pemilik: {
-        nama: 'Siti Rohmah',
-    },
-    usaha: {
-        nama_usaha: 'Warung Nasi Ibu Siti',
-        jenis_usaha: 'Rumah Makan',
-        alamat_usaha: 'Kp. Drawati RT 01 RW 02, Desa Drawati, Kec. Paseh, Kab. Bandung',
-    },
-};
-
-const dummyLapakProducts: Product[] = [
-    {
-        id: 101,
-        imgSrc: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Made%27s_Warung_Nasi_Campur.jpg',
-        title: 'Nasi Rames Komplit',
-        price: 'Rp 15.000',
-        category: 'pangan',
-        sellerName: 'Warung Nasi Ibu Siti',
-        sellerPhone: '6281234567890',
-        description: 'Nasi rames dengan lauk ayam goreng, orek tempe, sayur, dan sambal. Kenyang dan lezat!',
-    },
-    {
-        id: 102,
-        imgSrc: 'https://cdn0-production-images-kly.akamaized.net/8_C32Y92O48YLv2V4Q5kY_K9AJE=/1200x1200/smart/filters:quality(75):strip_icc():format(jpeg)/kly-media-production/medias/3103239/original/079148300_1586937512-es_teh_manis.jpg',
-        title: 'Es Teh Manis Segar',
-        price: 'Rp 4.000',
-        category: 'minuman',
-        sellerName: 'Warung Nasi Ibu Siti',
-        sellerPhone: '6281234567890',
-        description: 'Teh manis dingin yang diseduh dari daun teh pilihan, cocok untuk melepas dahaga.',
-    },
-];
+type Props = {
+    data: Lapak;
+}
 
 // --- KOMPONEN UTAMA ---
 
-const LapakUserDetail: React.FC = () => {
+const LapakUserDetail = ({data}: Props) => {
     const [activeCategory, setActiveCategory] = useState<'semua' | 'pangan' | 'minuman' | 'kerajinan'>('semua');
-    const [lapakDetail] = useState<LapakDetail | null>(dummyLapakDetail);
+    const [lapak, setLapak] = useState<Lapak | null>(data);
 
     // Sisa state dan handler untuk form telah dihapus
 
@@ -100,18 +101,18 @@ const LapakUserDetail: React.FC = () => {
     ];
 
     // **PERBAIKAN 1: Menambahkan logika untuk memfilter produk berdasarkan kategori yang aktif**
-    const filteredProducts = dummyLapakProducts.filter(product => {
+    const filteredProducts = data.produk.filter(produk => {
         if (activeCategory === 'semua') {
             return true; // Tampilkan semua produk jika kategori 'semua' aktif
         }
-        return product.category === activeCategory; // Tampilkan produk yang kategorinya cocok
+        return produk.category === activeCategory; // Tampilkan produk yang kategorinya cocok
     });
     
-    if (!lapakDetail) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Data lapak tidak ditemukan.</div>;
+    if (!lapak) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Data lapak tidak ditemukan.</div>;
 
     return (
         <>
-            <Head title={`${lapakDetail.nama_lapak} - Detail Lapak`} />
+            <Head title={`${lapak.nama} - Detail Lapak`} />
             
             <div className="min-h-screen bg-gray-50">
                 {/* Navbar */}
@@ -128,7 +129,7 @@ const LapakUserDetail: React.FC = () => {
                         </Link>
                         <div className="flex items-center space-x-3">
                             <div className="text-right">
-                                <h1 className="text-lg font-semibold text-gray-800">{lapakDetail.usaha.nama_usaha}</h1>
+                                <h1 className="text-lg font-semibold text-gray-800">{lapak.nama}</h1>
                                 <p className="text-sm text-gray-500">Detail Usaha</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-br from-[#1E4359] to-[#2A5B73] rounded-xl flex items-center justify-center shadow-lg">
@@ -144,11 +145,11 @@ const LapakUserDetail: React.FC = () => {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.6 }}
                 >
                     <div className="container mx-auto px-6 text-center">
-                        <motion.h1 className="text-4xl md:text-5xl font-bold mb-3">{lapakDetail.usaha.nama_usaha}</motion.h1>
-                        <motion.p className="text-xl text-blue-100 mb-4">{lapakDetail.usaha.jenis_usaha}</motion.p>
+                        <motion.h1 className="text-4xl md:text-5xl font-bold mb-3">{lapak.nama}</motion.h1>
+                        <motion.p className="text-xl text-blue-100 mb-4">{lapak.jenis_usaha}</motion.p>
                         <motion.div className="flex items-center justify-center gap-2 mb-6 max-w-2xl mx-auto">
                             <MapPin className="w-5 h-5 text-blue-200 flex-shrink-0" />
-                            <p className="text-blue-200">{lapakDetail.usaha.alamat_usaha}</p>
+                            <p className="text-blue-200">{lapak.alamat}</p>
                         </motion.div>
                         <motion.div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full border border-green-400/30">
                             <CheckCircle className="w-5 h-5 text-green-300" />
@@ -164,8 +165,8 @@ const LapakUserDetail: React.FC = () => {
                 >
                     <div className="container mx-auto px-6">
                         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="shadow-lg"><CardHeader className="flex flex-row items-center gap-3 space-y-0"><div className="w-10 h-10 bg-[#1E4359] rounded-lg flex items-center justify-center"><Building2 className="w-5 h-5 text-white" /></div><h3 className="font-semibold text-gray-800">Pemilik Usaha</h3></CardHeader><CardContent><p className="text-lg font-medium text-[#1E4359]">{lapakDetail.pemilik.nama}</p></CardContent></Card>
-                            <Card className="shadow-lg"><CardHeader className="flex flex-row items-center gap-3 space-y-0"><div className="w-10 h-10 bg-[#2A5B73] rounded-lg flex items-center justify-center"><Phone className="w-5 h-5 text-white" /></div><h3 className="font-semibold text-gray-800">Kontak</h3></CardHeader><CardContent><p className="text-lg font-medium text-[#2A5B73]">{lapakDetail.telepon}</p></CardContent></Card>
+                            <Card className="shadow-lg"><CardHeader className="flex flex-row items-center gap-3 space-y-0"><div className="w-10 h-10 bg-[#1E4359] rounded-lg flex items-center justify-center"><Building2 className="w-5 h-5 text-white" /></div><h3 className="font-semibold text-gray-800">Pemilik Usaha</h3></CardHeader><CardContent><p className="text-lg font-medium text-[#1E4359]">{lapak.penduduk.nama}</p></CardContent></Card>
+                            <Card className="shadow-lg"><CardHeader className="flex flex-row items-center gap-3 space-y-0"><div className="w-10 h-10 bg-[#2A5B73] rounded-lg flex items-center justify-center"><Phone className="w-5 h-5 text-white" /></div><h3 className="font-semibold text-gray-800">Kontak</h3></CardHeader><CardContent><p className="text-lg font-medium text-[#2A5B73]">{lapak.telepon}</p></CardContent></Card>
                         </div>
                     </div>
                 </motion.section>
@@ -196,27 +197,27 @@ const LapakUserDetail: React.FC = () => {
                 <section id="products" className="py-16 bg-white">
                     <div className="container mx-auto px-4">
                         <div className="flex justify-between items-center mb-10">
-                            <h2 className="text-3xl font-bold text-gray-800 capitalize">Produk dari {lapakDetail.nama_lapak}</h2>
+                            <h2 className="text-3xl font-bold text-gray-800 capitalize">Produk dari {lapak.nama}</h2>
                             {/* **PERBAIKAN 2: Tombol dan Dialog Form Pengajuan telah dihapus** */}
                         </div>
                         
                         {/* Grid untuk menampilkan produk yang sudah difilter */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {/* Menggunakan 'filteredProducts' bukan 'dummyLapakProducts' */}
-                            {filteredProducts.map((item) => (
+                            {filteredProducts.map((item: Produk) => (
                                 <Dialog key={item.id}>
                                     <DialogTrigger asChild>
-                                        <Card className="overflow-hidden shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"><CardHeader className="p-0"><img src={item.imgSrc} alt={item.title} className="w-full h-56 object-cover" /></CardHeader><CardContent className="p-6"><h3 className="text-xl font-bold text-gray-900 truncate">{item.title}</h3><p className="text-lg font-semibold text-orange-600 mt-2">{item.price}</p></CardContent></Card>
+                                        <Card className="overflow-hidden shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"><CardHeader className="p-0"><img src={item.foto} alt={item.nama} className="w-full h-56 object-cover" /></CardHeader><CardContent className="p-6"><h3 className="text-xl font-bold text-gray-900 truncate">{item.nama}</h3><p className="text-lg font-semibold text-orange-600 mt-2">{item.harga}</p></CardContent></Card>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-3xl">
-                                        <DialogHeader><DialogTitle className="text-3xl font-bold">{item.title}</DialogTitle><DialogDescription>Kategori: <span className="capitalize font-semibold text-orange-600">{item.category}</span></DialogDescription></DialogHeader>
+                                        <DialogHeader><DialogTitle className="text-3xl font-bold">{item.nama}</DialogTitle><DialogDescription>Kategori: <span className="capitalize font-semibold text-orange-600">{item.kategori?.nama}</span></DialogDescription></DialogHeader>
                                         <div className="grid gap-6 py-4 grid-cols-1 md:grid-cols-2">
-                                            <img src={item.imgSrc} alt={item.title} className="w-full h-80 rounded-lg object-cover" />
+                                            <img src={item.foto} alt={item.nama} className="w-full h-80 rounded-lg object-cover" />
                                             <div className="flex flex-col space-y-4">
-                                                <div><h4 className="font-semibold text-lg text-gray-800">Deskripsi Produk</h4><p className="text-gray-600">{item.description}</p></div>
-                                                <div><h4 className="font-semibold text-lg text-gray-800">Harga</h4><p className="text-2xl font-bold text-orange-600">{item.price}</p></div>
-                                                <div><h4 className="font-semibold text-lg text-gray-800">Penjual</h4><p className="text-gray-600">{item.sellerName}</p></div>
-                                                <Button className="w-full mt-auto" onClick={() => { const message = encodeURIComponent(`Halo, saya tertarik dengan produk "${item.title}". Apakah masih tersedia?`); window.open(`https://wa.me/${item.sellerPhone}?text=${message}`, '_blank'); }}><MessageCircle className="mr-2 h-4 w-4" /> Hubungi Penjual via WhatsApp</Button>
+                                                <div><h4 className="font-semibold text-lg text-gray-800">Deskripsi Produk</h4><p className="text-gray-600">{item.deskripsi}</p></div>
+                                                <div><h4 className="font-semibold text-lg text-gray-800">Harga</h4><p className="text-2xl font-bold text-orange-600">{item.harga}</p></div>
+                                                <div><h4 className="font-semibold text-lg text-gray-800">Penjual</h4><p className="text-gray-600">{lapak.penduduk?.nama}</p></div>
+                                                <Button className="w-full mt-auto" onClick={() => { const message = encodeURIComponent(`Halo, saya tertarik dengan produk "${item.nama}". Apakah masih tersedia?`); window.open(`https://wa.me/${lapak.telepon}?text=${message}`, '_blank'); }}><MessageCircle className="mr-2 h-4 w-4" /> Hubungi Penjual via WhatsApp</Button>
                                             </div>
                                         </div>
                                     </DialogContent>

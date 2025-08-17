@@ -27,25 +27,75 @@ import {
 // --- INTERFACE & TIPE DATA ---
 
 // Interface untuk daftar Lapak Usaha
-interface LapakUsaha {
+interface Lapak {
     id: number;
-    title: string;
-    price: string;
-    category: string;
-    sellerName: string;
-    sellerPhone: string;
-    description: string;
-    imgSrc: string;
-    lapakName: string;
-    satuan: string;
-    status: string;
-    pengajuan_nama: string;
-    nik: string;
-    nama_usaha: string;
+    nama: string;
+    deskripsi: string;
     jenis_usaha: string;
-    alamat_usaha: string;
-    lama_usaha: string;
-    tanggal_disetujui: string;
+    pemilik_nama: string;
+    pemilik_nik: string;
+    telepon?: string;
+    email?: string;
+    alamat: string;
+    lat?: string;
+    lng?: string;
+    zoom: number;
+    status: 'pending' | 'approved' | 'rejected';
+    penduduk?: {
+        id: number;
+        nama: string;
+        nik: string;
+    };
+    surat?: {
+        id: number;
+        nomor_surat: string;
+        status: string;
+    };
+    created_by?: {
+        id: number;
+        name: string;
+    };
+}
+
+interface Produk {
+    id: number;
+    lapak_id?: number | null;
+    kategori_id?: number | null;
+
+    nama?: string | null;
+    harga?: number | null;
+    satuan?: string | null;
+
+    tipe_potongan: boolean; // true = persen, false = nominal (or however you define it)
+    potongan: number;
+
+    deskripsi?: string | null;
+    foto?: string | null;
+    stok: number;
+
+    status: boolean; // true = aktif, false = nonaktif
+
+    created_at: string;
+    updated_at: string;
+
+    created_by?: number | null;
+    updated_by?: number | null;
+
+    // optional eager-loaded relations
+    lapak?: {
+        id: number;
+        nama: string;
+        deskripsi: string;
+    };
+    kategori?: {
+        id: number;
+        nama: string;
+        slug: string;
+    };
+    created_by_user?: {
+        id: number;
+        name: string;
+    };
 }
 
 // --- TIPE DATA BARU DARI DETAIL.TSX ---
@@ -60,73 +110,6 @@ type NewProductForm = {
     link_foto: string;
 };
 
-
-// --- DUMMY DATA ---
-
-// Data dummy untuk daftar Lapak Usaha
-const dummyLapakUsaha: LapakUsaha[] = [
-    {
-        id: 1,
-        title: 'Warung Nasi Ibu Siti',
-        price: '15000',
-        category: 'Kuliner',
-        sellerName: 'Ibu Siti',
-        sellerPhone: '081234567890',
-        description: 'Menjual aneka masakan rumahan lezat dan higienis.',
-        imgSrc: '',
-        lapakName: 'Warung Nasi Ibu Siti',
-        satuan: 'Porsi',
-        status: 'approved',
-        pengajuan_nama: 'Siti Rohmah',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Warung Nasi Ibu Siti',
-        jenis_usaha: 'Rumah Makan',
-        alamat_usaha: 'Kp. Drawati RT 01 RW 02, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '5 Tahun',
-        tanggal_disetujui: '2023-10-26',
-    },
-    {
-        id: 2,
-        title: 'Bengkel Motor Kang Ujang',
-        price: '50000',
-        category: 'Jasa',
-        sellerName: 'Kang Ujang',
-        sellerPhone: '089876543210',
-        description: 'Melayani servis motor, ganti oli, dan tambal ban.',
-        imgSrc: '',
-        lapakName: 'Bengkel Motor Kang Ujang',
-        satuan: 'Jasa',
-        status: 'approved',
-        pengajuan_nama: 'Ujang Surujang',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Bengkel Motor Kang Ujang',
-        jenis_usaha: 'Otomotif',
-        alamat_usaha: 'Jl. Raya Paseh No. 12, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '10 Tahun',
-        tanggal_disetujui: '2023-09-15',
-    },
-    {
-        id: 3,
-        title: 'Toko Kelontong Berkah',
-        price: '1000',
-        category: 'Kebutuhan Harian',
-        sellerName: 'Bapak Ahmad',
-        sellerPhone: '085678901234',
-        description: 'Menyediakan kebutuhan pokok dan sehari-hari.',
-        imgSrc: '',
-        lapakName: 'Toko Kelontong Berkah',
-        satuan: 'pcs',
-        status: 'approved',
-        pengajuan_nama: 'Ahmad Subagja',
-        nik: '3204xxxxxxxxxxxx',
-        nama_usaha: 'Toko Kelontong Berkah',
-        jenis_usaha: 'Perdagangan',
-        alamat_usaha: 'Gg. Pahlawan III, Desa Drawati, Kec. Paseh, Kab. Bandung',
-        lama_usaha: '3 Tahun',
-        tanggal_disetujui: '2024-01-20',
-    },
-];
-
 // --- DATA DUMMY BARU DARI DETAIL.TSX ---
 const allLapaks = [
     { value: "1", label: "Warung Nasi Ibu Siti" },
@@ -134,8 +117,16 @@ const allLapaks = [
     { value: "3", label: "Toko Kelontong Berkah" },
 ];
 
-const LapakUser: React.FC = () => {
-    const [products, setProducts] = useState<LapakUsaha[]>(dummyLapakUsaha);
+type Props = {
+    data: Lapak[];
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+}
+
+const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
+    const [lapaks, setLapaks] = useState<Lapak[]>(data);
 
     // --- LOGIKA FORM BARU DARI DETAIL.TSX ---
     const initialFormState: NewProductForm = {
@@ -171,11 +162,11 @@ const LapakUser: React.FC = () => {
     };
 
     const perizinanServices = [
-        { name: "Perizinan Pribadi", href: "/login", icon: FileText },
-        { name: "Perizinan Bangunan", href: "/login", icon: Building },
-        { name: "Perizinan Acara", href: "/login", icon: Calendar },
-        { name: "Perizinan Usaha", href: "/login", icon: Briefcase },
-        { name: "Perizinan Pertanian", href: "/login", icon: TreePine },
+        { name: "Perizinan Pribadi", href: "/form-pribadi", icon: FileText },
+        { name: "Perizinan Bangunan", href: "/form-bangunan", icon: Building },
+        { name: "Perizinan Acara", href: "/form-acara", icon: Calendar },
+        { name: "Perizinan Usaha", href: "/form-usaha", icon: Briefcase },
+        { name: "Perizinan Pertanian", href: "/form-pertanian", icon: TreePine },
     ];
 
     return (
@@ -243,7 +234,7 @@ const LapakUser: React.FC = () => {
                             </DropdownMenu>
                             <button>
                                 <Link
-                                    href={'/lapak-user'} 
+                                    href={'/lapak'} 
                                     className="text-gray-700 hover:text-[#1E4359] transition-colors font-medium"
                                 >
                                     Lapak
@@ -378,7 +369,7 @@ const LapakUser: React.FC = () => {
                                 </Dialog>
 
                                 {/* Tombol Ajukan SKU (Tombol Asli) */}
-                                <Link href="/surat/form/create/sku">
+                                <Link href="/form-usaha/form/sku">
                                     <Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white">
                                         <Plus className="mr-2 h-4 w-4" /> 
                                         Ajukan SKU
@@ -388,16 +379,16 @@ const LapakUser: React.FC = () => {
                         </div>
 
                         {/* Products Grid */}
-                        {products.length > 0 ? (
+                        {lapaks.length > 0 ? (
                             <motion.div 
                                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6 }}
                             >
-                                {products.map((product) => (
+                                {lapaks.map(lapak => (
                                     <motion.div
-                                        key={product.id}
+                                        key={lapak.id}
                                         className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300"
                                         whileHover={{ y: -8, scale: 1.02 }}
                                         transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
@@ -414,10 +405,10 @@ const LapakUser: React.FC = () => {
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-xl text-white group-hover:text-blue-100 transition-colors">
-                                                            {product.nama_usaha}
+                                                            {lapak.nama}
                                                         </h3>
                                                         <p className="text-blue-100 text-sm font-medium">
-                                                            {product.jenis_usaha}
+                                                            {lapak.jenis_usaha}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -438,7 +429,7 @@ const LapakUser: React.FC = () => {
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-xs text-gray-500 font-medium">Pemilik Usaha</p>
-                                                    <p className="font-semibold text-gray-800">{product.pengajuan_nama}</p>
+                                                    <p className="font-semibold text-gray-800">{lapak.penduduk?.nama}</p>
                                                 </div>
                                             </div>
 
@@ -449,13 +440,13 @@ const LapakUser: React.FC = () => {
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-xs text-gray-500 font-medium">Alamat Usaha</p>
-                                                    <p className="font-semibold text-gray-800 text-sm leading-relaxed">{product.alamat_usaha}</p>
+                                                    <p className="font-semibold text-gray-800 text-sm leading-relaxed">{lapak.alamat}</p>
                                                 </div>
                                             </div>
 
                                             {/* Action Button */}
                                             <div className="pt-2">
-                                                <Link href={`/lapak-user/${encodeURIComponent(product.nama_usaha)}`} className="block">
+                                                <Link href={`/lapak/${encodeURIComponent(lapak.id)}`} className="block">
                                                     <Button
                                                         className="w-full bg-gradient-to-r from-[#1E4359] to-[#2A5B73] hover:from-[#2A5B73] hover:to-[#1E4359] text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
                                                     >

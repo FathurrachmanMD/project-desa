@@ -3,18 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\Lapak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 class ProdukController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($id)
     {
-        //
+        $lapak = Lapak::with(['produk', 'penduduk'])->find($id);
+
+        // if ($status) {
+        //     $query->where('status', $status);
+        // }
+
+        // example: filter by kategori slug (if relation exists)
+        // if ($slug) {
+        //     $query->whereHas('kategori', fn($q) => $q->where('slug', $slug));
+        // }
+
+        return Inertia::render('lapak/detail', [
+            'data' => $lapak,
+        ]);
     }
 
     /**

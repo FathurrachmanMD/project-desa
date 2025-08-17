@@ -316,7 +316,7 @@ export default function PermitForm({ slug, id, surat }: PermitFormProps) {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Berkas Pendukung</h3>
                   <div className="space-y-4">
                       {
-                        data?.syarat?.map((row, index) => {
+                        data?.syarat?.map((row: {nama: string, href: string}, index: number) => {
                           return (
                             <div className="space-y-2">
                               <div key={index} className='flex items-center justify-between'>

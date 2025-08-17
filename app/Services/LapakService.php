@@ -26,8 +26,10 @@ class LapakService
                     'nama' => $formData["nama_usaha"] ?? 'Lapak ' . ($surat->penduduk->nama ?? 'User'),
                 ],
                 [
+                    'surat_id' => $surat->id,
                     'telepon' => $formData["nomor_hp"] ?? $surat->penduduk->nomor_hp ?? '',
-                    'status' => true,
+                    'status' => 'approved',
+                    'alamat' => $formData["alamat_usaha"] ?? $formData["alamat"],
                     'created_by' => $surat->created_by ?? Auth::id(),
                     'updated_by' => $surat->updated_by ?? Auth::id(),
                 ]
@@ -36,9 +38,9 @@ class LapakService
             Log::info('Lapak created/found', ['lapak_id' => $lapak->id, 'was_recently_created' => $lapak->wasRecentlyCreated]);
 
             // Jika lapak baru dibuat, buat produk default berdasarkan data surat
-            if ($lapak->wasRecentlyCreated) {
-                $this->createDefaultProduct($lapak, $formData, $surat);
-            }
+            // if ($lapak->wasRecentlyCreated) {
+            //     $this->createDefaultProduct($lapak, $formData, $surat);
+            // }
 
             return $lapak;
         } catch (\Exception $e) {

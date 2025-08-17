@@ -15,23 +15,27 @@ return new class extends Migration
             $table->id();
             // $table->unsignedBigInteger('config_id')->nullable()->index();
             $table->string('nama');
-            $table->unsignedBigInteger('penduduk_id')->nullable()->index(); // relasi ke penduduk
+            $table->text('deskripsi')->nullable();
+            $table->string('jenis_usaha')->nullable();
+
+            // $table->string('pemilik_nama');
+            // $table->string('pemilik_nik', 16);
 
             $table->string('telepon', 20)->nullable();
+            $table->string('email')->nullable();
+            $table->text('alamat');
             $table->string('lat', 20)->nullable();
             $table->string('lng', 20)->nullable();
 
             $table->tinyInteger('zoom')->default(10);
-            $table->boolean('status')->default(true); // tinyint(1)
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+
+            $table->foreignId('surat_id')->nullable()->constrained('surat')->onDelete('set null');
+            $table->foreignId('penduduk_id')->nullable()->constrained('penduduk')->onDelete('set null');
 
             $table->timestamps();
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-
-            $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
-            $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
-
-            $table->foreign('penduduk_id')->references('id')->on('penduduk')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
         });
     }
 

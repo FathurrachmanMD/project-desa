@@ -7,14 +7,43 @@ use App\Models\Penduduk;
 use App\Models\Surat;
 use Illuminate\Http\Request;
 
+use Inertia\Inertia;
+
 class LapakController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        // maybe only get approved lapak?
+        $status = $request->get('status'); // optional filter
+        $slug = $request->get('slug'); // optional filter for category
+
+        $query = Lapak::with([
+            'penduduk:id,nama,nik',
+            'surat:id,nomor_surat,status',
+            'createdBy:id,name',
+        ]);
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // example: filter by kategori slug (if relation exists)
+        // if ($slug) {
+        //     $query->whereHas('kategori', fn($q) => $q->where('slug', $slug));
+        // }
+
+        $lapak = $query->get();
+
+        return Inertia::render('lapak/index', [
+            'data' => $lapak,
+            'total' => $lapak->count(),
+            'pending' => $lapak->where('status', 'pending')->count(),
+            'approved' => $lapak->where('status', 'approved')->count(),
+            'rejected' => $lapak->where('status', 'rejected')->count(),
+        ]);
     }
 
     /**

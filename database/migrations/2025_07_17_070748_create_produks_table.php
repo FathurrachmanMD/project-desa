@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->text('deskripsi')->nullable();
             $table->string('foto', 225)->nullable();
+            $table->integer('stok')->default(0);
 
             $table->boolean('status')->default(true); // aktif/nonaktif
 

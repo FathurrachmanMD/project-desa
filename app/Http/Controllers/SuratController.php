@@ -66,7 +66,7 @@ class SuratController extends Controller
         ]);
 
         // Return response
-        return Inertia::render('admin/perizinan', [
+        return Inertia::render('admin/perizinan/index', [
             'slug' => $slug,
             'data' => $data,
             'total' => $total,
@@ -152,7 +152,7 @@ class SuratController extends Controller
             $surat = Surat::with('format')->findOrFail($id);
             $surat->syarat = $surat->getSyarat();
             // change this to inertia
-            return Inertia::render('admin/view', [
+            return Inertia::render('admin/perizinan/view', [
                 'slug' => $slug,
                 'id' => $id,
                 'surat' => $surat

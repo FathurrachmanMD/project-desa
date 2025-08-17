@@ -19,6 +19,7 @@ class KategoriSuratSeeder extends Seeder
             'Perizinan Keramaian' => 'acara',
             'Perizinan Pribadi' => 'pribadi',
             'Perizinan Pertanian' => 'pertanian',
+            'Pengajuan Produk' => 'produk',
         ];
 
         foreach ($kategori as $nama => $slug) {
