@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,14 +10,11 @@ import { useToast } from '@/contexts/ToastContext';
 import { ArrowLeft } from 'lucide-react';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
-import { cn } from '@/lib/utils'; // Assuming you have a cn utility for classnames
+import { cn } from '@/lib/utils';
+import React from 'react';
 
 // --- INTERFACES & TYPES ---
 
-/**
- * Defines the structure for a single form field's configuration.
- * This object is for display logic (labels, placeholders) and is static.
- */
 interface InputConfig {
   name: string;
   label: string;
@@ -28,31 +25,18 @@ interface InputConfig {
   readonly?: boolean;
 }
 
-/**
- * Defines the shape of the form's data state.
- * This holds the actual values of the form fields.
- */
 type FormData = {
   [key: string]: string;
 };
 
 interface Props {
   slug: string;
-  id?: number; // Optional ID, present only for editing
-  /**
-   * The `lapak` prop now contains only the initial values for the form fields.
-   * e.g., { nama_usaha: "Toko ABC", telepon: "08123..." }
-   * It will be null or undefined when creating a new entry.
-   */
+  id?: number;
   lapak?: FormData;
 }
 
 // --- STATIC FORM CONFIGURATION ---
 
-/**
- * This static object defines the structure and appearance of the form inputs.
- * It is separate from the form's data/state.
- */
 const inputs: { [key: string]: InputConfig } = {
   nama_pemilik: { name: 'nama_pemilik', label: 'Nama Pemilik', placeholder: 'Nama pemilik dari data kependudukan', type: 'text', required: true, readonly: true },
   nama: { name: 'nama', label: 'Nama Lapak', placeholder: 'Masukkan nama lapak', type: 'text', required: true },
@@ -63,9 +47,6 @@ const inputs: { [key: string]: InputConfig } = {
   status: { name: 'status', label: 'Status Perizinan', placeholder: 'Pilih Status', type: 'select', required: true, options: ['diproses', 'disetujui', 'ditolak'] },
 };
 
-/**
- * Generates a default (empty) state object based on the keys of the inputs config.
- */
 const createDefaultData = (): FormData => {
   const defaultData: FormData = {};
   Object.keys(inputs).forEach(key => {
@@ -76,11 +57,14 @@ const createDefaultData = (): FormData => {
 
 
 export default function LapakForm({ slug, id, lapak }: Props) {
-  // --- MODE & STATE INITIALIZATION ---
   const isEditMode = !!lapak;
+  const { showToast } = useToast();
+  
+  // Access validation errors from Inertia's page props
+  const { errors } = usePage().props as { errors: Partial<Record<keyof FormData, string>> };
+
   const [data, setData] = useState<FormData>(lapak || createDefaultData());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -97,27 +81,45 @@ export default function LapakForm({ slug, id, lapak }: Props) {
     setData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    console.log("Form data to be submitted:", data);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      showToast.success("Data submission logic is ready to be implemented.");
-    }, 1500);
+
+    const commonOptions = {
+        onStart: () => setIsSubmitting(true),
+        onFinish: () => setIsSubmitting(false),
+        onError: (errorBag: any) => {
+            console.error(errorBag);
+            showToast.error("Terjadi kesalahan. Periksa kembali isian Anda.");
+        },
+    };
+
+    if (isEditMode) {
+        router.put(route('lapak.update', id), data, {
+            ...commonOptions,
+            onSuccess: () => {
+                showToast.success("Data lapak berhasil diperbarui!");
+            },
+        });
+    } else {
+        router.post(route('lapak.store'), data, {
+            ...commonOptions,
+            onSuccess: () => {
+                showToast.success("Lapak baru berhasil ditambahkan!");
+                setData(createDefaultData()); // Reset form
+            },
+        });
+    }
   };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* Back Button */}
         <div className="mb-6">
           <Link href={`/perizinan/${slug}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 hover:underline">
             <ArrowLeft className="w-5 h-5 mr-2" /> Kembali
           </Link>
         </div>
 
-        {/* Header Section - Styled like the reference */}
         <div className="mb-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-gray-900 leading-tight">
@@ -132,11 +134,9 @@ export default function LapakForm({ slug, id, lapak }: Props) {
           </div>
         </div>
 
-        {/* Form Section */}
         <Card className="overflow-hidden border border-gray-100 shadow-sm">
           <CardContent className="p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.values(inputs).map((field) => (
                   <div key={field.name} className="space-y-2">
@@ -161,13 +161,13 @@ export default function LapakForm({ slug, id, lapak }: Props) {
                     ) : field.type === 'textarea' ? (
                       <Textarea id={field.name} name={field.name} value={data[field.name] || ''} onChange={handleChange} placeholder={field.placeholder} required={field.required} disabled={isSubmitting || field.readonly} className={cn('min-h-[120px] text-sm', field.readonly && 'bg-gray-50')} />
                     ) : (
-                      <Input id={field.name} name={field.name} type={field.type} value={data[field.name] || ''} onChange={handleChange} placeholder={field.placeholder} required={field.required} disabled={isSubmitting || field.readonly} readOnly={field.readonly} className={cn('h-11', field.readonly && 'bg-gray-50')} />
+                      <Input id={field.name} name={field.name} type={field.type as any} value={data[field.name] || ''} onChange={handleChange} placeholder={field.placeholder} required={field.required} disabled={isSubmitting || field.readonly} readOnly={field.readonly} className={cn('h-11', field.readonly && 'bg-gray-50')} />
                     )}
+                    {errors[field.name] && <p className="text-sm text-red-600 mt-1">{errors[field.name]}</p>}
                   </div>
                 ))}
               </div>
               
-              {/* Form Footer - Styled like the reference */}
               <div className="pt-6 border-t border-gray-200">
                 <div className="bg-blue-50 rounded-lg p-4 mb-6">
                   <div className="flex">

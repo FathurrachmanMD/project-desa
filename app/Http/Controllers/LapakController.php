@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
 class LapakController extends Controller
@@ -197,40 +198,35 @@ class LapakController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug, $id)
     {
+        // return response()->json($request);
         try {
-            $item = Lapak::findOrFail($id);
+            // findOrFail will automatically handle the "not found" case.
+            $lapak = Lapak::findOrFail($id);
 
+            // Let Laravel's automatic validation redirect handle failures.
             $validated = $request->validate([
-                'penduduk_id' => 'nullable|exists:penduduk,id',
-                'telepon'     => 'nullable|string|max:20',
-                'lat'         => 'nullable|string|max:20',
-                'lng'         => 'nullable|string|max:20',
-                'zoom'        => 'nullable|integer|min:0|max:21',
-                'status'      => 'boolean',
-                'updated_by'  => 'nullable|exists:users,id',
+                'nama'        => 'required|string|max:255',
+                'telepon'     => 'required|string|max:20',
+                'email'       => 'nullable|email|max:255',
+                'deskripsi'   => 'nullable|string',
+                'alamat'      => 'nullable|string',
+                'status'      => 'required',
             ]);
 
-            $item->update($validated);
-            return response()->json($item);
-        }
-        catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-        }
-        catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Data not found',
-            ], 404);
-        }
-        catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
-            ], 500);
+            // Add the user who updated the record, if you have this column.
+            // $validated['updated_by'] = Auth::id();
+
+            $lapak->update($validated);
+
+            // Redirect to the correct index page with a success message.
+            return Redirect::route('lapak.index')->with('success', 'Data lapak berhasil diperbarui!');
+            
+        } catch (\Exception $e) {
+            // General exception handler
+            return Redirect::route('lapak.index')
+                ->with('error', 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage());
         }
     }
 

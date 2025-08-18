@@ -44,12 +44,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('perizinan/lapak', [LapakController::class, 'index'])->name('lapak.index');
     Route::get('perizinan/lapak/{id}', [LapakController::class, 'show']);
-    Route::put('perizinan/lapak/{id}', [LapakController::class, 'update']);
+    Route::put('perizinan/lapak/{id}', [LapakController::class, 'update'])->name('lapak.update');
     Route::delete('lapak/{id}', [LapakController::class, 'destroy'])->name('lapak.destroy');
     
     Route::get('produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::post('produk', [ProdukController::class, 'store'])->name('produk.store');
     Route::get('produk/create', [ProdukController::class, 'show']);
     Route::get('produk/{id}', [ProdukController::class, 'show']);
+    Route::put('produk/{id}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 });
 

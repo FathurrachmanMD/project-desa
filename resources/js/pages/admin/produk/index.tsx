@@ -240,7 +240,7 @@ export default function Perizinan({ slug, data, total, diproses, disetujui, dito
                             name: "Aksi",
                             cell: row => (
                               <div className="flex items-center gap-2">
-                                <Link href={`/perizinan/${slug}/${row.id}`}>
+                                <Link href={`/${slug}/${row.id}`}>
                                   <Button className='bg-gray-500' type='button'>Lihat</Button>
                                 </Link>
                                 <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>

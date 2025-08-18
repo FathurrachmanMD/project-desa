@@ -218,8 +218,11 @@ class SuratController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug, $id)
     {
+        if ($slug === 'lapak') {
+            return app(LapakController::class)->update(request(), $slug, $id);
+        }
         try {
             // Find the existing Surat record by its ID
             $surat = Surat::findOrFail($id);
