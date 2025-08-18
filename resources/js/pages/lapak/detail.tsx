@@ -217,7 +217,7 @@ const LapakUserDetail = ({data}: Props) => {
                                                 <div><h4 className="font-semibold text-lg text-gray-800">Deskripsi Produk</h4><p className="text-gray-600">{item.deskripsi}</p></div>
                                                 <div><h4 className="font-semibold text-lg text-gray-800">Harga</h4><p className="text-2xl font-bold text-orange-600">{item.harga}</p></div>
                                                 <div><h4 className="font-semibold text-lg text-gray-800">Penjual</h4><p className="text-gray-600">{lapak.penduduk?.nama}</p></div>
-                                                <Button className="w-full mt-auto" onClick={() => { const message = encodeURIComponent(`Halo, saya tertarik dengan produk "${item.nama}". Apakah masih tersedia?`); window.open(`https://wa.me/${lapak.telepon}?text=${message}`, '_blank'); }}><MessageCircle className="mr-2 h-4 w-4" /> Hubungi Penjual via WhatsApp</Button>
+                                                <Button className="w-full mt-auto" onClick={() => { const message = encodeURIComponent(`Halo, saya tertarik dengan produk "${item.nama}". Apakah masih tersedia?`); window.open(`https://wa.me/62${lapak.telepon?.substring(1)}?text=${message}`, '_blank'); }}><MessageCircle className="mr-2 h-4 w-4" /> Hubungi Penjual via WhatsApp</Button>
                                             </div>
                                         </div>
                                     </DialogContent>

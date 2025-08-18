@@ -7,6 +7,9 @@ use App\Models\Penduduk;
 use App\Models\Surat;
 use Illuminate\Http\Request;
 
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use Inertia\Inertia;
 
 class LapakController extends Controller
@@ -15,6 +18,36 @@ class LapakController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
+    {
+        // Ambil semua data penduduk
+        $lapak = Lapak::with(['penduduk'])->get();
+        $slug = 'lapak';
+
+        // Hitung jumlah total dan berdasarkan status
+        $total      = $lapak->count();
+
+        // Return sesuai format yang kamu mau
+        return Inertia::render('admin/lapak/index', [
+            'slug' => $slug,
+            'data' => [
+                $slug => $lapak
+            ],
+            'total' => [
+                $slug => $total
+            ],
+            'diproses' => [
+                $slug => $lapak->where('status', 'diproses')->count()
+            ],
+            'disetujui' => [
+                $slug => $lapak->where('status', 'disetujui')->count()
+            ],
+            'ditolak' => [
+                $slug => $lapak->where('status', 'ditolak')->count()
+            ],
+        ]);
+    }
+
+    public function get(Request $request)
     {
         // maybe only get approved lapak?
         $status = $request->get('status'); // optional filter
@@ -40,9 +73,27 @@ class LapakController extends Controller
         return Inertia::render('lapak/index', [
             'data' => $lapak,
             'total' => $lapak->count(),
-            'pending' => $lapak->where('status', 'pending')->count(),
-            'approved' => $lapak->where('status', 'approved')->count(),
-            'rejected' => $lapak->where('status', 'rejected')->count(),
+            'diproses' => $lapak->where('status', 'diproses')->count(),
+            'disetujui' => $lapak->where('status', 'disetujui')->count(),
+            'ditolak' => $lapak->where('status', 'ditolak')->count(),
+        ]);
+    }
+
+    public function detail($id)
+    {
+        $lapak = Lapak::with(['produk', 'penduduk'])->where('status', 'disetujui')->find($id);
+
+        // if ($status) {
+        //     $query->where('status', $status);
+        // }
+
+        // example: filter by kategori slug (if relation exists)
+        // if ($slug) {
+        //     $query->whereHas('kategori', fn($q) => $q->where('slug', $slug));
+        // }
+
+        return Inertia::render('lapak/detail', [
+            'data' => $lapak,
         ]);
     }
 
@@ -99,9 +150,40 @@ class LapakController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Lapak $lapak)
+    public function show(Request $req, $slug, $id = null)
     {
-        //
+        $lapakData = null;
+        
+        // --- EDIT MODE ---
+        // If an ID is provided, fetch the existing data.
+        if ($id) {
+            // Eager load the 'penduduk' relationship to prevent extra database queries.
+            $lapak = Lapak::findOrFail($id);
+
+            // Prepare a simple, flat array of data for the 'lapak' prop.
+            // The keys here MUST match the keys in the `inputs` config of the React component.
+            $lapakData = [
+                // Flatten the relationship data for the form.
+                'nama_pemilik' => $lapak->penduduk->nama ?? 'Data Pemilik Tidak Ditemukan',
+                'nama'   => $lapak->nama,
+                'deskripsi'    => $lapak->deskripsi,
+                'telepon'      => $lapak->telepon,
+                'status'       => $lapak->status,
+            ];
+        }
+
+        // --- RENDER INERTIA VIEW ---
+        // The component path 'Lapak/Form' should map to 'resources/js/Pages/Lapak/Form.tsx'.
+        return Inertia::render('admin/lapak/form', [
+            'id' => $id,
+            /**
+             * Pass the flattened $lapakData object.
+             * If we are in create mode, this will be null, and the React
+             * component will initialize its own default empty state.
+             */
+            'lapak' => $lapakData,
+            'slug' => 'lapak', // Example slug, can be made dynamic if needed.
+        ]);
     }
 
     /**
@@ -358,16 +440,20 @@ class LapakController extends Controller
      */
     public function destroy($id)
     {
+        $slug = 'lapak';
+
         try {
-            $item = Lapak::findOrFail($id);
-            $item->delete();
-            return response()->json(['message' => 'Deleted successfully']);
-        }
-        catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Delete failed',
-                'error' => $e->getMessage()
-            ], 500);
+            $lapak = Lapak::findOrFail($id);
+            $lapak->delete();
+
+            return redirect()->route('lapak.index', $slug)
+                ->with('success', 'Lapak berhasil dihapus');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('lapak.index', $slug)
+                ->with('error', 'Lapak tidak ditemukan');
+        } catch (\Exception $e) {
+            return redirect()->route('lapak.index', $slug)
+                ->with('error', 'Gagal menghapus lapak: ' . $e->getMessage());
         }
     }
 }

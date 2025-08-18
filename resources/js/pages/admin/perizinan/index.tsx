@@ -199,12 +199,12 @@ export default function Perizinan({ slug, data, total, diproses, disetujui, dito
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan {slug} yang diajukan warga</span>
-              <NewButton href={`/perizinan/usaha/${activeTab}/create`}/>
+              <NewButton title='Tambah Perizinan' href={`/${activeTab}/create`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className={`grid grid-cols-${permitTypes.length} w-full mb-8`}>
+              <TabsList className={`grid grid-cols-${permitTypes.length < 5 ? permitTypes.length : 4} w-full mb-8`}>
                 {permitTypes.map((permit) => {
                     const Icon = permitIcons[permit.key as keyof typeof permitIcons]; // if you have icon keyed by format slug
 

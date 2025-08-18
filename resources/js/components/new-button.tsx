@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link } from '@inertiajs/react';
 
-export default function NewButton ({href}: {href: string}) {
+export default function NewButton ({title='Tambah Perizinan', href}: {title: string, href: string}) {
     return (
         <Link href={href}>
             <Button
@@ -10,7 +10,7 @@ export default function NewButton ({href}: {href: string}) {
             type='button'
             >
                 <Plus className="w-10 h-10" />
-                Tambah Perizinan
+                {title}
             </Button>
         </Link>
     )

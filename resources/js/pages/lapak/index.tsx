@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from '@/lib/utils';
+import { useToast } from '@/contexts/ToastContext';
 import axios from 'axios';
 
 // Import Ikon
@@ -100,6 +101,7 @@ type Props = {
 const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
     const API_URL = import.meta.env.VITE_API_URL;
     const [lapaks, setLapaks] = useState<Lapak[]>(data);
+    const { showToast } = useToast();
 
     // --- LOGIKA FORM BARU DARI DETAIL.TSX ---
     const initialFormState: Produk = {
@@ -112,6 +114,7 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
         foto: null,
     };
     const [newProduct, setNewProduct] = useState<Produk>(initialFormState);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [openLapakSelect, setOpenLapakSelect] = useState(false);
 
@@ -134,6 +137,7 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
         try {
             const formData = new FormData();
             const token = localStorage.getItem("token"); // or wherever you store it
+            setIsSubmitting(true);
 
             // Validate data exists
             if (!newProduct || !newProduct.surat) {
@@ -156,14 +160,6 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
                 formData.append("foto", newProduct.foto as Blob);
             }
 
-            console.log(newProduct)
-            console.log(formData)
-
-            // Validate id exists
-            // if (!id || typeof id !== 'string') {
-            // throw new Error('Invalid id parameter');
-            // }
-
             const response = await axios.post(`${API_URL}/produk`, formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -173,21 +169,20 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
 
             // Success handling here
             console.log("Submitted:", response.data);
-            // showToast.success("Data Berhasil Disimpan");
+            showToast.success("Data Berhasil Disimpan");
         } catch (error) {
             // Error handling here
             console.error("Submission failed:", error);
             
             if (error instanceof Error) {
-            // showToast.error('Kesalahan Sistem', error.message);
+                showToast.error('Kesalahan Sistem', error.message);
             } else {
-            // showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
+                showToast.error('Kesalahan Sistem', 'Gagal mengirim data');
             }
         } finally {
-            // setIsSubmitting(false);
+            setIsSubmitting(false);
+            setIsFormModalOpen(false);
         }
-        alert('Pengajuan produk terkirim (simulasi)');
-        setIsFormModalOpen(false);
     }
 
     // --- AKHIR LOGIKA FORM BARU ---
@@ -398,7 +393,7 @@ const LapakUser = ({data, total, pending, approved, rejected}: Props) => {
                                                 <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="surat" className="text-right pt-2">Bukti SKU</Label><div className="col-span-3"><Input id="surat" name="surat" type="file" onChange={handleFileChange} accept=".pdf, .png, .jpg, .jpeg" required /></div></div>
                                                 <div className="grid grid-cols-4 items-start gap-4"><Label htmlFor="foto" className="text-right pt-2">Foto Produk</Label><div className="col-span-3"><Input id="foto" name="foto" type="file" onChange={handleFileChange} accept=".png, .jpg, .jpeg" required /></div></div>
                                             </div>
-                                            <DialogFooter><Button type="submit">Kirim untuk Persetujuan</Button></DialogFooter>
+                                            <DialogFooter><Button type="submit" disabled={isSubmitting}>Kirim untuk Persetujuan</Button></DialogFooter>
                                         </form>
                                     </DialogContent>
                                 </Dialog>

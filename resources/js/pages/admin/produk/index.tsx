@@ -12,7 +12,7 @@ import { type BreadcrumbItem } from '@/types';
 import { 
   FileText,
   ListFilter,
-  User
+  ShoppingBag
 } from 'lucide-react';
 
 import DataTable from 'react-data-table-component';
@@ -24,25 +24,25 @@ const breadcrumbs: BreadcrumbItem[] = [
     href: '/dashboard',
   },
   {
-    title: 'Manajemen Customer',
-    href: '/customers',
+    title: 'Manajemen Produk',
+    href: '/produk',
   },
 ];
 
 const permitIcons = {
-  'penduduk': User,
+  'produk': ShoppingBag
 };
 
 type Props = {
     slug: String,
-    data: Record<string, {id: number, nama: string, nik: string, status: 'aktif' | 'nonaktif' | 'suspended'}[]>;       // e.g. { format_slug1: [surat1, surat2], ... }
+    data: Record<string, {id: number, nama: string, lapak: {id: number, nama: string}, status: 'diproses' | 'disetujui' | 'ditolak'}[]>;       // e.g. { format_slug1: [surat1, surat2], ... }
     total: Record<string, number>;       // e.g. { format_slug1: 10, ... }
-    aktif: Record<string, number>;
-    nonaktif: Record<string, number>;
-    suspended: Record<string, number>;
+    diproses: Record<string, number>;
+    disetujui: Record<string, number>;
+    ditolak: Record<string, number>;
 };
 
-export default function Perizinan({ slug, data, total, aktif, nonaktif, suspended }: Props) {
+export default function Perizinan({ slug, data, total, diproses, disetujui, ditolak }: Props) {
   const [activeTab, setActiveTab] = useState(() => {
       // Get all keys from data object
       const keys = Object.keys(data);
@@ -67,9 +67,9 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
   }
 
   const handleDelete = async () => {
-    router.delete(route('customers.destroy', {slug, id: idDelete}), {
+    router.delete(route('produk.destroy', {slug, id: idDelete}), {
       onSuccess: () => {
-        showToast.success('Berhasil menghapus data penduduk');
+        showToast.success('Berhasil menghapus produk');
       },
       onError: () => {
         showToast.error('Terjadi kesalahan');
@@ -113,18 +113,18 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
             <CardContent>
               <div className="text-2xl font-bold">{total[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
-                Semua pengajuan perizinan
+                Semua pengajuan produk
               </p>
             </CardContent>
           </Card>
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Aktif</CardTitle>
-              <div className="h-2 w-2 rounded-full bg-green-500" />
+              <CardTitle className="text-sm font-medium">Diproses</CardTitle>
+              <div className="h-2 w-2 rounded-full bg-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{aktif[activeTab]}</div>
+              <div className="text-2xl font-bold">{diproses[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Sedang dalam proses
               </p>
@@ -133,11 +133,11 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Non-aktif</CardTitle>
-              <div className="h-2 w-2 rounded-full bg-yellow-500" />
+              <CardTitle className="text-sm font-medium">Disetujui</CardTitle>
+              <div className="h-2 w-2 rounded-full bg-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{nonaktif[activeTab]}</div>
+              <div className="text-2xl font-bold">{disetujui[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Telah disetujui
               </p>
@@ -146,11 +146,11 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
           
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">Suspended</CardTitle>
+              <CardTitle className="text-sm font-medium">Ditolak</CardTitle>
               <div className="h-2 w-2 rounded-full bg-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{suspended[activeTab]}</div>
+              <div className="text-2xl font-bold">{ditolak[activeTab]}</div>
               <p className="text-xs text-muted-foreground">
                 Telah ditolak
               </p>
@@ -161,10 +161,10 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
         {/* Main Content */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle>Data {slug}</CardTitle>
+            <CardTitle>Data Produk</CardTitle>
             <CardDescription className='flex items-center align-middle'>
-              <span className='grow'>Kelola semua {slug} yang diajukan warga</span>
-              <NewButton title={'Tambah Penduduk'} href={`/customers/create`}/>
+              <span className='grow'>Kelola semua jenis {slug} yang diajukan warga</span>
+              <NewButton title='Tambah Produk' href={`/${activeTab}/create`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
@@ -218,13 +218,13 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
                             sortable: true
                           },
                           {
-                            name: "Nama Pemohon",
+                            name: "Nama Produk",
                             selector: row => row.nama,
                             sortable: true
                           },
                           {
-                            name: "NIK",
-                            selector: row => row.nik,
+                            name: "Nama Lapak",
+                            selector: row => row.lapak.nama,
                             sortable: true
                           },
                           {
@@ -232,7 +232,7 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
                             selector: row => row.status,
                             sortable: true,
                             cell: row => {
-                              const variant = row.status == 'nonaktif' ? 'warning' : (row.status == 'aktif' ? 'success' : (row.status == 'suspended' ? 'destructive' : 'secondary'));
+                              const variant = row.status == 'diproses' ? 'warning' : (row.status == 'disetujui' ? 'success' : (row.status == 'ditolak' ? 'destructive' : 'secondary'));
                               return (<Badge variant={variant}>{row.status.toUpperCase()}</Badge>)
                             }
                           },
@@ -240,7 +240,7 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
                             name: "Aksi",
                             cell: row => (
                               <div className="flex items-center gap-2">
-                                <Link href={`/customers/edit/${row.id}`}>
+                                <Link href={`/perizinan/${slug}/${row.id}`}>
                                   <Button className='bg-gray-500' type='button'>Lihat</Button>
                                 </Link>
                                 <Button className='bg-red-500' type='button' onClick={() => handleDeleteModal(row.id)}>Hapus</Button>
@@ -263,7 +263,7 @@ export default function Perizinan({ slug, data, total, aktif, nonaktif, suspende
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         onConfirm={handleDelete}
-        title={"Hapus Penduduk"}
+        title={"Hapus Surat"}
         description={`Apakah anda yakin akan menghapus data id:${idDelete}`}
         isLoading={isLoading}
       />

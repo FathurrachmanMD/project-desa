@@ -5,26 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\Penduduk;
 use App\Models\Surat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
+
+use Inertia\Inertia;
 
 class PendudukController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Penduduk::latest()->get();
+        // Ambil semua data penduduk
+        $penduduk = Penduduk::all();
+        $slug = 'penduduk';
 
-        return response()->json([
-            'message' => 'Daftar penduduk berhasil diambil',
-            'total' => $data->count(),
-            'aktif' => $data->where('status', 'aktif')->count(),
-            'nonaktif' => $data->where('status', 'nonaktif')->count(),
-            'suspended' => $data->where('status', 'suspended')->count(),
-            'data' => $data
+        // Hitung jumlah total dan berdasarkan status
+        $total      = $penduduk->count();
+        $aktif      = $penduduk->where('status', 'aktif')->count();
+        $nonaktif   = $penduduk->where('status', 'nonaktif')->count();
+        $suspended  = $penduduk->where('status', 'suspended')->count();
+
+        // Return sesuai format yang kamu mau
+        return Inertia::render('admin/customer/index', [
+            'slug' => $slug,
+            'data' => [
+                $slug => $penduduk
+            ],
+            'total' => [
+                $slug => $total
+            ],
+            'aktif' => [
+                $slug => $aktif
+            ],
+            'nonaktif' => [
+                $slug => $nonaktif
+            ],
+            'suspended' => [
+                $slug => $suspended
+            ],
         ]);
     }
+
 
     public function createFromSurat(Surat $surat) {
         // create or find penduduk by where surat.form.nik match
@@ -51,59 +74,72 @@ class PendudukController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'nama'             => 'required|string|max:255',
-                'nik'              => 'required|string|max:255|unique:penduduk,nik',
-                'sex'              => 'nullable|in:L,P',
-                'pekerjaan'        => 'nullable|string|max:255',
-                'tempatlahir'      => 'nullable|string|max:255',
-                'tanggallahir'     => 'nullable|date',
-                'status'           => 'nullable|in:aktif,nonaktif,suspended',
-                'alamat_sekarang'  => 'nullable|string',
-                'email'            => 'nullable|email|max:255',
-                'telepon'          => 'nullable|string|max:255',
-            ]);
+        // The validation logic is great. If it fails, Laravel will
+        // automatically redirect back with errors. No need for a try-catch.
+        $validated = $request->validate([
+            'nama'            => 'required|string|max:255',
+            'nik'             => 'required|string|max:255|unique:penduduk,nik',
+            'sex'             => 'required|in:L,P',
+            'pekerjaan'       => 'nullable|string|max:255',
+            'tempatlahir'     => 'nullable|string|max:255',
+            'tanggallahir'    => 'nullable|date',
+            'status'          => 'required|in:aktif,nonaktif,suspended',
+            'alamat_sekarang' => 'nullable|string',
+            'email'           => 'nullable|email|max:255',
+            'telepon'         => 'nullable|string|max:255',
+        ]);
 
-            $validated['created_by'] = Auth::id();
-            $validated['updated_by'] = Auth::id();
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
 
-            $data = Penduduk::create($validated);
+        Penduduk::create($validated);
 
-            return response()->json([
-                'message' => 'Surat berhasil disimpan',
-                'data' => $data
-            ], 201);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Validasi gagal',
-                'errors'  => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        // Instead of JSON, return a redirect to the customers list.
+        // Flash a success message to the session, which Inertia will pick up.
+        return Redirect::route('customers.index')->with('success', 'Penduduk baru berhasil ditambahkan!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id = null)
+    public function show(Request $req, $id = null)
     {
-        if (!$id) {
-            return response()->json([]);
+        $pendudukData = null;
+        
+        // --- EDIT MODE ---
+        // If an ID is provided, fetch the existing data.
+        if ($id) {
+            // Eager load the 'penduduk' relationship to prevent extra database queries.
+            $penduduk = Penduduk::findOrFail($id);
+
+            // Prepare a simple, flat array of data for the 'lapak' prop.
+            // The keys here MUST match the keys in the `inputs` config of the React component.
+            $pendudukData = [
+                'nama'            => $penduduk->nama,
+                'nik'             => $penduduk->nik,
+                'sex'             => $penduduk->sex,
+                'pekerjaan'       => $penduduk->pekerjaan,
+                'tempatlahir'     => $penduduk->tempatlahir,
+                'tanggallahir'    => $penduduk->tanggallahir?->format('Y-m-d'), // format date for input
+                'status'          => $penduduk->status,
+                'alamat_sekarang' => $penduduk->alamat_sekarang,
+                'email'           => $penduduk->email,
+                'telepon'         => $penduduk->telepon,
+            ];
         }
 
-        $penduduk = Penduduk::find($id);
-
-        if (!$penduduk) {
-            return response()->json([]);
-        }
-
-        return response()->json($penduduk);
+        // --- RENDER INERTIA VIEW ---
+        // The component path 'Lapak/Form' should map to 'resources/js/Pages/Lapak/Form.tsx'.
+        return Inertia::render('admin/customer/form', [
+            'id' => $id,
+            /**
+             * Pass the flattened $lapakData object.
+             * If we are in create mode, this will be null, and the React
+             * component will initialize its own default empty state.
+             */
+            'penduduk' => $pendudukData,
+            'slug' => 'penduduk', // Example slug, can be made dynamic if needed.
+        ]);
     }
 
 
@@ -118,53 +154,33 @@ class PendudukController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id = null)
+    public function update(Request $request, $id)
     {
-        try {
-            // Validate input
-            $validated = $request->validate([
-                'nama'             => 'sometimes|required|string|max:255',
-                'nik'              => 'sometimes|required|string|max:255|unique:penduduk,nik,' . ($id ?? 'NULL'),
-                'sex'              => 'nullable|in:L,P',
-                'pekerjaan'        => 'nullable|string|max:255',
-                'tempatlahir'      => 'nullable|string|max:255',
-                'tanggallahir'     => 'nullable|date',
-                'status'           => 'nullable|in:aktif,nonaktif,suspended',
-                'alamat_sekarang'  => 'nullable|string',
-                'email'            => 'nullable|email|max:255',
-                'telepon'          => 'nullable|string|max:255',
-            ]);
+        // Manually find the model by its ID.
+        // findOrFail will automatically throw a 404 error if the ID is not found.
+        $customer = Penduduk::findOrFail($id);
 
-            $validated['updated_by'] = Auth::id();
+        $validated = $request->validate([
+            'nama'            => 'required|string|max:255',
+            // Update the unique rule to ignore the current model's ID.
+            'nik'             => ['required', 'string', 'max:255'],
+            'sex'             => 'required|in:L,P',
+            'pekerjaan'       => 'nullable|string|max:255',
+            'tempatlahir'     => 'nullable|string|max:255',
+            'tanggallahir'    => 'nullable|date',
+            'status'          => 'required|in:aktif,nonaktif,suspended',
+            'alamat_sekarang' => 'nullable|string',
+            'email'           => 'nullable|email|max:255',
+            'telepon'         => 'nullable|string|max:255',
+        ]);
 
-            // If ID exists, try to find. If not found or null, create new.
-            $penduduk = $id ? Penduduk::find($id) : null;
+        $validated['updated_by'] = Auth::id();
 
-            if (!$penduduk) {
-                $validated['created_by'] = Auth::id();
-                $penduduk = Penduduk::create($validated);
-                $message = 'Penduduk berhasil dibuat';
-            } else {
-                $penduduk->update($validated);
-                $message = 'Penduduk berhasil diperbarui';
-            }
+        // The model has been found, so now we can update it.
+        $customer->update($validated);
 
-            return response()->json([
-                'message' => $message,
-                'data' => $penduduk
-            ]);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Validasi gagal',
-                'errors'  => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        // Redirect back to the index page with a success message.
+        return Redirect::route('customers.index')->with('success', 'Data penduduk berhasil diperbarui!');
     }
 
 
@@ -173,20 +189,20 @@ class PendudukController extends Controller
      */
     public function destroy($id)
     {
+        $slug = 'penduduk';
+
         try {
             $penduduk = Penduduk::findOrFail($id);
-
             $penduduk->delete();
 
-            return response()->json([
-                'message' => 'Penduduk berhasil dihapus'
-            ]);
-
+            return redirect()->route('customers.index', $slug)
+                ->with('success', 'Data penduduk berhasil dihapus');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('customers.index', $slug)
+                ->with('error', 'Data penduduk tidak ditemukan');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal menghapus penduduk',
-                'error'   => $e->getMessage()
-            ], 500);
+            return redirect()->route('customers.index', $slug)
+                ->with('error', 'Gagal menghapus data penduduk: ' . $e->getMessage());
         }
     }
 }

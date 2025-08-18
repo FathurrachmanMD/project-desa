@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, FileText, Calendar, Building2, Sprout, User, Users } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, FileText, Calendar, Building2, Sprout, User, Users, ShoppingBag, ShoppingCart } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -42,6 +42,16 @@ const mainNavItems: NavItem[] = [
         title: 'Manajemen Customer',
         href: '/customers',
         icon: Users,
+    },
+    {
+        title: 'Manajemen Lapak',
+        href: '/perizinan/lapak',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Manajemen Produk',
+        href: '/produk',
+        icon: ShoppingBag,
     },
 ];
 

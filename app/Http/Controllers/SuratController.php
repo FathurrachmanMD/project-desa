@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Http\Controllers\LapakController;
+
 use App\Services\PendudukService;
 use App\Services\LapakService;
 use Inertia\Inertia;
@@ -18,6 +20,9 @@ class SuratController extends Controller
 {
     public function index(Request $request, $slug)
     {
+        if ($slug === 'lapak') {
+            return app(LapakController::class)->index($request, $slug);
+        }
         // slug is now kategori slug
         // Step 1: Get all formats under the selected kategori
         $formats = FormatSurat::with([
@@ -148,6 +153,9 @@ class SuratController extends Controller
 
     public function show($slug, $id)
     {
+        if ($slug === 'lapak') {
+            return app(LapakController::class)->show(request(), $slug, $id);
+        }
         try {
             $surat = Surat::with('format')->findOrFail($id);
             $surat->syarat = $surat->getSyarat();

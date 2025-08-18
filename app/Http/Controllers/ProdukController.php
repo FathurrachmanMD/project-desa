@@ -7,7 +7,9 @@ use App\Models\Lapak;
 use App\Models\KategoriProduk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Inertia;
 
 class ProdukController extends Controller
@@ -15,21 +17,33 @@ class ProdukController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($id)
+    public function index(Request $request)
     {
-        $lapak = Lapak::with(['produk', 'penduduk'])->find($id);
+        // Ambil semua data penduduk
+        $produk = Produk::with(['lapak'])->get();
+        $slug = 'produk';
 
-        // if ($status) {
-        //     $query->where('status', $status);
-        // }
+        // Hitung jumlah total dan berdasarkan status
+        $total      = $produk->count();
 
-        // example: filter by kategori slug (if relation exists)
-        // if ($slug) {
-        //     $query->whereHas('kategori', fn($q) => $q->where('slug', $slug));
-        // }
-
-        return Inertia::render('lapak/detail', [
-            'data' => $lapak,
+        // Return sesuai format yang kamu mau
+        return Inertia::render('admin/produk/index', [
+            'slug' => $slug,
+            'data' => [
+                $slug => $produk
+            ],
+            'total' => [
+                $slug => $total
+            ],
+            'diproses' => [
+                $slug => $produk->where('status', 'diproses')->count()
+            ],
+            'disetujui' => [
+                $slug => $produk->where('status', 'disetujui')->count()
+            ],
+            'ditolak' => [
+                $slug => $produk->where('status', 'ditolak')->count()
+            ],
         ]);
     }
 
@@ -62,12 +76,14 @@ class ProdukController extends Controller
             ]);
 
             if ($request->hasFile('foto')) {
-                $path = $request->file('foto')->store('produk', 'public');
-                $validated['foto'] = $path;
+                $path = $request->file('foto')->store('foto', 'public');
+                $url = Storage::disk('public')->url($path);
+                $validated['foto'] = $url;
             }
             if ($request->hasFile('surat')) {
-                $path = $request->file('surat')->store('produk', 'public');
-                $validated['surat'] = $path;
+                $path = $request->file('surat')->store('surat', 'public');
+                $url = Storage::disk('public')->url($path);
+                $validated['surat'] = $url;
             }
 
             if (!empty($validated['kategori_produk'])) {
@@ -93,13 +109,41 @@ class ProdukController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Produk $produk)
+    public function show(Request $req, $id = null)
     {
-        //
+        $produkData = null;
+        
+        // --- EDIT MODE ---
+        // If an ID is provided, fetch the existing data.
+        if ($id) {
+            $produk = Produk::findOrFail($id);
+
+            // Prepare a simple, flat array of data for the 'produk' prop.
+            // The keys here MUST match the keys in the `inputs` config of the React component.
+            $produkData = [
+                'nama'      => $produk->nama,
+                'harga'     => $produk->harga,
+                'satuan'    => $produk->satuan,
+                'deskripsi' => $produk->deskripsi,
+                'stok'      => $produk->stok,
+                'status'    => $produk->status,
+            ];
+        }
+        
+        // --- RENDER INERTIA VIEW ---
+        // The component path 'Produk/Form' should map to 'resources/js/Pages/Produk/Form.tsx'.
+        return Inertia::render('admin/produk/form', [
+            'id' => $id,
+            /**
+             * Pass the flattened $produkData object.
+             * If we are in create mode, this will be null, and the React
+             * component will initialize its own default empty state.
+             */
+            'produk' => $produkData,
+            'slug'   => 'produk', // Example slug, can be made dynamic if needed.
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -152,13 +196,20 @@ class ProdukController extends Controller
      */
     public function destroy($id)
     {
+        $slug = 'produk';
+
         try {
-            $item = Produk::findOrFail($id);
-            $item->delete();
-            return response()->json(['message' => 'Deleted successfully']);
-        }
-        catch (\Exception $e) {
-            return response()->json(['message' => 'Delete failed', 'error' => $e->getMessage()], 500);
+            $produk = Produk::findOrFail($id);
+            $produk->delete();
+
+            return redirect()->route('produk.index', $slug)
+                ->with('success', 'produk berhasil dihapus');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('produk.index', $slug)
+                ->with('error', 'produk tidak ditemukan');
+        } catch (\Exception $e) {
+            return redirect()->route('produk.index', $slug)
+                ->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
 }

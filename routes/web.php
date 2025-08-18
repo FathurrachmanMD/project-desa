@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuratController;
 use App\Http\Controllers\LapakController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\PendudukController;
 
 Route::get('/', function () {
     return Inertia::render('landing');
@@ -34,14 +35,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('perizinan/{slug}/{id}', [SuratController::class, 'update']);
     Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy'])->name('perizinan.destroy');
 
-    Route::get('customers', function () {
-        return Inertia::render('customers/index');
-    })->name('customers.index');
-    Route::get('customers/form/{id?}', function ($id = null) {
-        return Inertia::render('customers/form', [
-            'id' => $id
-        ]);
-    });
+    Route::get('customers', [PendudukController::class, 'index'])->name('customers.index');
+    Route::get('customers/create', [PendudukController::class, 'show']);
+    Route::get('customers/edit/{id}', [PendudukController::class, 'show']);
+    Route::post('customers', [PendudukController::class, 'store'])->name('customers.store');
+    Route::put('customers/{id}', [PendudukController::class, 'update'])->name('customers.update');
+    Route::delete('customers/{id}', [PendudukController::class, 'destroy'])->name('customers.destroy');
+    
+    Route::get('perizinan/lapak', [LapakController::class, 'index'])->name('lapak.index');
+    Route::get('perizinan/lapak/{id}', [LapakController::class, 'show']);
+    Route::put('perizinan/lapak/{id}', [LapakController::class, 'update']);
+    Route::delete('lapak/{id}', [LapakController::class, 'destroy'])->name('lapak.destroy');
+    
+    Route::get('produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('produk/create', [ProdukController::class, 'show']);
+    Route::get('produk/{id}', [ProdukController::class, 'show']);
+    Route::delete('produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 });
 
 
@@ -101,8 +110,8 @@ Route::get('/lapak-usaha', function () {
     return Inertia::render('lapak-usaha/index');
 })->name('lapak-usaha');
 
-Route::get('/lapak', [LapakController::class, 'index'])->name('lapak-user');
-Route::get('/lapak/{id}', [ProdukController::class, 'index'])->name('lapak-detail');
+Route::get('/lapak', [LapakController::class, 'get'])->name('lapak-user');
+Route::get('/lapak/{id}', [LapakController::class, 'detail'])->name('lapak-detail');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
