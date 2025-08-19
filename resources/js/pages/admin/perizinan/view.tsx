@@ -205,7 +205,7 @@ export default function PermitForm({ slug, id, surat }: PermitFormProps) {
         </div>
         {status === "disetujui" && (
           <div className="mb-6 w-full flex">
-            <Link
+            <a
               target="_blank"
               rel="noopener noreferrer"
               href={`/surat/print/${id}`}
@@ -218,7 +218,7 @@ export default function PermitForm({ slug, id, surat }: PermitFormProps) {
                 <Printer/>
                 Print Surat
               </Button>
-            </Link>
+            </a>
           </div>
         )}
         {/* Form Section */}

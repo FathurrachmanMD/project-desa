@@ -1,4 +1,4 @@
-import { Link, router, useForm } from '@inertiajs/react'; // Import useForm
+import { Link, router, useForm } from '@inertiajs/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,11 +6,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/contexts/ToastContext';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check, ChevronsUpDown } from 'lucide-react';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 
 // --- INTERFACES & TYPES ---
 
@@ -24,13 +26,11 @@ interface InputConfig {
   readonly?: boolean;
 }
 
-// Represents a file coming from the server
 interface ProdukFile {
     nama: string;
     href: string;
 }
 
-// Represents the form data from the server when editing
 interface ProdukData {
     [key: string]: string | number | ProdukFile[];
     files: ProdukFile[];
@@ -38,13 +38,21 @@ interface ProdukData {
 
 // Represents the state of our form, which can include files for upload
 type FormData = {
-  [key: string]: string | File | null;
-  
+  [key: string]: string | File | null | number;
+  lapak_id: number | string;
+  gambar_produk: File | null;
+  surat_izin: File | null;
 };
+
+interface Lapak {
+  id: number;
+  nama: string;
+}
 
 interface Props {
   id?: number;
   produk?: ProdukData;
+  lapaks: Lapak[]; // Changed prop name to plural for clarity
 }
 
 // --- STATIC FORM CONFIGURATION ---
@@ -97,7 +105,9 @@ const inputs: { [key: string]: InputConfig } = {
 
 const createDefaultData = (): FormData => {
   const defaultData: any = {
+    lapak_id: '',
     gambar_produk: null,
+    surat_izin: null,
   };
   Object.keys(inputs).forEach(key => {
     defaultData[key] = '';
@@ -106,12 +116,12 @@ const createDefaultData = (): FormData => {
 };
 
 
-export default function ProdukForm({ id, produk }: Props) {
+export default function ProdukForm({ id, produk, lapaks }: Props) {
   const isEditMode = !!produk;
   const { showToast } = useToast();
+  const [openLapakSelect, setOpenLapakSelect] = useState(false);
 
-  const { data, setData, post, processing, errors, reset } = useForm(
-    // Initialize form with product data or defaults, ensuring 'gambar_produk' is null
+  const { data, setData, post, processing, errors, reset } = useForm<FormData>(
     {
         ...createDefaultData(),
         ...produk,
@@ -126,16 +136,18 @@ export default function ProdukForm({ id, produk }: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setData(name as any, value);
+    setData(name as keyof FormData, value);
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setData(name as any, value);
+    setData(name as keyof FormData, value);
   };
   
+  // Generic file change handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-          setData('gambar_produk', e.target.files[0]);
+      if (e.target.files && e.target.files.length > 0) {
+          // Use the input's name attribute to set the correct state key
+          setData(e.target.name as keyof FormData, e.target.files[0]);
       }
   };
 
@@ -154,15 +166,14 @@ export default function ProdukForm({ id, produk }: Props) {
     };
 
     if (isEditMode) {
-      // IMPORTANT: To upload files with a PUT/PATCH request, you MUST use a POST request
-      // and spoof the method by adding a `_method: 'PUT'` field to your data.
-      // Inertia's `put()` method does not support multipart/form-data.
+      // Inertia requires using POST for file uploads, even on updates.
+      // The _method: 'PUT' field tells the backend to treat it as a PUT request.
       post(route('produk.update', id), {
         ...commonOptions,
-        data: {
+        transform: (data) => ({
             ...data,
             _method: 'PUT',
-        }
+        }),
       });
     } else {
       post(route('produk.store'), commonOptions);
@@ -191,10 +202,39 @@ export default function ProdukForm({ id, produk }: Props) {
             </p>
           </div>
         </div>
-
         <Card className="overflow-hidden border border-gray-100 shadow-sm">
           <CardContent className="p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Nama Lapak</Label>
+                  <Popover open={openLapakSelect} onOpenChange={setOpenLapakSelect}>
+                      <PopoverTrigger asChild>
+                          <Button variant="outline" role="combobox" aria-expanded={openLapakSelect} className="w-full justify-between h-11">
+                              {data.lapak_id ? lapaks.find((lapak) => lapak.id === data.lapak_id)?.nama : "Cari dan pilih lapak..."}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Cari nama lapak..." />
+                            <CommandEmpty>Lapak tidak ditemukan.</CommandEmpty>
+                              <CommandGroup>
+                                  {lapaks.map((lapak) => (
+                                      <CommandItem key={lapak.id} value={lapak.nama} onSelect={() => { 
+                                          // Correctly update useForm state
+                                          setData('lapak_id', lapak.id); 
+                                          setOpenLapakSelect(false); 
+                                      }}>
+                                          <Check className={cn("mr-2 h-4 w-4", data.lapak_id === lapak.id ? "opacity-100" : "opacity-0")} />
+                                          {lapak.nama}
+                                      </CommandItem>
+                                  ))}
+                              </CommandGroup>
+                          </Command>
+                      </PopoverContent>
+                  </Popover>
+                  {errors.lapak_id && <p className="text-sm text-red-600 mt-1">{errors.lapak_id}</p>}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.values(inputs).map((field) => (
                   <div key={field.name} className="space-y-2">
@@ -260,36 +300,36 @@ export default function ProdukForm({ id, produk }: Props) {
                                 <span className="text-xs text-red-500">Wajib diisi</span>
                             </div>
                             <Input
-                                id="foto"
-                                name="foto"
+                                id="gambar_produk"
+                                name="gambar_produk" // Correct name to match FormData key
                                 type="file"
                                 onChange={handleFileChange}
                                 disabled={processing}
-                                accept=".pdf,.doc,.docx,image/*"
+                                accept="image/*"
                                 required
                                 className={cn('border-dashed border-2', errors.gambar_produk ? 'border-red-500' : 'border-gray-300')}
                             />
                             {errors.gambar_produk && <p className="text-sm text-red-600 mt-1">{errors.gambar_produk}</p>}
                             <p className="text-xs text-gray-500 mt-1">
-                                Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
+                                Format file: JPG, PNG (Maks. 5MB)
                             </p>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 mt-4">
                              <div className='flex items-center justify-between'>
-                                <Label htmlFor="gambar_produk" className="text-sm font-medium text-gray-700">Bukti Surat Izin</Label>
+                                <Label htmlFor="surat_izin" className="text-sm font-medium text-gray-700">Bukti Surat Izin</Label>
                                 <span className="text-xs text-red-500">Wajib diisi</span>
                             </div>
                             <Input
-                                id="surat"
-                                name="surat"
+                                id="surat_izin"
+                                name="surat_izin" // Correct name to match FormData key
                                 type="file"
                                 onChange={handleFileChange}
                                 disabled={processing}
                                 accept=".pdf,.doc,.docx,image/*"
                                 required
-                                className={cn('border-dashed border-2', errors.gambar_produk ? 'border-red-500' : 'border-gray-300')}
+                                className={cn('border-dashed border-2', errors.surat_izin ? 'border-red-500' : 'border-gray-300')}
                             />
-                            {errors.gambar_produk && <p className="text-sm text-red-600 mt-1">{errors.gambar_produk}</p>}
+                            {errors.surat_izin && <p className="text-sm text-red-600 mt-1">{errors.surat_izin}</p>}
                             <p className="text-xs text-gray-500 mt-1">
                                 Format file: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)
                             </p>
@@ -300,8 +340,7 @@ export default function ProdukForm({ id, produk }: Props) {
               </div>
               
               <div className="pt-6 border-t border-gray-200">
-                {/* ... Rest of the form footer ... */}
-                 <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <div className="bg-blue-50 rounded-lg p-4 mb-6">
                   <div className="flex">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -321,7 +360,7 @@ export default function ProdukForm({ id, produk }: Props) {
                   <p className="text-sm text-gray-600">
                     Dengan mengirimkan formulir ini, saya menyatakan bahwa data yang saya berikan adalah benar.
                   </p>
-                  <Button type="submit" className="w-full sm:w-auto px-8 py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" disabled={processing}>
+                  <Button type="submit" className="w-full sm:w-auto px-8 py-3 text-base font-medium" disabled={processing}>
                     {processing ? (
                       <div className="flex items-center">
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
