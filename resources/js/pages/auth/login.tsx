@@ -371,14 +371,14 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         </form>
 
                                         {/* Additional Links */}
-                                        <FadeInView delay={1.2} className="text-center pt-4 border-t border-gray-200">
+                                        {/* <FadeInView delay={1.2} className="text-center pt-4 border-t border-gray-200">
                                             <p className="text-sm text-gray-600">
                                                 Belum punya akses?{' '}
                                                 <Link href={route('register')} className="text-[#33475B] hover:text-[#2a3c4a] font-medium hover:underline transition-all duration-200">
                                                     Daftar Sekarang
                                                 </Link>
                                             </p>
-                                        </FadeInView>
+                                        </FadeInView> */}
                                     </CardContent>
                                 </Card>
                                 </AnimatedCard>

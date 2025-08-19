@@ -82,7 +82,7 @@ export function Navbar() {
                     {isAuthenticated ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                                <Button className="relative h-10 w-10 rounded-full bg-[#1E4359]">
                                     <Avatar>
                                         <AvatarImage src={user.avatar} alt={user.name} />
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>

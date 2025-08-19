@@ -123,8 +123,8 @@ export function Navbar() {
                         {isAuthenticated ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-[#1E4359] to-[#2A5B73] rounded-full flex items-center justify-center text-white">
+                                    <Button variant="ghost" className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[#1E4359] to-[#2A5B73]">
+                                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white">
                                             {user.name.charAt(0)}
                                         </div>
                                     </Button>
