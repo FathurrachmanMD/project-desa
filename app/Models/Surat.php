@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Models\SyaratSurat;
 

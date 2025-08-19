@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileUpload } from '@/components/ui/file-upload';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/contexts/ToastContext';
-import { FileText, Home, Plane, User, FileCheck, ArrowLeft } from 'lucide-react';
+import { FileText, Home, Plane, User, FileCheck, ArrowLeft, Printer } from 'lucide-react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
@@ -102,7 +102,7 @@ export default function PermitForm({ slug, id, surat }: PermitFormProps) {
     { value: 'diproses', label: 'Diproses' },
     { value: 'disetujui', label: 'Disetujui' },
     { value: 'ditolak', label: 'Ditolak' },
-    { value: 'dicetak', label: 'Dicetak' },
+    // { value: 'dicetak', label: 'Dicetak' },
   ];
 
   const [formatSurat, setFormatSurat] = useState<FormatSurat | null>(null);
@@ -203,35 +203,57 @@ export default function PermitForm({ slug, id, surat }: PermitFormProps) {
             </div>
           </div>
         </div>
-
+        {status === "disetujui" && (
+          <div className="mb-6 w-full flex">
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`/surat/print/${id}`}
+              className="w-full"
+            >
+              <Button
+                type="button"
+                className="w-full"
+              >
+                <Printer/>
+                Print Surat
+              </Button>
+            </a>
+          </div>
+        )}
         {/* Form Section */}
         <Card className="overflow-hidden border border-gray-100 shadow-sm">            
           <CardContent className="">
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="">
               <div className="space-y-8">
-                Status
-                <Select
-                  value={status}
-                  onValueChange={(value) => {
-                    setStatus(value)
-                  }}
-                  required={true}
-                >
-                  <SelectTrigger className="w-full h-11">
-                    <SelectValue placeholder="Status Surat" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((option) => (
-                      <SelectItem
-                        key={typeof option === 'string' ? option : option.value}
-                        value={typeof option === 'string' ? option : option.value}
-                        className="text-gray-700"
-                      >
-                        {typeof option === 'string' ? option : option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {
+                  status !== 'disetujui' &&
+                  <>
+                    Status
+                    <Select
+                      value={status}
+                      onValueChange={(value) => {
+                        setStatus(value)
+                      }}
+                      required={true}
+                    >
+                      <SelectTrigger className="w-full h-11">
+                        <SelectValue placeholder="Status Surat" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem
+                            key={typeof option === 'string' ? option : option.value}
+                            value={typeof option === 'string' ? option : option.value}
+                            className="text-gray-700"
+                          >
+                            {typeof option === 'string' ? option : option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </>
+                }
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {formatSurat?.form_isian?.map((field, index) => {

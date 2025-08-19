@@ -199,7 +199,7 @@ export default function Perizinan({ slug, data, total, diproses, disetujui, dito
             <CardTitle>Data Perizinan</CardTitle>
             <CardDescription className='flex items-center align-middle'>
               <span className='grow'>Kelola semua jenis perizinan {slug} yang diajukan warga</span>
-              <NewButton title='Tambah Perizinan' href={`/${activeTab}/create`}/>
+              <NewButton title='Tambah Perizinan' href={`/perizinan/${slug}/${activeTab}/create`}/>
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">

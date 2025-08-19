@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Http\Controllers\LapakController;
 
@@ -333,6 +334,26 @@ class SuratController extends Controller
             return redirect()->route('perizinan.show', $slug)
                 ->with('error', 'Gagal menghapus surat: ' . $e->getMessage());
         }
+    }
+
+    public function print($id)
+    {
+        $surat = Surat::findOrFail($id);
+
+        $slug = $surat->format->url_surat;
+        $template = $surat->format->template;
+        $data     = $surat->form;
+
+        foreach ($data as $key => $value) {
+            $safeValue = e($value);
+            $template = preg_replace(
+                '/\{' . preg_quote($key, '/') . '\}/',
+                $safeValue,
+                $template
+            );
+        }
+
+        return Pdf::loadHTML($template)->download("surat-$slug-$id.pdf");
     }
 
 }

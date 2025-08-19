@@ -74,6 +74,7 @@ class ProdukController extends Controller
                 'deskripsi'     => 'nullable|string',
                 'foto'          => 'nullable|file|mimes:jpg,jpeg,png',
                 'surat'          => 'nullable|file|mimes:pdf,jpg,jpeg,png',
+                'status'          => 'nullable',
             ]);
 
             if ($request->hasFile('foto')) {
@@ -100,7 +101,12 @@ class ProdukController extends Controller
 
             $item = Produk::create($validated);
 
-            return response()->json($item, 201);
+            if ($request->wantsJson()) {
+                    return response()->json($item, 201);
+                }
+
+            // Inertia/browser request → redirect or Inertia response
+            return redirect()->route('produk.index')->with('success', 'Item created successfully!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['message' => 'Validation error', 'errors' => $e->errors()], 422);
@@ -147,11 +153,14 @@ class ProdukController extends Controller
                 'files'     => $files,
             ];
         }
+
+        $lapak = Lapak::where('status', 'disetujui')->get();
         
         // --- RENDER INERTIA VIEW ---
         // The component path 'Produk/Form' should map to 'resources/js/Pages/Produk/Form.tsx'.
         return Inertia::render('admin/produk/form', [
             'id' => $id,
+            'lapaks' => $lapak,
             /**
              * Pass the flattened $produkData object.
              * If we are in create mode, this will be null, and the React

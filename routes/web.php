@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('perizinan/{slug}/{id}', [SuratController::class, 'show']);
     Route::put('perizinan/{slug}/{id}', [SuratController::class, 'update']);
     Route::delete('perizinan/{slug}/{id}', [SuratController::class, 'destroy'])->name('perizinan.destroy');
+    Route::get('surat/print/{id}', [SuratController::class, 'print']);
 
     Route::get('customers', [PendudukController::class, 'index'])->name('customers.index');
     Route::get('customers/create', [PendudukController::class, 'show']);
@@ -54,7 +55,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('produk/{id}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
 });
-
 
 // Form Usaha Routes
 Route::get('form-usaha', function () {
